@@ -14,8 +14,8 @@
 // | limitations under the License.
 // +-------------------------------------------------------------------------
 
-#ifndef INCLUDE_CONFIGURE_VERSION_H_
-#define INCLUDE_CONFIGURE_VERSION_H_
+#ifndef QSFS_CONFIGURE_VERSION_H_
+#define QSFS_CONFIGURE_VERSION_H_
 
 namespace QS {
 
@@ -28,4 +28,4 @@ const char* GetVersionString();
 }  // namespace Configure
 }  // namespace QS
 
-#endif  // INCLUDE_CONFIGURE_VERSION_H_
+#endif  // QSFS_CONFIGURE_VERSION_H_

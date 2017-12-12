@@ -14,8 +14,8 @@
 // | limitations under the License.
 // +-------------------------------------------------------------------------
 
-#ifndef INCLUDE_CONFIGURE_DEFAULT_H_
-#define INCLUDE_CONFIGURE_DEFAULT_H_
+#ifndef QSFS_CONFIGURE_DEFAULT_H_
+#define QSFS_CONFIGURE_DEFAULT_H_
 
 #include <stddef.h>
 #include <stdint.h>  // for fixed width integer types
@@ -77,4 +77,4 @@ uint64_t GetUploadMultipartThresholdSize();
 }  // namespace QS
 
 // NOLINTNEXTLIN
-#endif  // INCLUDE_CONFIGURE_DEFAULT_H_
+#endif  // QSFS_CONFIGURE_DEFAULT_H_

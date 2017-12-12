@@ -14,8 +14,8 @@
 // | limitations under the License.
 // +-------------------------------------------------------------------------
 
-#ifndef INCLUDE_CONFIGURE_INCLUDEFUSE_H_
-#define INCLUDE_CONFIGURE_INCLUDEFUSE_H_
+#ifndef QSFS_CONFIGURE_INCLUDEFUSE_H_
+#define QSFS_CONFIGURE_INCLUDEFUSE_H_
 
 // To prevent redefining "FUSE_USE_VERSION",
 // include this file instead of fuse.h.
@@ -23,4 +23,4 @@
 #define FUSE_USE_VERSION 26
 #include <fuse.h>
 
-#endif  // INCLUDE_CONFIGURE_INCLUDEFUSE_H_
+#endif  // QSFS_CONFIGURE_INCLUDEFUSE_H_

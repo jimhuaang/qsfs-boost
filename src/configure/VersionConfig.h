@@ -14,9 +14,9 @@
 // | limitations under the License.
 // +-------------------------------------------------------------------------
 
-#ifndef INCLUDE_CONFIGURE_VERSIONCONFIG_H_
-#define INCLUDE_CONFIGURE_VERSIONCONFIG_H_
+#ifndef QSFS_CONFIGURE_VERSIONCONFIG_H_
+#define QSFS_CONFIGURE_VERSIONCONFIG_H_
 
 #define QSFS_VERSION_STRING "1.0.0"
 
-#endif  // INCLUDE_CONFIGURE_VERSIONCONFIG_H_
+#endif  // QSFS_CONFIGURE_VERSIONCONFIG_H_

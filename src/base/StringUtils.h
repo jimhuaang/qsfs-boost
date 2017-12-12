@@ -14,8 +14,8 @@
 // | limitations under the License.
 // +-------------------------------------------------------------------------
 
-#ifndef INCLUDE_BASE_STRINGUTILS_H_
-#define INCLUDE_BASE_STRINGUTILS_H_
+#ifndef QSFS_BASE_STRINGUTILS_H_
+#define QSFS_BASE_STRINGUTILS_H_
 
 #include <stdio.h>
 
@@ -75,4 +75,4 @@ std::string FormatPath(const std::string &from, const std::string &to);
 }  // namespace StringUtils
 }  // namespace QS
 
-#endif  // INCLUDE_BASE_STRINGUTILS_H_
+#endif  // QSFS_BASE_STRINGUTILS_H_

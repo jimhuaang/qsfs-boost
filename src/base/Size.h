@@ -14,8 +14,8 @@
 // | limitations under the License.
 // +-------------------------------------------------------------------------
 
-#ifndef INCLUDE_BASE_SIZE_H_
-#define INCLUDE_BASE_SIZE_H_
+#ifndef QSFS_BASE_SIZE_H_
+#define QSFS_BASE_SIZE_H_
 
 #include <stddef.h>  // for size_t
 #include <stdint.h>  // for unit64_t
@@ -50,4 +50,4 @@ static const size_t M100 = 100 * 1000 * 1000;
 }  // namespace QS
 
 
-#endif  // INCLUDE_BASE_SIZE_H_
+#endif  // QSFS_BASE_SIZE_H_
