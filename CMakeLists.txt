@@ -53,10 +53,14 @@ string (TOLOWER "${CMAKE_SYSTEM_NAME}"  CPACK_SYSTEM_NAME)
 project (${PACKAGE_NAME})
 message (STATUS "Building project version: ${PACKAGE_VERSION}")
 
+#
+# directories
+#
 # qsfs source directory
 set (QSFS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/
      CACHE PATH "qsfs source directory")
-
+set (THIRD_PARTY_SOURCE_DIR ${CMAKE_SOURCE_DIR}/third_party/
+     CACHE PATH "third party source directory")
 
 #
 # configure version
@@ -66,6 +70,16 @@ if (EXISTS ${QSFS_SOURCE_DIR}/configure/VersionConfig.h)
 endif ()
 configure_file (cmake/templates/VersionConfig.h.in
                 "${QSFS_SOURCE_DIR}/configure/VersionConfig.h")
+
+
+# 
+# dependencies
+#
+find_package (Threads REQUIRED)
+if (NOT Threads_FOUND)
+  message (FATAL_ERROR "Could not find pthread. Check the log file"
+  "\n\t${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log")
+endif ()
 
 
 #
@@ -96,8 +110,11 @@ add_compile_options (-Wall)
 #
 # set up include directories
 #
-# Where qsfs's .h files can be found.
+# Where qsfs's header files can be found
 include_directories (${QSFS_SOURCE_DIR})
+
+# Where third party files can be found
+include_directories(${THIRD_PARTY_SOURCE_DIR})
 
 
 #

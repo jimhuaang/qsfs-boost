@@ -22,9 +22,23 @@
 #include <string>
 #include <vector>
 
+#include "boost/type_traits/is_pointer.hpp"
+
 namespace QS {
 
 namespace StringUtils {
+
+template <typename P>
+std::string PointerAddress(P p) {
+  if (boost::is_pointer<P>::value) {
+    int sz = snprintf(NULL, 0, "%p", p);
+    std::vector<char> buf(sz + 1);
+    snprintf(&buf[0], sz + 1, "%p", p);
+    std::string ss(buf.begin(), buf.end());
+    return ss;
+  }
+  return std::string();
+}
 
 std::string ToLower(const std::string &str);
 std::string ToUpper(const std::string &str);

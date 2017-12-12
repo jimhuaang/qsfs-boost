@@ -23,6 +23,8 @@
 #include <cctype>
 #include <string>
 
+#include "boost/lambda/lambda.hpp"
+
 namespace QS {
 
 namespace StringUtils {
@@ -49,19 +51,20 @@ string ToUpper(const string &str) {
 
 // --------------------------------------------------------------------------
 string LTrim(const string &str, unsigned char ch) {
+  using namespace boost::lambda;
   string copy(str);
-  //auto pos = std::find_if(copy.begin(), copy.end(),
-  //                        [&ch](unsigned char c) { return ch != c; });
-  //copy.erase(copy.begin(), pos);
+  string::iterator pos = std::find_if(copy.begin(), copy.end(), ch != _1);
+  copy.erase(copy.begin(), pos);
   return copy;
 }
 
 // --------------------------------------------------------------------------
 string RTrim(const string &str, unsigned char ch) {
+  using namespace boost::lambda;
   string copy(str);
-  //auto rpos = std::find_if(copy.rbegin(), copy.rend(),
-  //                         [&ch](unsigned char c) { return ch != c; });
-  //copy.erase(rpos.base(), copy.end());
+  string::reverse_iterator rpos =
+      std::find_if(copy.rbegin(), copy.rend(), ch != _1);
+  copy.erase(rpos.base(), copy.end());
   return copy;
 }
 
