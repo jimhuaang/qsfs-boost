@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/jimhuaang/qsfs.svg?branch=master)][build link]
 [![License](http://img.shields.io/badge/license-apache%20v2-blue.svg)][license link]
 
-**qsfs** is a FUSE based filesystem written in modern C++(version C++ 11 or later), that allows you to mount a qingstor bucket in Linux.
+**qsfs** is a FUSE based filesystem that allows you to mount a qingstor bucket in Linux.
 
 
 ## Features
