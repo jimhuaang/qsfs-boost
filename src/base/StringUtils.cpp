@@ -51,7 +51,7 @@ string ToUpper(const string &str) {
 
 // --------------------------------------------------------------------------
 string LTrim(const string &str, unsigned char ch) {
-  using namespace boost::lambda;
+  using boost::lambda::_1;
   string copy(str);
   string::iterator pos = std::find_if(copy.begin(), copy.end(), ch != _1);
   copy.erase(copy.begin(), pos);
@@ -60,7 +60,7 @@ string LTrim(const string &str, unsigned char ch) {
 
 // --------------------------------------------------------------------------
 string RTrim(const string &str, unsigned char ch) {
-  using namespace boost::lambda;
+  using boost::lambda::_1;
   string copy(str);
   string::reverse_iterator rpos =
       std::find_if(copy.rbegin(), copy.rend(), ch != _1);

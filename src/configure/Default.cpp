@@ -98,15 +98,15 @@ blkcnt_t GetBlocks(off_t size) {
 }
 
 uint64_t GetMaxCacheSize() {
-  return QS::Data::Size::MB100;  // default value
+  return QS::Size::MB100;  // default value
 }
 
 size_t GetMaxStatCount() {
-  return QS::Data::Size::K20;  // default value
+  return QS::Size::K20;  // default value
 }
 
 uint16_t GetMaxListObjectsCount() {
-  return QS::Data::Size::K1;  // default value
+  return QS::Size::K1;  // default value
 }
 
 static const int CLIENT_DEFAULT_POOL_SIZE = 5;
@@ -125,23 +125,23 @@ const char* GetQingStorSDKLogFileName() { return QS_SDK_LOG_FILE_NAME; }
 
 size_t GetDefaultParallelTransfers() { return 5; }
 
-uint64_t GetDefaultTransferMaxBufHeapSize() { return QS::Data::Size::MB50; }
+uint64_t GetDefaultTransferMaxBufHeapSize() { return QS::Size::MB50; }
 
 uint64_t GetDefaultTransferBufSize() {
   // should be larger than 2 * MB4 (min part size) = 8MB,
   // as QSTransferManager count on it to average the last two
   // multiparts size when do multipart upload
-  return QS::Data::Size::MB10;
+  return QS::Size::MB10;
 }
 
 uint64_t GetUploadMultipartMinPartSize() {
   // qs qingstor sepcific
-  return QS::Data::Size::MB4;
+  return QS::Size::MB4;
 }
 
-uint64_t GetUploadMultipartMaxPartSize() { return QS::Data::Size::GB1; }
+uint64_t GetUploadMultipartMaxPartSize() { return QS::Size::GB1; }
 
-uint64_t GetUploadMultipartThresholdSize() { return QS::Data::Size::MB20; }
+uint64_t GetUploadMultipartThresholdSize() { return QS::Size::MB20; }
 
 }  // namespace Default
 }  // namespace Configure

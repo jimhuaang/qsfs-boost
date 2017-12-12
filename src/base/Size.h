@@ -14,15 +14,13 @@
 // | limitations under the License.
 // +-------------------------------------------------------------------------
 
-#ifndef INCLUDE_DATA_SIZE_H_
-#define INCLUDE_DATA_SIZE_H_
+#ifndef INCLUDE_BASE_SIZE_H_
+#define INCLUDE_BASE_SIZE_H_
 
 #include <stddef.h>  // for size_t
 #include <stdint.h>  // for unit64_t
 
 namespace QS {
-
-namespace Data {
 
 namespace Size {
 
@@ -49,8 +47,7 @@ static const size_t M10 = 10 * 1000 * 1000;
 static const size_t M100 = 100 * 1000 * 1000;
 
 }  // namespace Size
-}  // namespace Data
 }  // namespace QS
 
 
-#endif  // INCLUDE_DATA_SIZE_H_
+#endif  // INCLUDE_BASE_SIZE_H_

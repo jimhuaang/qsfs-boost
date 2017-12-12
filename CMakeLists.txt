@@ -83,6 +83,13 @@ endif ()
 
 
 #
+# linter target (make lint)
+#
+add_custom_target (lint COMMAND ${CMAKE_COMMAND} -P
+                   ${CMAKE_SOURCE_DIR}/cmake/lint.cmake)
+
+
+#
 # compile set up
 #
 # As we build gflags as a subproject and gflags is built as static single-threaded
