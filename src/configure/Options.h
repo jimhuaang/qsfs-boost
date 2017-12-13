@@ -22,6 +22,8 @@
 #include <iostream>
 #include <string>
 
+#include "boost/noncopyable.hpp"
+
 #include "base/LogLevel.h"
 #include "configure/IncludeFuse.h"  // for fuse.h
 
@@ -40,12 +42,8 @@ namespace Configure {
 
 using QS::Logging::LogLevel;
 
-class Options {
+class Options : private boost::noncopyable {
  public:
-  Options(Options &&) = delete;
-  Options(const Options &) = delete;
-  Options &operator=(Options &&) = delete;
-  Options &operator=(const Options &) = delete;
   ~Options() {
     if (m_fuseArgsInitialized) {
       fuse_opt_free_args(&m_fuseArgs);
@@ -62,11 +60,11 @@ class Options {
   const std::string &GetZone() const { return m_zone; }
   const std::string &GetCredentialsFile() const { return m_credentialsFile; }
   const std::string &GetLogDirectory() const { return m_logDirectory; }
-  LogLevel GetLogLevel() const { return m_logLevel; }
+  LogLevel::Value GetLogLevel() const { return m_logLevel; }
   uint16_t GetRetries() const { return m_retries; }
   uint32_t GetRequestTimeOut() const { return m_requestTimeOut; }
   uint32_t GetMaxCacheSizeInMB() const { return m_maxCacheSizeInMB; }
-  const std::string GetDiskCacheDirectory() const { return m_diskCacheDir; }
+  const std::string &GetDiskCacheDirectory() const { return m_diskCacheDir; }
   uint32_t GetMaxStatCountInK() const { return m_maxStatCountInK; }
   int32_t GetMaxListCount() const { return m_maxListCount; }
   int32_t GetStatExpireInMin() const { return m_statExpireInMin; }
@@ -78,7 +76,7 @@ class Options {
   const std::string &GetHost() const { return m_host; }
   const std::string &GetProtocol() const { return m_protocol; }
   uint16_t GetPort() const { return m_port; }
-  const std::string GetAdditionalAgent() const { return m_additionalAgent; }
+  const std::string &GetAdditionalAgent() const { return m_additionalAgent; }
   bool IsClearLogDir() const { return m_clearLogDir; }
   bool IsForeground() const { return m_foreground; }
   bool IsSingleThread() const { return m_singleThread; }
@@ -101,19 +99,13 @@ class Options {
   void SetZone(const char *zone) { m_zone = zone; }
   void SetCredentialsFile(const char *file) { m_credentialsFile = file; }
   void SetLogDirectory(const std::string &path) { m_logDirectory = path; }
-  void SetLogLevel(LogLevel level) { m_logLevel = level; }
+  void SetLogLevel(LogLevel::Value level) { m_logLevel = level; }
   void SetRetries(unsigned retries) { m_retries = retries; }
   void SetRequestTimeOut(uint32_t timeout) { m_requestTimeOut = timeout; }
-  void SetMaxCacheSizeInMB(uint32_t maxcache) {
-    m_maxCacheSizeInMB = maxcache;
-  }
+  void SetMaxCacheSizeInMB(uint32_t maxcache) { m_maxCacheSizeInMB = maxcache; }
   void SetDiskCacheDirectory(const char *diskdir) { m_diskCacheDir = diskdir; }
-  void SetMaxStatCountInK(uint32_t maxstat) {
-    m_maxStatCountInK = maxstat;
-  }
-  void SetMaxListCount(int32_t maxlist) {
-    m_maxListCount = maxlist;
-  }
+  void SetMaxStatCountInK(uint32_t maxstat) { m_maxStatCountInK = maxstat; }
+  void SetMaxListCount(int32_t maxlist) { m_maxListCount = maxlist; }
   void SetStatExpireInMin(int32_t expire) { m_statExpireInMin = expire; }
   void SetParallelTransfers(unsigned numtransfers) {
     m_parallelTransfers = numtransfers;
@@ -121,9 +113,7 @@ class Options {
   void SetTransferBufferSizeInMB(uint32_t bufsize) {
     m_transferBufferSizeInMB = bufsize;
   }
-  void SetClientPoolSize(uint32_t poolsize) {
-    m_clientPoolSize = poolsize;
-  }
+  void SetClientPoolSize(uint32_t poolsize) { m_clientPoolSize = poolsize; }
   void SetHost(const char *host) { m_host = host; }
   void SetProtocol(const char *protocol) { m_protocol = protocol; }
   void SetPort(unsigned port) { m_port = port; }
@@ -139,7 +129,8 @@ class Options {
   void SetShowHelp(bool showHelp) { m_showHelp = showHelp; }
   void setShowVerion(bool showVersion) { m_showVersion = showVersion; }
   void SetFuseArgs(int argc, char **argv) {
-    m_fuseArgs = FUSE_ARGS_INIT(argc, argv);
+    struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
+    m_fuseArgs = args;
     m_fuseArgsInitialized = true;
   }
 
@@ -148,14 +139,14 @@ class Options {
   std::string m_zone;
   std::string m_credentialsFile;
   std::string m_logDirectory;
-  LogLevel m_logLevel;
+  LogLevel::Value m_logLevel;
   uint16_t m_retries;
   uint32_t m_requestTimeOut;  // in milliseconds
   uint32_t m_maxCacheSizeInMB;
   std::string m_diskCacheDir;
   uint32_t m_maxStatCountInK;
-  int32_t m_maxListCount;  // negative value will list all files for ls
-  int32_t m_statExpireInMin;  //  negative value will disable state expire
+  int32_t m_maxListCount;        // negative value will list all files for ls
+  int32_t m_statExpireInMin;     //  negative value will disable state expire
   uint16_t m_parallelTransfers;  // count of file transfers in parallel
   uint32_t m_transferBufferSizeInMB;
   uint16_t m_clientPoolSize;
@@ -172,7 +163,7 @@ class Options {
   bool m_showHelp;
   bool m_showVersion;
   struct fuse_args m_fuseArgs;
-  bool m_fuseArgsInitialized = false;
+  bool m_fuseArgsInitialized;
 
   friend class QS::FileSystem::Mounter;  // for DoMount
   friend void QS::FileSystem::Parser::Parse(int argc, char **argv);
@@ -183,6 +174,5 @@ std::ostream &operator<<(std::ostream &os, const Options &opts);
 
 }  // namespace Configure
 }  // namespace QS
-
 
 #endif  // QSFS_CONFIGURE_OPTIONS_H_
