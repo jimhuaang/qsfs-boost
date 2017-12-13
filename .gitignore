@@ -37,3 +37,7 @@ CTestTestfile.cmake
 #
 external/
 .vscode/
+
+
+# need to be moved at end
+third_party/install

@@ -20,10 +20,10 @@ execute_process(COMMAND uname -m OUTPUT_VARIABLE MACHINE_HARDWARE)
 
 if (MACHINE_HARDWARE MATCHES "x86_64" OR MACHINE_HARDWARE MATCHES "x64"
     OR MACHINE_HARDWARE MATCHES "amd64")
-  set(MACH_64 TRUE CACHE BOOL "Machine hardware is 64-bit")
+  set(IS_MACH_64 TRUE CACHE BOOL "Machine hardware is 64-bit")
 endif()
 
-if (MACH_64)
+if (IS_MACH_64)
   # when GCC is built as a 64-bit only compiler
   # this only affect configure step, not affect build step
   set(ENV{LIBRARY_PATH} "/usr/lib/x86_64-linux-gnu/:$LIBRARY_PATH"
@@ -57,10 +57,11 @@ message (STATUS "Building project version: ${PACKAGE_VERSION}")
 # directories
 #
 # qsfs source directory
-set (QSFS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/
+set (QSFS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src
      CACHE PATH "qsfs source directory")
-set (THIRD_PARTY_SOURCE_DIR ${CMAKE_SOURCE_DIR}/third_party/
+set (THIRD_PARTY_SOURCE_DIR ${CMAKE_SOURCE_DIR}/third_party
      CACHE PATH "third party source directory")
+
 
 #
 # configure version
@@ -80,6 +81,21 @@ if (NOT Threads_FOUND)
   message (FATAL_ERROR "Could not find pthread. Check the log file"
   "\n\t${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log")
 endif ()
+
+# download and install dependencies under ./third_party/install
+set (EXTERNAL_PROJECT_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/third_party/install
+     CACHE PATH "Installation prefix for dependencies")
+if (NOT googletest_INSTALLED)
+  include (cmake/gtest.cmake)
+endif()
+
+if(NOT googleflags_INSTALLED)
+  include (cmake/gflags.cmake)
+endif()
+
+if(NOT googlelog_INSTALLED)
+  include(cmake/glog.cmake)
+endif()
 
 
 #
@@ -108,7 +124,7 @@ add_compile_options (-fPIC)
 add_compile_options (-Wall)
 #add_compile_options (-Wunused-value)
 
-#if(MACH_64)
+#if(IS_MACH_64)
 #  # fuse
 #  add_compile_options(-D_FILE_OFFSET_BITS=64)
 #endif()
@@ -122,6 +138,16 @@ include_directories (${QSFS_SOURCE_DIR})
 
 # Where third party files can be found
 include_directories(${THIRD_PARTY_SOURCE_DIR})
+
+# Where dependencies's header files can be found.
+include_directories(${EXTERNAL_PROJECT_INSTALL_PREFIX}/include)
+
+# Where dependencies's targets can be found.
+link_directories(${EXTERNAL_PROJECT_INSTALL_PREFIX}/lib)
+if (IS_MACH_64)
+  # glog will export to lib64 on Centos x86_64
+  link_directories(${EXTERNAL_PROJECT_INSTALL_PREFIX}/lib64)
+endif()
 
 
 #
@@ -137,6 +163,40 @@ set (EXPORT_NAME ${PROJECT_NAME}-targets)
 set (INSTALL_PREFIX_REL2CONFIG_DIR .)
 file (RELATIVE_PATH INSTALL_PREFIX_REL2CONFIG_DIR
       "${CMAKE_INSTALL_PREFIX}/${INSTALL_CMAKE_DIR}" "${CMAKE_INSTALL_PREFIX}")
+
+
+#
+# uninstall
+#
+include(cmake/UninstallProject.cmake)
+setup_uninstall_project(${PROJECT_NAME})
+
+set (UNINSTALL_ALL ${UNINSTALL_ALL} uninstall_${PROJECT_NAME})
+
+if(TARGET uninstall_qingstorsdk)
+  set (UNINSTALL_ALL ${UNINSTALL_ALL} uninstall_qingstorsdk)
+endif()
+
+if(TARGET uninstall_googletest)
+  set (UNINSTALL_ALL ${UNINSTALL_ALL} uninstall_googletest)
+endif()
+
+if(TARGET uninstall_googlelog)
+  set (UNINSTALL_ALL ${UNINSTALL_ALL} uninstall_googlelog)
+endif()
+
+if(TARGET uninstall_googleflags)
+  set (UNINSTALL_ALL ${UNINSTALL_ALL} uninstall_googleflags)
+endif()
+
+add_custom_target(
+  uninstall DEPENDS uninstall_${PROJECT_NAME}
+)
+
+add_custom_target(
+  uninstall_all DEPENDS ${UNINSTALL_ALL}
+)
+
 
 #
 # subdirectories
