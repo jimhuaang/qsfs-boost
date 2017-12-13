@@ -103,6 +103,7 @@ function(install_project PROJECT INSTALL_DIR)
         execute_process(COMMAND ${CMAKE_COMMAND}
             -H${${PROJECT}_SOURCE_DIR}
             -B${${PROJECT}_BINARY_DIR}
+            -DBUILD_TESTING=OFF
             RESULT_VARIABLE result
             ${OUTPUT_QUIET}
             WORKING_DIRECTORY "${${PROJECT}_DOWNLOAD_DIR}"
@@ -111,6 +112,7 @@ function(install_project PROJECT INSTALL_DIR)
         execute_process(COMMAND ${CMAKE_COMMAND}
             -H${${PROJECT}_SOURCE_DIR}
             -B${${PROJECT}_BINARY_DIR}
+            -DBUILD_TESTING=OFF
             -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
             RESULT_VARIABLE result
             ${OUTPUT_QUIET}
@@ -121,14 +123,24 @@ function(install_project PROJECT INSTALL_DIR)
         message(FATAL_ERROR "Pre-install step for ${PROJECT} failed: ${result}")
     endif()
 
-    # need to get root privileges to install project
-    execute_process(COMMAND sudo cmake
-        --build ${${PROJECT}_BINARY_DIR}
-        --target install
-        RESULT_VARIABLE result
-        ${OUTPUT_QUIET}
-        WORKING_DIRECTORY "${${PROJECT}_DOWNLOAD_DIR}"
-    )
+    if (IS_ROOT)
+        execute_process(COMMAND cmake
+            --build ${${PROJECT}_BINARY_DIR}
+            --target install
+            RESULT_VARIABLE result
+            ${OUTPUT_QUIET}
+            WORKING_DIRECTORY "${${PROJECT}_DOWNLOAD_DIR}"
+        )
+    else (IS_ROOT)
+        # need to get root privileges to install project
+        execute_process(COMMAND sudo cmake
+            --build ${${PROJECT}_BINARY_DIR}
+            --target install
+            RESULT_VARIABLE result
+            ${OUTPUT_QUIET}
+            WORKING_DIRECTORY "${${PROJECT}_DOWNLOAD_DIR}"
+        )
+    endif()
     if(result)
         message(FATAL_ERROR "Install step for ${PROJECT} failed: ${result}")
     endif()

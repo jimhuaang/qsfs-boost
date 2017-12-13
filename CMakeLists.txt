@@ -7,20 +7,27 @@ cmake_minimum_required(VERSION 3.0)
 option (BUILD_PACKAGING    "Enable build of distribution packages using CPack." OFF)
 option (BUILD_SHARED_LIBS  "Build shared libraries." OFF)
 # to turn on, specify -DBUILD_TESTS=ON in cmake command line
-option (BUILD_TESTS        "Enable build of the unit tests and their execution using CTest." OFF)
+option (BUILD_TESTING      "Enable build of the unit tests and their execution using CTest." OFF)
 option (INSTALL_HEADERS    "Request installation of headers and other development files." OFF)
 option (REGISTER_BUILD_DIR "Request entry of build directory in CMake's package registry." OFF)
 
 # for temporary test
-set (CMAKE_C_COMPILER   "/opt/gcc-4.1.2/bin/gcc")
-set (CMAKE_CXX_COMPILER "/opt/gcc-4.1.2/bin/g++")
-SET (ENV{LIBRARY_PATH} "/usr/lib/x86_64-linux-gnu/:$LIBRARY_PATH")
+set (CMAKE_C_COMPILER   "/opt/gcc-4.1.2/bin/gcc" CACHE PATH "" FORCE)
+set (CMAKE_CXX_COMPILER "/opt/gcc-4.1.2/bin/g++" CACHE PATH "" FORCE)
+SET (ENV{LIBRARY_PATH} "/usr/lib/x86_64-linux-gnu/:$LIBRARY_PATH" CACHE INTERNAL "" FORCE)
 
+#
+# system info
+#
 execute_process(COMMAND uname -m OUTPUT_VARIABLE MACHINE_HARDWARE)
-
 if (MACHINE_HARDWARE MATCHES "x86_64" OR MACHINE_HARDWARE MATCHES "x64"
     OR MACHINE_HARDWARE MATCHES "amd64")
   set(IS_MACH_64 TRUE CACHE BOOL "Machine hardware is 64-bit")
+endif()
+
+execute_process(COMMAND whoami OUTPUT_VARIABLE CURRENT_USER)
+if(CURRENT_USER MATCHES "root")
+  set (IS_ROOT TRUE CACHE BOOL "Current user is root")
 endif()
 
 if (IS_MACH_64)
@@ -32,6 +39,7 @@ endif()
 
 # this only affect configure step, not affect build step
 #execute_process(COMMAND export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/:$LIBRARY_PATH)
+
 
 #
 # project information
@@ -207,8 +215,8 @@ add_subdirectory (src)
 #
 # testing
 #
-if (BUILD_TESTS)
+if (BUILD_TESTING)
   include(CTest)
   enable_testing ()
   add_subdirectory(test)
-endif (BUILD_TESTS)
+endif (BUILD_TESTING)
