@@ -88,7 +88,7 @@ string AccessMaskToString(int amode) {
   ret = QS::StringUtils::RTrim(ret, ' ');
   string::size_type pos = 0;
   while ((pos = ret.find(' ')) != string::npos) {
-    ret.replace(pos, 1, "&");
+    ret.replace(pos, 1, "|");
   }
   return ret;
 }

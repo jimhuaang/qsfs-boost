@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.0)
 option (BUILD_PACKAGING    "Enable build of distribution packages using CPack." OFF)
 option (BUILD_SHARED_LIBS  "Build shared libraries." OFF)
 # to turn on, specify -DBUILD_TESTS=ON in cmake command line
-option (BUILD_TESTING      "Enable build of the unit tests and their execution using CTest." OFF)
+option (BUILD_TESTING      "Enable build of the unit tests and their execution using CTest." ON)
 option (INSTALL_HEADERS    "Request installation of headers and other development files." OFF)
 option (REGISTER_BUILD_DIR "Request entry of build directory in CMake's package registry." OFF)
 

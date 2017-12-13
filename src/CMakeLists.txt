@@ -29,7 +29,7 @@ add_executable(
   ${PROJECT_NAME}
   ${QSFS_SOURCES}
   )
-target_link_libraries(${PROJECT_NAME} fuse)
+target_link_libraries(${PROJECT_NAME} fuse ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -50,6 +50,17 @@ add_library(
   Base
   ${QSFS_BASE_SRCS}
 )
+
+#
+# make libs referenced by unit test
+#
+# use OBJECT lib type, as we do not need to produce any library files
+add_library(
+  qsfsBaseUtils OBJECT
+  base/StringUtils.cpp
+  #base/TimeUtils.cpp
+  #base/Utils.cpp
+  )
 
 #
 # install headers
