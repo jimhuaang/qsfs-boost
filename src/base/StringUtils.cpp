@@ -23,6 +23,7 @@
 #include <cctype>
 #include <string>
 
+#include "boost/foreach.hpp"
 #include "boost/lambda/lambda.hpp"
 
 namespace QS {
@@ -34,18 +35,14 @@ using std::string;
 // --------------------------------------------------------------------------
 string ToLower(const string &str) {
   string copy(str);
-  for (string::iterator pc = copy.begin(); pc != copy.end(); ++pc) {
-    *pc = std::tolower(*pc);
-  }
+  BOOST_FOREACH (char &ch, copy) { ch = std::tolower(ch); }
   return copy;
 }
 
 // --------------------------------------------------------------------------
 string ToUpper(const string &str) {
   string copy(str);
-  for (string::iterator pc = copy.begin(); pc != copy.end(); ++pc) {
-    *pc = std::toupper(*pc);
-  }
+  BOOST_FOREACH (char &ch, copy) { ch = std::toupper(ch); }
   return copy;
 }
 
