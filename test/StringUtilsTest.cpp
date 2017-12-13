@@ -34,15 +34,15 @@ TEST(StringUtilsTest, ChangeCase) {
 }
 
 TEST(StringUtilsTest, Trim) {
-  string raw        = "    hello world    ";
+  string raw = "    hello world    ";
   string notrailing = "    hello world";
-  string noleading  = "hello world    ";
+  string noleading = "hello world    ";
   string noboth = "hello world";
   char ch = ' ';
 
   EXPECT_EQ(notrailing, QS::StringUtils::RTrim(raw, ch));
-  EXPECT_EQ(noleading,  QS::StringUtils::LTrim(raw, ch));
-  EXPECT_EQ(noboth,     QS::StringUtils::Trim(raw,ch));
+  EXPECT_EQ(noleading, QS::StringUtils::LTrim(raw, ch));
+  EXPECT_EQ(noboth, QS::StringUtils::Trim(raw, ch));
 }
 
 TEST(StringUtilsTest, FileMode) {
@@ -50,8 +50,8 @@ TEST(StringUtilsTest, FileMode) {
   EXPECT_EQ(string("R_OK"), AccessMaskToString(R_OK));
   EXPECT_EQ(string("W_OK"), AccessMaskToString(W_OK));
   EXPECT_EQ(string("X_OK"), AccessMaskToString(X_OK));
-  EXPECT_EQ(string("R_OK|W_OK"), AccessMaskToString(R_OK|W_OK));
-  EXPECT_EQ(string("R_OK|W_OK|X_OK"), AccessMaskToString(R_OK|W_OK|X_OK));
+  EXPECT_EQ(string("R_OK|W_OK"), AccessMaskToString(R_OK | W_OK));
+  EXPECT_EQ(string("R_OK|W_OK|X_OK"), AccessMaskToString(R_OK | W_OK | X_OK));
 }
 
 TEST(StringUtilsTest, FilePermission) {
@@ -68,10 +68,10 @@ TEST(StringUtilsTest, FilePermission) {
   EXPECT_EQ(string("?-------w-"), ModeToString(S_IWOTH));
   EXPECT_EQ(string("?--------x"), ModeToString(S_IXOTH));
   EXPECT_EQ(string("?------rwx"), ModeToString(S_IRWXO));
-  EXPECT_EQ(string("?rwxrwx---"), ModeToString(S_IRWXU|S_IRWXG));
-  EXPECT_EQ(string("?rwx---rwx"), ModeToString(S_IRWXU|S_IRWXO));
-  EXPECT_EQ(string("?---rwxrwx"), ModeToString(S_IRWXG|S_IRWXO));
-  EXPECT_EQ(string("?rwxrwxrwx"), ModeToString(S_IRWXU|S_IRWXG|S_IRWXO));
+  EXPECT_EQ(string("?rwxrwx---"), ModeToString(S_IRWXU | S_IRWXG));
+  EXPECT_EQ(string("?rwx---rwx"), ModeToString(S_IRWXU | S_IRWXO));
+  EXPECT_EQ(string("?---rwxrwx"), ModeToString(S_IRWXG | S_IRWXO));
+  EXPECT_EQ(string("?rwxrwxrwx"), ModeToString(S_IRWXU | S_IRWXG | S_IRWXO));
 }
 
 TEST(StringUtilsTest, FileType) {

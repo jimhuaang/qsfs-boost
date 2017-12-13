@@ -35,14 +35,14 @@ using std::string;
 // --------------------------------------------------------------------------
 string ToLower(const string &str) {
   string copy(str);
-  BOOST_FOREACH (char &ch, copy) { ch = std::tolower(ch); }
+  BOOST_FOREACH(char &ch, copy) { ch = std::tolower(ch); }
   return copy;
 }
 
 // --------------------------------------------------------------------------
 string ToUpper(const string &str) {
   string copy(str);
-  BOOST_FOREACH (char &ch, copy) { ch = std::toupper(ch); }
+  BOOST_FOREACH(char &ch, copy) { ch = std::toupper(ch); }
   return copy;
 }
 
