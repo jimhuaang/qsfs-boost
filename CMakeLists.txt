@@ -139,21 +139,31 @@ endif()
 
 
 #
-# set up include directories
+# set up include/link directories
 #
 # Where qsfs's header files can be found
 include_directories (${QSFS_SOURCE_DIR})
 
 # Where boost files can be found
 include_directories(${THIRD_PARTY_SOURCE_DIR}/boost_1_49_0)
+# Where boost lib can be found
+if (IS_MACH_64)
+  # link to boost lib built on x86_64 with gcc4.1.2
+  link_directories(${THIRD_PARTY_SOURCE_DIR}/boost_1_49_0/lib64)
+else (IS_MACH_64)
+  # link to boost lib built on x86 with gcc4.1.2
+  link_directories(${THIRD_PARTY_SOURCE_DIR}/boost_1_49_0/lib)
+endif ()
 
+# other dependencies (glog/gtest) built with source code and
+# installed under third-party/install in cmake configure.
 # Where dependencies's header files can be found.
 include_directories(${EXTERNAL_PROJECT_INSTALL_PREFIX}/include)
-
 # Where dependencies's targets can be found.
+# On ubuntu x86_64 all libs get installed under lib
 link_directories(${EXTERNAL_PROJECT_INSTALL_PREFIX}/lib)
 if (IS_MACH_64)
-  # glog will export to lib64 on Centos x86_64
+  # On Centos x86_64 glog/gtest libs get installed under lib64
   link_directories(${EXTERNAL_PROJECT_INSTALL_PREFIX}/lib64)
 endif()
 
