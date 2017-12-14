@@ -5,8 +5,9 @@
 # Normal rules
 #
 *.o
-#*.a
+*.a
 *.so
+!libboost_thread.a
 
 #
 # Build directory (make)
@@ -16,8 +17,8 @@ build/
 #
 # Generated directory of build targets
 #
-#bin/
-#lib/
+bin/
+lib/
 
 #
 # Generated cmake files
@@ -40,4 +41,4 @@ external/
 
 
 # need to be moved at end
-# third_party/install
+third_party/install
