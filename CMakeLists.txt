@@ -145,7 +145,7 @@ endif()
 include_directories (${QSFS_SOURCE_DIR})
 
 # Where boost files can be found
-include_directories(${THIRD_PARTY_SOURCE_DIR}/boost)
+include_directories(${THIRD_PARTY_SOURCE_DIR}/boost_1_49_0)
 
 # Where dependencies's header files can be found.
 include_directories(${EXTERNAL_PROJECT_INSTALL_PREFIX}/include)
