@@ -22,9 +22,8 @@
 #include <iostream>
 #include <string>
 
-#include "boost/noncopyable.hpp"
-
 #include "base/LogLevel.h"
+#include "base/Singleton.hpp"
 #include "configure/IncludeFuse.h"  // for fuse.h
 
 namespace QS {
@@ -42,7 +41,7 @@ namespace Configure {
 
 using QS::Logging::LogLevel;
 
-class Options : private boost::noncopyable {
+class Options : public Singleton<Options> {
  public:
   ~Options() {
     if (m_fuseArgsInitialized) {
@@ -51,7 +50,6 @@ class Options : private boost::noncopyable {
   }
 
  public:
-  static Options &Instance();
   bool IsNoMount() const { return m_showHelp || m_showVersion; }
 
   // accessor
@@ -165,6 +163,7 @@ class Options : private boost::noncopyable {
   struct fuse_args m_fuseArgs;
   bool m_fuseArgsInitialized;
 
+  friend class Singleton<Options>;
   friend class QS::FileSystem::Mounter;  // for DoMount
   friend void QS::FileSystem::Parser::Parse(int argc, char **argv);
   friend std::ostream &operator<<(std::ostream &os, const Options &opts);

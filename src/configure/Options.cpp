@@ -19,7 +19,6 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
-//#include <mutex>  // NOLINT
 #include <string>
 
 #include "boost/exception/to_string.hpp"
@@ -53,18 +52,6 @@ using QS::Logging::GetLogLevelName;
 using QS::Logging::GetLogLevelByName;
 using std::ostream;
 using std::string;
-
-//static std::unique_ptr<Options> instance(nullptr);
-//static std::once_flag flag;
-static Options* instance = NULL;
-
-// --------------------------------------------------------------------------
-Options &Options::Instance() {
-  //std::call_once(flag, [] { instance.reset(new Options); });
-  //return *instance.get();
-  instance = new Options;
-  return *instance;
-}
 
 // --------------------------------------------------------------------------
 Options::Options()

@@ -29,7 +29,7 @@ add_executable(
   ${PROJECT_NAME}
   ${QSFS_SOURCES}
   )
-target_link_libraries(${PROJECT_NAME} fuse ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${PROJECT_NAME} fuse boost_thread ${CMAKE_THREAD_LIBS_INIT})
 set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -50,6 +50,7 @@ add_library(
   Base
   ${QSFS_BASE_SRCS}
 )
+target_link_libraries(Base boost_thread ${CMAKE_THREAD_LIBS_INIT})
 
 #
 # make libs referenced by unit test
