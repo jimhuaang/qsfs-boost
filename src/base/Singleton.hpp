@@ -15,7 +15,7 @@
 // +-------------------------------------------------------------------------
 
 #include "boost/noncopyable.hpp"
-#include "boost/smart_ptr/scoped_ptr.hpp"
+#include "boost/scoped_ptr.hpp"
 #include "boost/thread/once.hpp"
 
 //
