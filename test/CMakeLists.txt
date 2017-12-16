@@ -9,12 +9,11 @@ if (BUILD_TESTING)
   add_test(NAME qsfs_exception COMMAND ExceptionTest)
 
   add_executable(
-    StringUtilsTest
-    StringUtilsTest.cpp
-    ${QSFS_SOURCE_DIR}/base/StringUtils.cpp
+    HashUtilsTest
+    HashUtilsTest.cpp
   )
-  target_link_libraries(StringUtilsTest gtest ${CMAKE_THREAD_LIBS_INIT})
-  add_test(NAME qsfs_stringutils COMMAND StringUtilsTest)
+  target_link_libraries(HashUtilsTest gtest ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_hashutils COMMAND HashUtilsTest)
 
   add_executable(
     LogLevelTest
@@ -26,10 +25,24 @@ if (BUILD_TESTING)
   add_test(NAME qsfs_loglevel COMMAND LogLevelTest)
 
   add_executable(
-    HashUtilsTest
-    HashUtilsTest.cpp
+    StringUtilsTest
+    StringUtilsTest.cpp
+    ${QSFS_SOURCE_DIR}/base/StringUtils.cpp
   )
-  target_link_libraries(HashUtilsTest gtest ${CMAKE_THREAD_LIBS_INIT})
-  add_test(NAME qsfs_hashutils COMMAND HashUtilsTest)
+  target_link_libraries(StringUtilsTest gtest ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_stringutils COMMAND StringUtilsTest)
+
+  add_executable(
+    TimeUtilsTest
+    TimeUtilsTest.cpp
+    ${QSFS_SOURCE_DIR}/base/TimeUtils.cpp
+    ${QSFS_SOURCE_DIR}/base/LogLevel.cpp
+    ${QSFS_SOURCE_DIR}/base/Logging.cpp
+    ${QSFS_SOURCE_DIR}/base/Utils.cpp
+    ${QSFS_SOURCE_DIR}/base/StringUtils.cpp
+    ${QSFS_SOURCE_DIR}/configure/Default.cpp
+  )
+  target_link_libraries(TimeUtilsTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_timeutils COMMAND TimeUtilsTest)
 
 endif (BUILD_TESTING)
