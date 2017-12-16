@@ -22,7 +22,7 @@
 #include <exception>
 #include <iostream>
 #include <string>
-//#include <utility>
+#include <utility>
 
 #include "boost/bind.hpp"
 #include "boost/thread/once.hpp"
@@ -30,9 +30,8 @@
 
 #include "base/Exception.h"
 #include "base/LogLevel.h"
-//#include "base/Utils.h"
+#include "base/Utils.h"
 #include "configure/Default.h"
-
 
 namespace {
 
@@ -47,6 +46,7 @@ namespace QS {
 namespace Logging {
 
 using QS::Exception::QSException;
+using std::pair;
 using std::string;
 
 static boost::once_flag initOnce = BOOST_ONCE_INIT;
@@ -74,17 +74,15 @@ void Log::DoInitialize(const string &logdir) {
     // So need to set FLAGS_log_dir before calling google::InitGoogleLogging.
     FLAGS_log_dir = logdir.c_str();
 
-    // if (!QS::Utils::CreateDirectoryIfNotExistsNoLog(logdir)) {
-    //  throw QSException("Unable to create log directory " + logdir + " : " +
-    //                    strerror(errno));
-    //}
-    //
-    //// Check log directory with logOn=false.
-    //// NOTES: set logOn=true will cause infinite loop.
-    // if (!QS::Utils::HavePermission(logdir, false)) {
-    //  throw QSException("Could not create logging file at " + logdir +
-    //                    ": Permission denied");
-    //}
+    if (!QS::Utils::CreateDirectoryIfNotExists(logdir)) {
+      throw QSException("Unable to create log directory " + logdir + " : " +
+                        strerror(errno));
+    }
+
+    if (!QS::Utils::HavePermission(logdir).first) {
+      throw QSException("Could not create logging file at " + logdir +
+                        ": Permission denied");
+    }
   }
 
   InitializeGLog();
@@ -95,12 +93,12 @@ void Log::ClearLogDirectory() const {
   if (m_logDirectory.empty()) {
     std::cerr << "Log messge to STDERR , nothing to clear" << std::endl;
   } else {
-    // auto outcome = QS::Utils::DeleteFilesInDirectoryNoLog(m_logDirectory,
-    // false);
-    // if (!outcome.first) {
-    //  std::cerr << "Unable to clear log directory : ";
-    //  std::cerr << outcome.second << ". But Continue..." << std::endl;
-    //}
+    pair<bool, string> outcome =
+        QS::Utils::DeleteFilesInDirectory(m_logDirectory, false);
+    if (!outcome.first) {
+      std::cerr << "Unable to clear log directory : ";
+      std::cerr << outcome.second << ". But Continue..." << std::endl;
+    }
   }
 }
 
