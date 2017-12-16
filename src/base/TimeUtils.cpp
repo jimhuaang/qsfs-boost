@@ -21,8 +21,6 @@
 
 #include <string>
 
-#include "base/LogMacros.h"
-
 namespace QS {
 
 namespace TimeUtils {
@@ -32,7 +30,6 @@ using std::string;
 // --------------------------------------------------------------------------
 time_t RFC822GMTToSeconds(const string &date) {
   if (date.empty()) {
-    DebugWarning("Null date input");
     return 0L;
   }
   struct tm res;

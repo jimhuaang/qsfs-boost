@@ -25,6 +25,18 @@ if (BUILD_TESTING)
   add_test(NAME qsfs_loglevel COMMAND LogLevelTest)
 
   add_executable(
+    LoggingTest
+    LoggingTest.cpp
+    ${QSFS_SOURCE_DIR}/base/Logging.cpp
+    ${QSFS_SOURCE_DIR}/base/LogLevel.cpp
+    ${QSFS_SOURCE_DIR}/base/Utils.cpp
+    ${QSFS_SOURCE_DIR}/base/StringUtils.cpp
+    ${QSFS_SOURCE_DIR}/configure/Default.cpp
+  )
+  target_link_libraries(LoggingTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_logging COMMAND LoggingTest)
+
+  add_executable(
     StringUtilsTest
     StringUtilsTest.cpp
     ${QSFS_SOURCE_DIR}/base/StringUtils.cpp
@@ -36,13 +48,14 @@ if (BUILD_TESTING)
     TimeUtilsTest
     TimeUtilsTest.cpp
     ${QSFS_SOURCE_DIR}/base/TimeUtils.cpp
-    ${QSFS_SOURCE_DIR}/base/LogLevel.cpp
-    ${QSFS_SOURCE_DIR}/base/Logging.cpp
-    ${QSFS_SOURCE_DIR}/base/Utils.cpp
-    ${QSFS_SOURCE_DIR}/base/StringUtils.cpp
-    ${QSFS_SOURCE_DIR}/configure/Default.cpp
+    #${QSFS_SOURCE_DIR}/base/LogLevel.cpp
+    #${QSFS_SOURCE_DIR}/base/Logging.cpp
+    #${QSFS_SOURCE_DIR}/base/Utils.cpp
+    #${QSFS_SOURCE_DIR}/base/StringUtils.cpp
+    #${QSFS_SOURCE_DIR}/configure/Default.cpp
   )
-  target_link_libraries(TimeUtilsTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  #target_link_libraries(TimeUtilsTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(TimeUtilsTest gtest ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_timeutils COMMAND TimeUtilsTest)
 
 endif (BUILD_TESTING)
