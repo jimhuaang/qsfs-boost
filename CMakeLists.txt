@@ -132,6 +132,8 @@ add_compile_options (-fPIC)
 add_compile_options (-Wall)
 #add_compile_options (-Wunused-value)
 
+add_compile_options (-g)  # for testing
+
 if(IS_MACH_64)
   # fuse need to uses 64 bit off_t *
   add_compile_options(-D_FILE_OFFSET_BITS=64)

@@ -45,6 +45,15 @@ if (BUILD_TESTING)
   add_test(NAME qsfs_stringutils COMMAND StringUtilsTest)
 
   add_executable(
+    ThreadPoolTest
+    ThreadPoolTest.cpp
+    ${QSFS_SOURCE_DIR}/base/ThreadPool.cpp
+    ${QSFS_SOURCE_DIR}/base/TaskHandle.cpp
+  )
+  target_link_libraries(ThreadPoolTest gtest boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_threadpool COMMAND ThreadPoolTest)
+
+  add_executable(
     TimeUtilsTest
     TimeUtilsTest.cpp
     ${QSFS_SOURCE_DIR}/base/TimeUtils.cpp

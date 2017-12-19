@@ -46,10 +46,10 @@ add_library(
   Configure
   ${QSFS_CONFIGURE_SRCS}
 )
-add_library(
-  Base
-  ${QSFS_BASE_SRCS}
-)
+#add_library(
+#  Base
+#  ${QSFS_BASE_SRCS}
+#)
 #target_link_libraries(Base glog flags boost_thread ${CMAKE_THREAD_LIBS_INIT})
 
 #
