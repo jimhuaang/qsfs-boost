@@ -18,7 +18,7 @@
 
 #include "boost/bind.hpp"
 #include "boost/thread/locks.hpp"
-#include "boost/thread/mutex.hpp"
+#include "boost/thread/shared_mutex.hpp"
 
 #include "base/ThreadPool.h"
 
@@ -26,8 +26,10 @@ namespace QS {
 
 namespace Threading {
 
-using boost::mutex;
 using boost::lock_guard;
+using boost::mutex;
+using boost::shared_lock;
+using boost::shared_mutex;
 using boost::unique_lock;
 
 // --------------------------------------------------------------------------
@@ -46,13 +48,13 @@ TaskHandle::~TaskHandle() {
 
 // --------------------------------------------------------------------------
 void TaskHandle::Stop() {
-  lock_guard<mutex> lock(m_continueLock);
+  lock_guard<shared_mutex> lock(m_continueLock);
   m_continue = false;
 }
 
 // --------------------------------------------------------------------------
-bool TaskHandle::ShouldContinue() {
-  lock_guard<mutex> lock(m_continueLock);
+bool TaskHandle::ShouldContinue() const {
+  shared_lock<shared_mutex> lock(m_continueLock);
   return m_continue;
 }
 
@@ -74,7 +76,7 @@ void TaskHandle::operator()() {
 }
 
 // --------------------------------------------------------------------------
-bool TaskHandle::Predicate() {
+bool TaskHandle::Predicate() const {
   return !ShouldContinue() || m_threadPool.HasTasks();
 }
 
