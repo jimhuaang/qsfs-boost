@@ -35,7 +35,7 @@
 #include <vector>
 
 #include "boost/exception/to_string.hpp"
-#include "boost/shared_ptr.hpp"
+#include "boost/scope_exit.hpp"
 
 #include "base/StringUtils.h"
 #include "configure/Default.h"
@@ -44,7 +44,6 @@ namespace QS {
 
 namespace Utils {
 
-using boost::shared_ptr;
 using boost::to_string;
 using QS::StringUtils::FormatPath;
 using std::make_pair;
@@ -103,10 +102,18 @@ pair<bool, string> DeleteFilesInDirectory(const std::string &path,
   bool success = true;
   string msg;
 
-  shared_ptr<DIR> dir(opendir(path.c_str()), closedir);
+  DIR *dir = opendir(path.c_str());
+  BOOST_SCOPE_EXIT((dir)) {
+    if (dir) {
+      closedir(dir);
+      dir = NULL;
+    }
+  }
+  BOOST_SCOPE_EXIT_END
+
   if (dir) {
     struct dirent *nextDir = NULL;
-    while ((nextDir = readdir(dir.get())) != NULL) {
+    while ((nextDir = readdir(dir)) != NULL) {
       if (strcmp(nextDir->d_name, ".") == 0 ||
           strcmp(nextDir->d_name, "..") == 0) {
         continue;
@@ -177,10 +184,18 @@ pair<bool, string> IsDirectoryEmpty(const std::string &path) {
   bool success = true;
   string msg;
 
-  shared_ptr<DIR> dir(opendir(path.c_str()), closedir);
+  DIR *dir = opendir(path.c_str());
+  BOOST_SCOPE_EXIT((dir)) {
+    if (dir) {
+      closedir(dir);
+      dir = NULL;
+    }
+  }
+  BOOST_SCOPE_EXIT_END
+
   if (dir) {
     struct dirent *nextDir = NULL;
-    while ((nextDir = readdir(dir.get())) != NULL) {
+    while ((nextDir = readdir(dir)) != NULL) {
       if (strcmp(nextDir->d_name, ".") != 0 &&
           strcmp(nextDir->d_name, "..") != 0) {
         success = false;
