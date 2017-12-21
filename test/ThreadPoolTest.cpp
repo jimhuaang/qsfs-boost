@@ -62,23 +62,21 @@ static const int poolSize_ = 2;
 
 class ThreadPoolTest : public Test {
  public:
-  struct Task {
-    shared_ptr<packaged_task<int> > m_task;
-    Task(const shared_ptr<packaged_task<int> > &task) : m_task(task) {}
-    void operator()() { (*m_task)(); }
-  };
-
   unique_future<int> FactorialCallable(int n) {
     shared_ptr<packaged_task<int> > pTask =
         make_shared<packaged_task<int> >(bind(type<int>(), Factorial, n));
-    m_pThreadPool->SubmitToThread(boost::bind<void>(Task(pTask)));
+    m_pThreadPool->SubmitToThread(boost::bind<void>(
+        PackageFunctor1<BOOST_TYPEOF(&Factorial), int>(pTask)));
     return pTask->get_future();
   }
 
   unique_future<int> FactorialCallablePrioritized(int n) {
     shared_ptr<packaged_task<int> > pTask =
         make_shared<packaged_task<int> >(bind(type<int>(), Factorial, n));
-    m_pThreadPool->SubmitToThread(boost::bind<void>(Task(pTask)), true);
+    m_pThreadPool->SubmitToThread(
+        boost::bind<void>(
+            PackageFunctor1<BOOST_TYPEOF(&Factorial), int>(pTask)),
+        true);
     return pTask->get_future();
   }
 
@@ -90,33 +88,31 @@ class ThreadPoolTest : public Test {
 
   void TearDown() { delete m_pThreadPool; }
 
-  //// test private member
-  // void TestInterruptThreadPool() {
-  //  EXPECT_FALSE(m_pThreadPool->HasTasks());
-  //
-  //  m_pThreadPool->StopProcessing();
-  //  auto f = m_pThreadPool->SubmitCallable(Factorial, 5);
-  //  EXPECT_TRUE(m_pThreadPool->HasTasks());
-  //
-  //  auto fStatus = f.wait_for(std::chrono::milliseconds(100));
-  //  ASSERT_EQ(fStatus, std::future_status::timeout);
-  //
-  //  auto task = m_pThreadPool->PopTask();
-  //  EXPECT_FALSE(m_pThreadPool->HasTasks());
-  //
-  //  // Should never invoke f.get(), as after stoping thredpool, task will
-  //  never
-  //  // get a chance to execute, so this will hang the program there.
-  //  // f.get();
-  //}
+  // test private member
+  void TestInterruptThreadPool() {
+    EXPECT_FALSE(m_pThreadPool->HasTasks());
+
+    m_pThreadPool->StopProcessing();
+    unique_future<int> f = m_pThreadPool->SubmitCallable(Factorial, 5);
+    EXPECT_TRUE(m_pThreadPool->HasTasks());
+
+    f.timed_wait(boost::posix_time::milliseconds(100));
+    boost::future_state::state fStatus = f.get_state();
+    ASSERT_EQ(fStatus, boost::future_state::waiting);
+
+    m_pThreadPool->PopTask();
+    EXPECT_FALSE(m_pThreadPool->HasTasks());
+
+    // Should never invoke f.get(), as after stoping thredpool, task will
+    // neverget a chance to execute, so this will hang the program there.
+    // f.get();
+  }
 
  protected:
   ThreadPool *m_pThreadPool;
 };
 
-// TEST_F(ThreadPoolTest, TestInterrupt) {
-//  TestInterruptThreadPool();
-//}
+TEST_F(ThreadPoolTest, TestInterrupt) { TestInterruptThreadPool(); }
 
 TEST_F(ThreadPoolTest, TestSubmitToThread) {
   int num = 5;
@@ -138,7 +134,7 @@ TEST_F(ThreadPoolTest, TestSubmitToThread) {
 int result = 0;
 boost::mutex lockResult;
 
-void Add1(const int &value) { 
+void Add1(const int &value) {
   boost::lock_guard<boost::mutex> locker(lockResult);
   result = value;
 }
@@ -163,7 +159,6 @@ TEST_F(ThreadPoolTest, TestSubmit) {
   m_pThreadPool->Submit(Add3, 1, 10, 100);
   boost::this_thread::sleep(boost::posix_time::milliseconds(30));
   EXPECT_EQ(result, 111);
-
   m_pThreadPool->SubmitPrioritized(Add1, 1);
   boost::this_thread::sleep(boost::posix_time::milliseconds(30));
   EXPECT_EQ(result, 1);
@@ -175,20 +170,22 @@ TEST_F(ThreadPoolTest, TestSubmit) {
   EXPECT_EQ(result, 111);
 }
 
-//TEST_F(ThreadPoolTest, TestSubmitCallable) {
-//  int num = 5;
-//  BOOST_AUTO f1 = m_pThreadPool->SubmitCallable(Factorial, num);
-//  BOOST_AUTO fStatus1 = f1.wait_for(std::chrono::milliseconds(100));
-//  ASSERT_EQ(fStatus1, std::future_status::ready);
-//  EXPECT_EQ(f1.get(), 120);
-//  //
-//  //  int a = 1;
-//  //  int b = 11;
-//  //  auto f2 = m_pThreadPool->SubmitCallablePrioritized(Add, a, b);
-//  //  auto fStatus2 = f2.wait_for(std::chrono::milliseconds(100));
-//  //  ASSERT_EQ(fStatus2, std::future_status::ready);
-//  //  EXPECT_EQ(f2.get(), 12);
-//}
+TEST_F(ThreadPoolTest, TestSubmitCallable) {
+  int num = 5;
+  unique_future<int> f1 = m_pThreadPool->SubmitCallable(Factorial, num);
+  f1.timed_wait(boost::posix_time::milliseconds(100));
+  boost::future_state::state fStatus1 = f1.get_state();
+  ASSERT_EQ(fStatus1, boost::future_state::ready);
+  EXPECT_EQ(f1.get(), 120);
+
+  int a = 1;
+  int b = 11;
+  unique_future<int> f2 = m_pThreadPool->SubmitCallablePrioritized(Add, a, b);
+  f2.timed_wait(boost::posix_time::milliseconds(100));
+  boost::future_state::state fStatus2 = f2.get_state();
+  ASSERT_EQ(fStatus2, boost::future_state::ready);
+  EXPECT_EQ(f2.get(), 12);
+}
 //
 // TEST_F(ThreadPoolTest, TestSubmitAsync) {
 //  auto callback = [](int resultOfFactorial, int num) {

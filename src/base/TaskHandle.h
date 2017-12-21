@@ -14,8 +14,8 @@
 // | limitations under the License.
 // +-------------------------------------------------------------------------
 
-#ifndef INCLUDE_BASE_TASKHANDLE_H_
-#define INCLUDE_BASE_TASKHANDLE_H_
+#ifndef QSFS_BASE_TASKHANDLE_H_
+#define QSFS_BASE_TASKHANDLE_H_
 
 #include "boost/noncopyable.hpp"
 #include "boost/thread/shared_mutex.hpp"
@@ -52,4 +52,4 @@ class TaskHandle : private boost::noncopyable {
 }  // namespace QS
 
 
-#endif  // INCLUDE_BASE_TASKHANDLE_H_
+#endif  // QSFS_BASE_TASKHANDLE_H_

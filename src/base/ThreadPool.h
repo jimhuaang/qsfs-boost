@@ -14,47 +14,31 @@
 // | limitations under the License.
 // +-------------------------------------------------------------------------
 
-#ifndef INCLUDE_BASE_THREADPOOL_H_
-#define INCLUDE_BASE_THREADPOOL_H_
+#ifndef QSFS_BASE_THREADPOOL_H_
+#define QSFS_BASE_THREADPOOL_H_
 
 #include <stddef.h>
 
-//#include <functional>
 #include <list>
-//#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "boost/bind.hpp"
 #include "boost/function.hpp"
+#include "boost/make_shared.hpp"
 #include "boost/move/move.hpp"
 #include "boost/noncopyable.hpp"
 #include "boost/preprocessor.hpp"
+#include "boost/shared_ptr.hpp"
 #include "boost/thread/condition_variable.hpp"
+#include "boost/thread/future.hpp"
+#include "boost/thread/locks.hpp"
 #include "boost/thread/mutex.hpp"
 #include "boost/typeof/typeof.hpp"
 #include "boost/utility/result_of.hpp"
 
-
-namespace QS {
-
-namespace Threading {
-
-class TaskHandle;
-class ThreadPoolInitializer;
-
-typedef boost::function<void()> Task;
-
-class ThreadPool : private boost::noncopyable {
- public:
-  explicit ThreadPool(size_t poolSize);
-  ~ThreadPool();
-
- public:
-  void SubmitToThread(const Task& task, bool prioritized = false);
-
 //
-// Perfect Forward and Variadic Template Emulation in C++03
+// Macros for emulating Variadic Template in C++03
 //
 #define NUM_PARAMETERS 3
 #define TYPES(Z, N, D) \
@@ -67,24 +51,111 @@ class ThreadPool : private boost::noncopyable {
   BOOST_PP_COMMA_IF(N)   \
   boost::forward<BOOST_PP_CAT(A, N)>(BOOST_PP_CAT(a, N))
 
+
+namespace QS {
+
+namespace Threading {
+
+//
+// Generate PackageFunctor1, ..., PackageFunctorN
+// N = NUM_PARAMETERS
+//
 #define EXPAND(N)                                                            \
   template <typename F, BOOST_PP_ENUM_PARAMS(N, typename A)>                 \
-  void Submit(const F& f, BOOST_PP_REPEAT(N, PARAMETERS, ~)) {               \
-    typedef BOOST_TYPEOF(&f) T;                                              \
-    typedef typename boost::result_of<T(BOOST_PP_REPEAT(N, TYPES, ~))>::type \
+  struct BOOST_PP_CAT(PackageFunctor, N) {                                   \
+    typedef typename boost::result_of<F(BOOST_PP_REPEAT(N, TYPES, ~))>::type \
         ReturnType;                                                          \
-    return SubmitToThread(boost::bind(boost::type<ReturnType>(), f,          \
-                                      BOOST_PP_REPEAT(N, FORWARD, ~)));      \
-  }                                                                          \
-                                                                             \
-  template <typename F, BOOST_PP_ENUM_PARAMS(N, typename A)>                 \
-  void SubmitPrioritized(const F& f, BOOST_PP_REPEAT(N, PARAMETERS, ~)) {    \
-    typedef BOOST_TYPEOF(&f) T;                                              \
-    typedef typename boost::result_of<T(BOOST_PP_REPEAT(N, TYPES, ~))>::type \
-        ReturnType;                                                          \
-    return SubmitToThread(boost::bind(boost::type<ReturnType>(), f,          \
-                                      BOOST_PP_REPEAT(N, FORWARD, ~)),       \
-                          true);                                             \
+    boost::shared_ptr<boost::packaged_task<ReturnType> > m_task;             \
+    BOOST_PP_CAT(PackageFunctor, N)                                          \
+    (const boost::shared_ptr<boost::packaged_task<ReturnType> >& task)       \
+        : m_task(task) {}                                                    \
+    void operator()() { (*m_task)(); }                                       \
+  };
+
+#define BOOST_PP_LOCAL_MACRO(N) EXPAND(N)
+#define BOOST_PP_LOCAL_LIMITS (1, NUM_PARAMETERS)  // starting from 1
+#include BOOST_PP_LOCAL_ITERATE()
+
+#undef BOOST_PP_LOCAL_MACRO
+#undef BOOST_PP_LOCAL_LIMITS
+#undef EXPAND
+
+
+class TaskHandle;
+class ThreadPoolInitializer;
+
+typedef boost::function<void()> Task;
+
+
+class ThreadPool : private boost::noncopyable {
+ public:
+  explicit ThreadPool(size_t poolSize);
+  ~ThreadPool();
+
+ public:
+  void SubmitToThread(const Task& task, bool prioritized = false);
+
+  //template <typename F, typename A0>
+  //boost::unique_future<typename boost::result_of<F(A0)>::type> SubmitCallable1(
+  //    F f, BOOST_FWD_REF(A0) a0) {
+  //  typedef typename boost::result_of<F(A0)>::type ReturnType;
+  //  boost::shared_ptr<boost::packaged_task<ReturnType> > task =
+  //      boost::make_shared<boost::packaged_task<ReturnType> >(
+  //          boost::bind(boost::type<ReturnType>(), f, boost::forward<A0>(a0)));
+  //  SubmitToThread(boost::bind<void>(Functor<F, A0>(task)));
+  //  return task->get_future();
+  //}
+
+//
+// Perfect Forward and Variadic Template Emulation in C++03
+//
+#define EXPAND(N)                                                             \
+  template <typename F, BOOST_PP_ENUM_PARAMS(N, typename A)>                  \
+  void Submit(F f, BOOST_PP_REPEAT(N, PARAMETERS, ~)) {                       \
+    typedef typename boost::result_of<F(BOOST_PP_REPEAT(N, TYPES, ~))>::type  \
+        ReturnType;                                                           \
+    return SubmitToThread(boost::bind(boost::type<ReturnType>(), f,           \
+                                      BOOST_PP_REPEAT(N, FORWARD, ~)));       \
+  }                                                                           \
+                                                                              \
+  template <typename F, BOOST_PP_ENUM_PARAMS(N, typename A)>                  \
+  void SubmitPrioritized(F f, BOOST_PP_REPEAT(N, PARAMETERS, ~)) {            \
+    typedef typename boost::result_of<F(BOOST_PP_REPEAT(N, TYPES, ~))>::type  \
+        ReturnType;                                                           \
+    return SubmitToThread(boost::bind(boost::type<ReturnType>(), f,           \
+                                      BOOST_PP_REPEAT(N, FORWARD, ~)),        \
+                          true);                                              \
+  }                                                                           \
+                                                                              \
+  template <typename F, BOOST_PP_ENUM_PARAMS(N, typename A)>                  \
+  boost::unique_future<                                                       \
+      typename boost::result_of<F(BOOST_PP_REPEAT(N, TYPES, ~))>::type>       \
+  SubmitCallable(F f, BOOST_PP_REPEAT(N, PARAMETERS, ~)) {                    \
+    typedef typename boost::result_of<F(BOOST_PP_REPEAT(N, TYPES, ~))>::type  \
+        ReturnType;                                                           \
+    boost::shared_ptr<boost::packaged_task<ReturnType> > task =               \
+        boost::make_shared<boost::packaged_task<ReturnType> >(boost::bind(    \
+            boost::type<ReturnType>(), f, BOOST_PP_REPEAT(N, FORWARD, ~)));   \
+    SubmitToThread(boost::bind(boost::type<void>(),                           \
+                               BOOST_PP_CAT(PackageFunctor, N) < F,           \
+                               BOOST_PP_REPEAT(N, TYPES, ~) > (task)));       \
+    return task->get_future();                                                \
+  }                                                                           \
+                                                                              \
+  template <typename F, BOOST_PP_ENUM_PARAMS(N, typename A)>                  \
+  boost::unique_future<                                                       \
+      typename boost::result_of<F(BOOST_PP_REPEAT(N, TYPES, ~))>::type>       \
+  SubmitCallablePrioritized(F f, BOOST_PP_REPEAT(N, PARAMETERS, ~)) {         \
+    typedef typename boost::result_of<F(BOOST_PP_REPEAT(N, TYPES, ~))>::type  \
+        ReturnType;                                                           \
+    boost::shared_ptr<boost::packaged_task<ReturnType> > task =               \
+        boost::make_shared<boost::packaged_task<ReturnType> >(boost::bind(    \
+            boost::type<ReturnType>(), f, BOOST_PP_REPEAT(N, FORWARD, ~)));   \
+    SubmitToThread(                                                           \
+        boost::bind(boost::type<void>(), BOOST_PP_CAT(PackageFunctor, N) < F, \
+                    BOOST_PP_REPEAT(N, TYPES, ~) > (task)),                   \
+        true);                                                                \
+    return task->get_future();                                                \
   }
 
 #define BOOST_PP_LOCAL_MACRO(N) EXPAND(N)
@@ -94,18 +165,8 @@ class ThreadPool : private boost::noncopyable {
 #undef BOOST_PP_LOCAL_MACRO
 #undef BOOST_PP_LOCAL_LIMITS
 #undef EXPAND
-#undef FORWARD
-#undef PARAMETERS
-#undef NUM_PARAMETERS
 
-  // template <typename F, typename... Args>
-  // auto SubmitCallable(F &&f, Args &&... args)
-  //    -> std::future<typename std::result_of<F(Args...)>::type>;
-  //
-  // template <typename F, typename... Args>
-  // auto SubmitCallablePrioritized(F &&f, Args &&... args)
-  //    -> std::future<typename std::result_of<F(Args...)>::type>;
-  //
+
   // template <typename ReceivedHandler, typename F, typename... Args>
   // void SubmitAsync(ReceivedHandler &&handler, F &&f, Args &&... args);
   //
@@ -113,17 +174,6 @@ class ThreadPool : private boost::noncopyable {
   // void SubmitAsyncPrioritized(ReceivedHandler &&handler, F &&f,
   //                            Args &&... args);
   //
-  // template <typename ReceivedHandler, typename CallerContext, typename F,
-  //          typename... Args>
-  // void SubmitAsyncWithContext(ReceivedHandler &&handler,
-  //                            CallerContext &&context, F &&f, Args &&...
-  //                            args);
-  //
-  // template <typename ReceivedHandler, typename CallerContext, typename F,
-  //          typename... Args>
-  // void SubmitAsyncWithContextPrioritized(ReceivedHandler &&handler,
-  //                                       CallerContext &&context, F &&f,
-  //                                       Args &&... args);
 
  private:
   Task* PopTask();
@@ -151,40 +201,6 @@ class ThreadPool : private boost::noncopyable {
   friend class ThreadPoolTest;
 };
 
-//
-// template <typename F, typename... Args>
-// auto ThreadPool::SubmitCallable(F &&f, Args &&... args)
-//    -> std::future<typename std::result_of<F(Args...)>::type> {
-//  using ReturnType = typename std::result_of<F(Args...)>::type;
-//
-//  auto task = std::make_shared<std::packaged_task<ReturnType()>>(
-//      std::bind(std::forward<F>(f), std::forward<Args>(args)...));
-//
-//  std::future<ReturnType> res = task->get_future();
-//  {
-//    std::lock_guard<std::mutex> lock(m_queueLock);
-//    m_tasks.emplace_back([task]() { (*task)(); });
-//  }
-//  m_syncConditionVar.notify_one();
-//  return res;
-//}
-//
-// template <typename F, typename... Args>
-// auto ThreadPool::SubmitCallablePrioritized(F &&f, Args &&... args)
-//    -> std::future<typename std::result_of<F(Args...)>::type> {
-//  using ReturnType = typename std::result_of<F(Args...)>::type;
-//
-//  auto task = std::make_shared<std::packaged_task<ReturnType()>>(
-//      std::bind(std::forward<F>(f), std::forward<Args>(args)...));
-//
-//  std::future<ReturnType> res = task->get_future();
-//  {
-//    std::lock_guard<std::mutex> lock(m_queueLock);
-//    m_tasks.emplace_front([task]() { (*task)(); });
-//  }
-//  m_syncConditionVar.notify_one();
-//  return res;
-//}
 //
 // template <typename ReceivedHandler, typename F, typename... Args>
 // void ThreadPool::SubmitAsync(ReceivedHandler &&handler, F &&f,
@@ -214,41 +230,16 @@ class ThreadPool : private boost::noncopyable {
 //  m_syncConditionVar.notify_one();
 //}
 //
-// template <typename ReceivedHandler, typename CallerContext, typename F,
-//          typename... Args>
-// void ThreadPool::SubmitAsyncWithContext(ReceivedHandler &&handler,
-//                                        CallerContext &&context, F &&f,
-//                                        Args &&... args) {
-//  auto task =
-//      std::bind(std::forward<ReceivedHandler>(handler),
-//                std::forward<CallerContext>(context),
-//                std::bind(std::forward<F>(f), std::forward<Args>(args)...),
-//                std::forward<Args>(args)...);
-//  {
-//    std::lock_guard<std::mutex> lock(m_queueLock);
-//    m_tasks.emplace_back([task]() { task(); });
-//  }
-//  m_syncConditionVar.notify_one();
-//}
-//
-// template <typename ReceivedHandler, typename CallerContext, typename F,
-//          typename... Args>
-// void ThreadPool::SubmitAsyncWithContextPrioritized(ReceivedHandler &&handler,
-//                                                   CallerContext &&context,
-//                                                   F &&f, Args &&... args) {
-//  auto task =
-//      std::bind(std::forward<ReceivedHandler>(handler),
-//                std::forward<CallerContext>(context),
-//                std::bind(std::forward<F>(f), std::forward<Args>(args)...),
-//                std::forward<Args>(args)...);
-//  {
-//    std::lock_guard<std::mutex> lock(m_queueLock);
-//    m_tasks.emplace_front([task]() { task(); });
-//  }
-//  m_syncConditionVar.notify_one();
-//}
+
 
 }  // namespace Threading
 }  // namespace QS
 
-#endif  // INCLUDE_BASE_THREADPOOL_H_
+#undef FORWARD
+#undef PARAMETERS
+#undef TYPES
+#undef NUM_PARAMETERS
+
+#endif  // QSFS_BASE_THREADPOOL_H_
+
+
