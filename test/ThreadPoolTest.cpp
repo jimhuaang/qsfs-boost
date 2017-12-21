@@ -21,9 +21,14 @@
 #include "boost/make_shared.hpp"
 #include "boost/shared_ptr.hpp"
 #include "boost/thread/future.hpp"
+#include "boost/thread/locks.hpp"
+#include "boost/thread/mutex.hpp"
 #include "boost/thread/thread_time.hpp"
+#include "boost/typeof/typeof.hpp"
 
 #include "base/ThreadPool.h"
+
+#include <iostream>
 
 namespace QS {
 
@@ -113,7 +118,7 @@ class ThreadPoolTest : public Test {
 //  TestInterruptThreadPool();
 //}
 
-TEST_F(ThreadPoolTest, TestSubmit) {
+TEST_F(ThreadPoolTest, TestSubmitToThread) {
   int num = 5;
   unique_future<int> f = FactorialCallable(num);
   f.timed_wait(boost::posix_time::milliseconds(100));
@@ -130,19 +135,59 @@ TEST_F(ThreadPoolTest, TestSubmit) {
   EXPECT_EQ(f1.get(), 120);
 }
 
-// TEST_F(ThreadPoolTest, TestSubmitCallable) {
+int result = 0;
+boost::mutex lockResult;
+
+void Add1(const int &value) { 
+  boost::lock_guard<boost::mutex> locker(lockResult);
+  result = value;
+}
+
+void Add2(const int &v1, const int &v2) {
+  boost::lock_guard<boost::mutex> locker(lockResult);
+  result = v1 + v2;
+}
+
+void Add3(const int &v1, const int &v2, const int &v3) {
+  boost::lock_guard<boost::mutex> locker(lockResult);
+  result = v1 + v2 + v3;
+}
+
+TEST_F(ThreadPoolTest, TestSubmit) {
+  m_pThreadPool->Submit(Add1, 1);
+  boost::this_thread::sleep(boost::posix_time::milliseconds(30));
+  EXPECT_EQ(result, 1);
+  m_pThreadPool->Submit(Add2, 1, 10);
+  boost::this_thread::sleep(boost::posix_time::milliseconds(30));
+  EXPECT_EQ(result, 11);
+  m_pThreadPool->Submit(Add3, 1, 10, 100);
+  boost::this_thread::sleep(boost::posix_time::milliseconds(30));
+  EXPECT_EQ(result, 111);
+
+  m_pThreadPool->SubmitPrioritized(Add1, 1);
+  boost::this_thread::sleep(boost::posix_time::milliseconds(30));
+  EXPECT_EQ(result, 1);
+  m_pThreadPool->SubmitPrioritized(Add2, 1, 10);
+  boost::this_thread::sleep(boost::posix_time::milliseconds(30));
+  EXPECT_EQ(result, 11);
+  m_pThreadPool->SubmitPrioritized(Add3, 1, 10, 100);
+  boost::this_thread::sleep(boost::posix_time::milliseconds(30));
+  EXPECT_EQ(result, 111);
+}
+
+//TEST_F(ThreadPoolTest, TestSubmitCallable) {
 //  int num = 5;
-//  auto f1 = m_pThreadPool->SubmitCallable(Factorial, num);
-//  auto fStatus1 = f1.wait_for(std::chrono::milliseconds(100));
+//  BOOST_AUTO f1 = m_pThreadPool->SubmitCallable(Factorial, num);
+//  BOOST_AUTO fStatus1 = f1.wait_for(std::chrono::milliseconds(100));
 //  ASSERT_EQ(fStatus1, std::future_status::ready);
 //  EXPECT_EQ(f1.get(), 120);
-//
-//  int a = 1;
-//  int b = 11;
-//  auto f2 = m_pThreadPool->SubmitCallablePrioritized(Add, a, b);
-//  auto fStatus2 = f2.wait_for(std::chrono::milliseconds(100));
-//  ASSERT_EQ(fStatus2, std::future_status::ready);
-//  EXPECT_EQ(f2.get(), 12);
+//  //
+//  //  int a = 1;
+//  //  int b = 11;
+//  //  auto f2 = m_pThreadPool->SubmitCallablePrioritized(Add, a, b);
+//  //  auto fStatus2 = f2.wait_for(std::chrono::milliseconds(100));
+//  //  ASSERT_EQ(fStatus2, std::future_status::ready);
+//  //  EXPECT_EQ(f2.get(), 12);
 //}
 //
 // TEST_F(ThreadPoolTest, TestSubmitAsync) {
