@@ -186,41 +186,31 @@ TEST_F(ThreadPoolTest, TestSubmitCallable) {
   ASSERT_EQ(fStatus2, boost::future_state::ready);
   EXPECT_EQ(f2.get(), 12);
 }
-//
-// TEST_F(ThreadPoolTest, TestSubmitAsync) {
-//  auto callback = [](int resultOfFactorial, int num) {
-//    EXPECT_EQ(num, 5);
-//    EXPECT_EQ(resultOfFactorial, 120);
-//  };
-//  m_pThreadPool->SubmitAsync(callback, Factorial, 5);
-//
-//  auto callback1 = [](int resultOfAdd, int a, int b) {
-//    EXPECT_EQ(a, 1);
-//    EXPECT_EQ(b, 11);
-//    EXPECT_EQ(resultOfAdd, 12);
-//  };
-//  m_pThreadPool->SubmitAsyncPrioritized(callback1, Add, 1, 11);
-//}
-//
-// struct AsyncContext {};
-//
-// TEST_F(ThreadPoolTest, TestSubmitAsyncWithContext) {
-//  AsyncContext asyncContext;
-//  auto callback = [](AsyncContext context, int resultOfFactorial, int num) {
-//    EXPECT_EQ(num, 5);
-//    EXPECT_EQ(resultOfFactorial, 120);
-//  };
-//  m_pThreadPool->SubmitAsyncWithContext(callback, asyncContext, Factorial, 5);
-//
-//  auto callback1 = [](AsyncContext context, int resultOfAdd, int a, int b) {
-//    EXPECT_EQ(a, 1);
-//    EXPECT_EQ(b, 11);
-//    EXPECT_EQ(resultOfAdd, 12);
-//  };
-//  m_pThreadPool->SubmitAsyncWithContextPrioritized(callback1, asyncContext,
-//  Add,
-//                                                   1, 11);
-//}
+
+struct callback {
+  callback() {}
+  void operator()(int result, int num) {
+    EXPECT_EQ(num, 5);
+    EXPECT_EQ(result, 120);
+  }
+};
+
+struct callback1 {
+  callback1() {}
+  void operator()(int result, int a, int b) {
+    EXPECT_EQ(a, 1);
+    EXPECT_EQ(b, 11);
+    EXPECT_EQ(result, 12);
+  }
+};
+
+TEST_F(ThreadPoolTest, TestSubmitAsync) {
+  m_pThreadPool->SubmitAsync(
+      boost::bind(boost::type<void>(), callback(), _1, _2), Factorial, 5);
+
+  m_pThreadPool->SubmitAsyncPrioritized(
+      boost::bind(boost::type<void>(), callback1(), _1, _2, _3), Add, 1, 11);
+}
 
 }  // namespace Threading
 }  // namespace QS

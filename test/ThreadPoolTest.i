@@ -110109,7 +110109,12 @@ namespace boost { namespace type_of {
 # 20 "../src/base/ThreadPool.h"
 # 1 "/usr/lib/gcc/x86_64-linux-gnu/5/include/stddef.h" 1 3 4
 # 21 "../src/base/ThreadPool.h" 2
-# 29 "../src/base/ThreadPool.h"
+
+
+
+
+
+
 # 1 "../third_party/boost_1_49_0/boost/function.hpp" 1
 # 64 "../third_party/boost_1_49_0/boost/function.hpp"
 # 1 "../third_party/boost_1_49_0/boost/preprocessor/iteration/detail/iter/forward1.hpp" 1
@@ -110222,7 +110227,7 @@ namespace boost { namespace type_of {
 # 15 "../third_party/boost_1_49_0/boost/function/detail/function_iterate.hpp" 2
 # 98 "../third_party/boost_1_49_0/boost/preprocessor/iteration/detail/iter/forward1.hpp" 2
 # 65 "../third_party/boost_1_49_0/boost/function.hpp" 2
-# 30 "../src/base/ThreadPool.h" 2
+# 28 "../src/base/ThreadPool.h" 2
 
 
 
@@ -110510,7 +110515,7 @@ namespace boost { namespace type_of {
 # 22 "../third_party/boost_1_49_0/boost/preprocessor/variadic.hpp" 2
 # 35 "../third_party/boost_1_49_0/boost/preprocessor/library.hpp" 2
 # 18 "../third_party/boost_1_49_0/boost/preprocessor.hpp" 2
-# 34 "../src/base/ThreadPool.h" 2
+# 32 "../src/base/ThreadPool.h" 2
 
 
 
@@ -111485,32 +111490,26 @@ struct tr1_result_of_impl<R (T0::*)
 
 
 }
-# 41 "../src/base/ThreadPool.h" 2
-# 57 "../src/base/ThreadPool.h"
+# 39 "../src/base/ThreadPool.h" 2
+# 55 "../src/base/ThreadPool.h"
 namespace QS {
 
 namespace Threading {
-# 75 "../src/base/ThreadPool.h"
+# 77 "../src/base/ThreadPool.h"
 # 1 "../third_party/boost_1_49_0/boost/preprocessor/iteration/detail/local.hpp" 1
 # 37 "../third_party/boost_1_49_0/boost/preprocessor/iteration/detail/local.hpp"
-        template <typename F, typename A0> struct ThreadPoolFunctor1 { typedef typename boost::result_of<F( A0)>::type ReturnType; boost::shared_ptr<boost::packaged_task<ReturnType> > m_task; ThreadPoolFunctor1 (const boost::shared_ptr<boost::packaged_task<ReturnType> >& task) : m_task(task) {} void operator()() { (*m_task)(); } };
-# 76 "../src/base/ThreadPool.h" 2
+        template <typename F, typename A0> struct PackageFunctor1 { typedef typename boost::result_of<F( A0)>::type ReturnType; boost::shared_ptr<boost::packaged_task<ReturnType> > m_task; PackageFunctor1 (const boost::shared_ptr<boost::packaged_task<ReturnType> >& task) : m_task(task) {} void operator()() { (*m_task)(); } };
+
+
+        template <typename F, typename A0 , typename A1> struct PackageFunctor2 { typedef typename boost::result_of<F( A0 , A1)>::type ReturnType; boost::shared_ptr<boost::packaged_task<ReturnType> > m_task; PackageFunctor2 (const boost::shared_ptr<boost::packaged_task<ReturnType> >& task) : m_task(task) {} void operator()() { (*m_task)(); } };
+
+
+        template <typename F, typename A0 , typename A1 , typename A2> struct PackageFunctor3 { typedef typename boost::result_of<F( A0 , A1 , A2)>::type ReturnType; boost::shared_ptr<boost::packaged_task<ReturnType> > m_task; PackageFunctor3 (const boost::shared_ptr<boost::packaged_task<ReturnType> >& task) : m_task(task) {} void operator()() { (*m_task)(); } };
+# 78 "../src/base/ThreadPool.h" 2
 
 
 
 
-
-template <typename F, typename A0>
-struct Functor {
-  typedef typename boost::result_of<F(A0)>::type ReturnType;
-
-  boost::shared_ptr<boost::packaged_task<ReturnType> > m_task;
-
-  Functor(const boost::shared_ptr<boost::packaged_task<ReturnType> >& task)
-      : m_task(task) {}
-
-  void operator()() { (*m_task)(); }
-};
 
 
 class TaskHandle;
@@ -111526,23 +111525,28 @@ class ThreadPool : private boost::noncopyable {
 
  public:
   void SubmitToThread(const Task& task, bool prioritized = false);
-
-  template <typename F, typename A0>
-  boost::unique_future<typename boost::result_of<F(A0)>::type> SubmitCallable1(
-      F f, const A0 & a0) {
-    typedef typename boost::result_of<F(A0)>::type ReturnType;
-    boost::shared_ptr<boost::packaged_task<ReturnType> > task =
-        boost::make_shared<boost::packaged_task<ReturnType> >(
-            boost::bind(boost::type<ReturnType>(), f, boost::forward<A0>(a0)));
-    SubmitToThread(boost::bind<void>(Functor<F, A0>(task)));
-    return task->get_future();
+# 124 "../src/base/ThreadPool.h"
+  template <typename ReceivedHandler, typename F, typename A0>
+  void SubmitAsync1(ReceivedHandler handler, F f, const A0 & a0) {
+    typedef typename boost::result_of<ReceivedHandler(F(A0))>::type ReturnType;
+    typedef typename boost::result_of<F(A0)>::type ReturnType1;
+    return SubmitToThread(boost::bind(
+        boost::type<ReturnType>(), handler,
+        boost::bind(boost::type<ReturnType1>(), f, boost::forward<A0>(a0)),
+        boost::forward<A0>(a0)));
   }
-# 172 "../src/base/ThreadPool.h"
+# 203 "../src/base/ThreadPool.h"
 # 1 "../third_party/boost_1_49_0/boost/preprocessor/iteration/detail/local.hpp" 1
 # 37 "../third_party/boost_1_49_0/boost/preprocessor/iteration/detail/local.hpp"
-        template <typename F, typename A0> void Submit(F f, const A0 & a0) { typedef typename boost::result_of<F( A0)>::type ReturnType; return SubmitToThread(boost::bind(boost::type<ReturnType>(), f, boost::forward<A0>(a0))); } template <typename F, typename A0> void SubmitPrioritized(F f, const A0 & a0) { typedef typename boost::result_of<F( A0)>::type ReturnType; return SubmitToThread(boost::bind(boost::type<ReturnType>(), f, boost::forward<A0>(a0)), true); } template <typename F, typename A0> boost::unique_future< typename boost::result_of<F( A0)>::type> SubmitCallable(F f, const A0 & a0) { typedef typename boost::result_of<F( A0)>::type ReturnType; boost::shared_ptr<boost::packaged_task<ReturnType> > task = boost::make_shared<boost::packaged_task<ReturnType> >(boost::bind( boost::type<ReturnType>(), f, boost::forward<A0>(a0))); SubmitToThread(boost::bind( boost::type<void>(), Functor<F, A0>(task))); return task->get_future(); } template <typename F, typename A0> boost::unique_future< typename boost::result_of<F( A0)>::type> SubmitCallablePrioritized(F f, const A0 & a0) { typedef typename boost::result_of<F( A0)>::type ReturnType; boost::shared_ptr<boost::packaged_task<ReturnType> > task = boost::make_shared<boost::packaged_task<ReturnType> >(boost::bind( boost::type<ReturnType>(), f, boost::forward<A0>(a0))); SubmitToThread( boost::bind(boost::type<void>(), Functor<F, A0>(task)), true); return task->get_future(); }
-# 173 "../src/base/ThreadPool.h" 2
-# 206 "../src/base/ThreadPool.h"
+        template <typename F, typename A0> void Submit(F f, const A0 & a0) { typedef typename boost::result_of<F( A0)>::type ReturnType; return SubmitToThread(boost::bind(boost::type<ReturnType>(), f, boost::forward<A0>(a0))); } template <typename F, typename A0> void SubmitPrioritized(F f, const A0 & a0) { typedef typename boost::result_of<F( A0)>::type ReturnType; return SubmitToThread(boost::bind(boost::type<ReturnType>(), f, boost::forward<A0>(a0)), true); } template <typename F, typename A0> boost::unique_future< typename boost::result_of<F( A0)>::type> SubmitCallable(F f, const A0 & a0) { typedef typename boost::result_of<F( A0)>::type ReturnType; boost::shared_ptr<boost::packaged_task<ReturnType> > task = boost::make_shared<boost::packaged_task<ReturnType> >(boost::bind( boost::type<ReturnType>(), f, boost::forward<A0>(a0))); SubmitToThread(boost::bind(boost::type<void>(), PackageFunctor1 < F, A0 > (task))); return task->get_future(); } template <typename F, typename A0> boost::unique_future< typename boost::result_of<F( A0)>::type> SubmitCallablePrioritized(F f, const A0 & a0) { typedef typename boost::result_of<F( A0)>::type ReturnType; boost::shared_ptr<boost::packaged_task<ReturnType> > task = boost::make_shared<boost::packaged_task<ReturnType> >(boost::bind( boost::type<ReturnType>(), f, boost::forward<A0>(a0))); SubmitToThread( boost::bind(boost::type<void>(), PackageFunctor1 < F, A0 > (task)), true); return task->get_future(); } template <typename ReceivedHandler, typename F, typename A0> void SubmitAsync(ReceivedHandler handler, F f, const A0 & a0) { typedef typename boost::result_of<ReceivedHandler( F( A0))>::type ReturnType; typedef typename boost::result_of<F( A0)>::type ReturnType1; return SubmitToThread( boost::bind(boost::type<ReturnType>(), handler, boost::bind(boost::type<ReturnType1>(), f, boost::forward<A0>(a0)), boost::forward<A0>(a0))); }
+
+
+        template <typename F, typename A0 , typename A1> void Submit(F f, const A0 & a0 , const A1 & a1) { typedef typename boost::result_of<F( A0 , A1)>::type ReturnType; return SubmitToThread(boost::bind(boost::type<ReturnType>(), f, boost::forward<A0>(a0) , boost::forward<A1>(a1))); } template <typename F, typename A0 , typename A1> void SubmitPrioritized(F f, const A0 & a0 , const A1 & a1) { typedef typename boost::result_of<F( A0 , A1)>::type ReturnType; return SubmitToThread(boost::bind(boost::type<ReturnType>(), f, boost::forward<A0>(a0) , boost::forward<A1>(a1)), true); } template <typename F, typename A0 , typename A1> boost::unique_future< typename boost::result_of<F( A0 , A1)>::type> SubmitCallable(F f, const A0 & a0 , const A1 & a1) { typedef typename boost::result_of<F( A0 , A1)>::type ReturnType; boost::shared_ptr<boost::packaged_task<ReturnType> > task = boost::make_shared<boost::packaged_task<ReturnType> >(boost::bind( boost::type<ReturnType>(), f, boost::forward<A0>(a0) , boost::forward<A1>(a1))); SubmitToThread(boost::bind(boost::type<void>(), PackageFunctor2 < F, A0 , A1 > (task))); return task->get_future(); } template <typename F, typename A0 , typename A1> boost::unique_future< typename boost::result_of<F( A0 , A1)>::type> SubmitCallablePrioritized(F f, const A0 & a0 , const A1 & a1) { typedef typename boost::result_of<F( A0 , A1)>::type ReturnType; boost::shared_ptr<boost::packaged_task<ReturnType> > task = boost::make_shared<boost::packaged_task<ReturnType> >(boost::bind( boost::type<ReturnType>(), f, boost::forward<A0>(a0) , boost::forward<A1>(a1))); SubmitToThread( boost::bind(boost::type<void>(), PackageFunctor2 < F, A0 , A1 > (task)), true); return task->get_future(); } template <typename ReceivedHandler, typename F, typename A0 , typename A1> void SubmitAsync(ReceivedHandler handler, F f, const A0 & a0 , const A1 & a1) { typedef typename boost::result_of<ReceivedHandler( F( A0 , A1))>::type ReturnType; typedef typename boost::result_of<F( A0 , A1)>::type ReturnType1; return SubmitToThread( boost::bind(boost::type<ReturnType>(), handler, boost::bind(boost::type<ReturnType1>(), f, boost::forward<A0>(a0) , boost::forward<A1>(a1)), boost::forward<A0>(a0) , boost::forward<A1>(a1))); }
+
+
+        template <typename F, typename A0 , typename A1 , typename A2> void Submit(F f, const A0 & a0 , const A1 & a1 , const A2 & a2) { typedef typename boost::result_of<F( A0 , A1 , A2)>::type ReturnType; return SubmitToThread(boost::bind(boost::type<ReturnType>(), f, boost::forward<A0>(a0) , boost::forward<A1>(a1) , boost::forward<A2>(a2))); } template <typename F, typename A0 , typename A1 , typename A2> void SubmitPrioritized(F f, const A0 & a0 , const A1 & a1 , const A2 & a2) { typedef typename boost::result_of<F( A0 , A1 , A2)>::type ReturnType; return SubmitToThread(boost::bind(boost::type<ReturnType>(), f, boost::forward<A0>(a0) , boost::forward<A1>(a1) , boost::forward<A2>(a2)), true); } template <typename F, typename A0 , typename A1 , typename A2> boost::unique_future< typename boost::result_of<F( A0 , A1 , A2)>::type> SubmitCallable(F f, const A0 & a0 , const A1 & a1 , const A2 & a2) { typedef typename boost::result_of<F( A0 , A1 , A2)>::type ReturnType; boost::shared_ptr<boost::packaged_task<ReturnType> > task = boost::make_shared<boost::packaged_task<ReturnType> >(boost::bind( boost::type<ReturnType>(), f, boost::forward<A0>(a0) , boost::forward<A1>(a1) , boost::forward<A2>(a2))); SubmitToThread(boost::bind(boost::type<void>(), PackageFunctor3 < F, A0 , A1 , A2 > (task))); return task->get_future(); } template <typename F, typename A0 , typename A1 , typename A2> boost::unique_future< typename boost::result_of<F( A0 , A1 , A2)>::type> SubmitCallablePrioritized(F f, const A0 & a0 , const A1 & a1 , const A2 & a2) { typedef typename boost::result_of<F( A0 , A1 , A2)>::type ReturnType; boost::shared_ptr<boost::packaged_task<ReturnType> > task = boost::make_shared<boost::packaged_task<ReturnType> >(boost::bind( boost::type<ReturnType>(), f, boost::forward<A0>(a0) , boost::forward<A1>(a1) , boost::forward<A2>(a2))); SubmitToThread( boost::bind(boost::type<void>(), PackageFunctor3 < F, A0 , A1 , A2 > (task)), true); return task->get_future(); } template <typename ReceivedHandler, typename F, typename A0 , typename A1 , typename A2> void SubmitAsync(ReceivedHandler handler, F f, const A0 & a0 , const A1 & a1 , const A2 & a2) { typedef typename boost::result_of<ReceivedHandler( F( A0 , A1 , A2))>::type ReturnType; typedef typename boost::result_of<F( A0 , A1 , A2)>::type ReturnType1; return SubmitToThread( boost::bind(boost::type<ReturnType>(), handler, boost::bind(boost::type<ReturnType1>(), f, boost::forward<A0>(a0) , boost::forward<A1>(a1) , boost::forward<A2>(a2)), boost::forward<A0>(a0) , boost::forward<A1>(a1) , boost::forward<A2>(a2))); }
+# 204 "../src/base/ThreadPool.h" 2
+# 218 "../src/base/ThreadPool.h"
  private:
   Task* PopTask();
   bool HasTasks();
@@ -111568,7 +111572,7 @@ class ThreadPool : private boost::noncopyable {
   friend class ThreadPoolInitializer;
   friend class ThreadPoolTest;
 };
-# 329 "../src/base/ThreadPool.h"
+# 275 "../src/base/ThreadPool.h"
 }
 }
 # 30 "ThreadPoolTest.cpp" 2
@@ -111610,8 +111614,8 @@ class ThreadPoolTest : public Test {
   unique_future<int> FactorialCallable(int n) {
     shared_ptr<packaged_task<int> > pTask =
         make_shared<packaged_task<int> >(bind(type<int>(), Factorial, n));
-    m_pThreadPool->SubmitToThread(
-        boost::bind<void>(Functor<__typeof__(boost::type_of::ensure_obj(&Factorial)), int>(pTask)));
+    m_pThreadPool->SubmitToThread(boost::bind<void>(
+        PackageFunctor1<__typeof__(boost::type_of::ensure_obj(&Factorial)), int>(pTask)));
     return pTask->get_future();
   }
 
@@ -111619,7 +111623,9 @@ class ThreadPoolTest : public Test {
     shared_ptr<packaged_task<int> > pTask =
         make_shared<packaged_task<int> >(bind(type<int>(), Factorial, n));
     m_pThreadPool->SubmitToThread(
-        boost::bind<void>(Functor<__typeof__(boost::type_of::ensure_obj(&Factorial)), int>(pTask)), true);
+        boost::bind<void>(
+            PackageFunctor1<__typeof__(boost::type_of::ensure_obj(&Factorial)), int>(pTask)),
+        true);
     return pTask->get_future();
   }
 
@@ -111633,18 +111639,18 @@ class ThreadPoolTest : public Test {
 
 
   void TestInterruptThreadPool() {
-    switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar_ = ::testing::AssertionResult(!(m_pThreadPool->HasTasks()))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 91, ::testing::internal::GetBoolAssertionFailureMessage( gtest_ar_, "m_pThreadPool->HasTasks()", "true", "false").c_str()) = ::testing::Message();
+    switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar_ = ::testing::AssertionResult(!(m_pThreadPool->HasTasks()))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 93, ::testing::internal::GetBoolAssertionFailureMessage( gtest_ar_, "m_pThreadPool->HasTasks()", "true", "false").c_str()) = ::testing::Message();
 
     m_pThreadPool->StopProcessing();
     unique_future<int> f = m_pThreadPool->SubmitCallable(Factorial, 5);
-    switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar_ = ::testing::AssertionResult((m_pThreadPool->HasTasks()))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 95, ::testing::internal::GetBoolAssertionFailureMessage( gtest_ar_, "m_pThreadPool->HasTasks()", "false", "true").c_str()) = ::testing::Message();
+    switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar_ = ::testing::AssertionResult((m_pThreadPool->HasTasks()))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 97, ::testing::internal::GetBoolAssertionFailureMessage( gtest_ar_, "m_pThreadPool->HasTasks()", "false", "true").c_str()) = ::testing::Message();
 
     f.timed_wait(boost::posix_time::milliseconds(100));
     boost::future_state::state fStatus = f.get_state();
-    switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(fStatus)) == 1)>::Compare("fStatus", "boost::future_state::waiting", fStatus, boost::future_state::waiting))) ; else return ::testing::internal::AssertHelper(::testing::TestPartResult::kFatalFailure, "ThreadPoolTest.cpp", 99, gtest_ar.failure_message()) = ::testing::Message();
+    switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(fStatus)) == 1)>::Compare("fStatus", "boost::future_state::waiting", fStatus, boost::future_state::waiting))) ; else return ::testing::internal::AssertHelper(::testing::TestPartResult::kFatalFailure, "ThreadPoolTest.cpp", 101, gtest_ar.failure_message()) = ::testing::Message();
 
     m_pThreadPool->PopTask();
-    switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar_ = ::testing::AssertionResult(!(m_pThreadPool->HasTasks()))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 102, ::testing::internal::GetBoolAssertionFailureMessage( gtest_ar_, "m_pThreadPool->HasTasks()", "true", "false").c_str()) = ::testing::Message();
+    switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar_ = ::testing::AssertionResult(!(m_pThreadPool->HasTasks()))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 104, ::testing::internal::GetBoolAssertionFailureMessage( gtest_ar_, "m_pThreadPool->HasTasks()", "true", "false").c_str()) = ::testing::Message();
 
 
 
@@ -111656,38 +111662,38 @@ class ThreadPoolTest : public Test {
 };
 
 class ThreadPoolTest_TestInterrupt_Test : public ThreadPoolTest { public: ThreadPoolTest_TestInterrupt_Test() {} private: virtual void TestBody(); static ::testing::TestInfo* const test_info_ __attribute__ ((unused)); ThreadPoolTest_TestInterrupt_Test(ThreadPoolTest_TestInterrupt_Test const &); void operator=(ThreadPoolTest_TestInterrupt_Test const &);};::testing::TestInfo* const ThreadPoolTest_TestInterrupt_Test ::test_info_ = ::testing::internal::MakeAndRegisterTestInfo( "ThreadPoolTest", "TestInterrupt", 
-# 113 "ThreadPoolTest.cpp" 3 4
+# 115 "ThreadPoolTest.cpp" 3 4
 __null
-# 113 "ThreadPoolTest.cpp"
+# 115 "ThreadPoolTest.cpp"
 , 
-# 113 "ThreadPoolTest.cpp" 3 4
+# 115 "ThreadPoolTest.cpp" 3 4
 __null
-# 113 "ThreadPoolTest.cpp"
-, ::testing::internal::CodeLocation("ThreadPoolTest.cpp", 113), (::testing::internal::GetTypeId<ThreadPoolTest>()), ThreadPoolTest::SetUpTestCase, ThreadPoolTest::TearDownTestCase, new ::testing::internal::TestFactoryImpl< ThreadPoolTest_TestInterrupt_Test>);void ThreadPoolTest_TestInterrupt_Test::TestBody() { TestInterruptThreadPool(); }
+# 115 "ThreadPoolTest.cpp"
+, ::testing::internal::CodeLocation("ThreadPoolTest.cpp", 115), (::testing::internal::GetTypeId<ThreadPoolTest>()), ThreadPoolTest::SetUpTestCase, ThreadPoolTest::TearDownTestCase, new ::testing::internal::TestFactoryImpl< ThreadPoolTest_TestInterrupt_Test>);void ThreadPoolTest_TestInterrupt_Test::TestBody() { TestInterruptThreadPool(); }
 
 class ThreadPoolTest_TestSubmitToThread_Test : public ThreadPoolTest { public: ThreadPoolTest_TestSubmitToThread_Test() {} private: virtual void TestBody(); static ::testing::TestInfo* const test_info_ __attribute__ ((unused)); ThreadPoolTest_TestSubmitToThread_Test(ThreadPoolTest_TestSubmitToThread_Test const &); void operator=(ThreadPoolTest_TestSubmitToThread_Test const &);};::testing::TestInfo* const ThreadPoolTest_TestSubmitToThread_Test ::test_info_ = ::testing::internal::MakeAndRegisterTestInfo( "ThreadPoolTest", "TestSubmitToThread", 
-# 115 "ThreadPoolTest.cpp" 3 4
+# 117 "ThreadPoolTest.cpp" 3 4
 __null
-# 115 "ThreadPoolTest.cpp"
+# 117 "ThreadPoolTest.cpp"
 , 
-# 115 "ThreadPoolTest.cpp" 3 4
+# 117 "ThreadPoolTest.cpp" 3 4
 __null
-# 115 "ThreadPoolTest.cpp"
-, ::testing::internal::CodeLocation("ThreadPoolTest.cpp", 115), (::testing::internal::GetTypeId<ThreadPoolTest>()), ThreadPoolTest::SetUpTestCase, ThreadPoolTest::TearDownTestCase, new ::testing::internal::TestFactoryImpl< ThreadPoolTest_TestSubmitToThread_Test>);void ThreadPoolTest_TestSubmitToThread_Test::TestBody() {
+# 117 "ThreadPoolTest.cpp"
+, ::testing::internal::CodeLocation("ThreadPoolTest.cpp", 117), (::testing::internal::GetTypeId<ThreadPoolTest>()), ThreadPoolTest::SetUpTestCase, ThreadPoolTest::TearDownTestCase, new ::testing::internal::TestFactoryImpl< ThreadPoolTest_TestSubmitToThread_Test>);void ThreadPoolTest_TestSubmitToThread_Test::TestBody() {
   int num = 5;
   unique_future<int> f = FactorialCallable(num);
   f.timed_wait(boost::posix_time::milliseconds(100));
   boost::future_state::state fStatus = f.get_state();
-  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(fStatus)) == 1)>::Compare("fStatus", "boost::future_state::ready", fStatus, boost::future_state::ready))) ; else return ::testing::internal::AssertHelper(::testing::TestPartResult::kFatalFailure, "ThreadPoolTest.cpp", 120, gtest_ar.failure_message()) = ::testing::Message();
-  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar_ = ::testing::AssertionResult((f.is_ready()))) ; else return ::testing::internal::AssertHelper(::testing::TestPartResult::kFatalFailure, "ThreadPoolTest.cpp", 121, ::testing::internal::GetBoolAssertionFailureMessage( gtest_ar_, "f.is_ready()", "false", "true").c_str()) = ::testing::Message();
-  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(f.get())) == 1)>::Compare("f.get()", "120", f.get(), 120))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 122, gtest_ar.failure_message()) = ::testing::Message();
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(fStatus)) == 1)>::Compare("fStatus", "boost::future_state::ready", fStatus, boost::future_state::ready))) ; else return ::testing::internal::AssertHelper(::testing::TestPartResult::kFatalFailure, "ThreadPoolTest.cpp", 122, gtest_ar.failure_message()) = ::testing::Message();
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar_ = ::testing::AssertionResult((f.is_ready()))) ; else return ::testing::internal::AssertHelper(::testing::TestPartResult::kFatalFailure, "ThreadPoolTest.cpp", 123, ::testing::internal::GetBoolAssertionFailureMessage( gtest_ar_, "f.is_ready()", "false", "true").c_str()) = ::testing::Message();
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(f.get())) == 1)>::Compare("f.get()", "120", f.get(), 120))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 124, gtest_ar.failure_message()) = ::testing::Message();
 
   unique_future<int> f1 = FactorialCallablePrioritized(num);
   f1.timed_wait(boost::posix_time::milliseconds(100));
   boost::future_state::state fStatus1 = f1.get_state();
-  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(fStatus1)) == 1)>::Compare("fStatus1", "boost::future_state::ready", fStatus1, boost::future_state::ready))) ; else return ::testing::internal::AssertHelper(::testing::TestPartResult::kFatalFailure, "ThreadPoolTest.cpp", 127, gtest_ar.failure_message()) = ::testing::Message();
-  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar_ = ::testing::AssertionResult((f1.is_ready()))) ; else return ::testing::internal::AssertHelper(::testing::TestPartResult::kFatalFailure, "ThreadPoolTest.cpp", 128, ::testing::internal::GetBoolAssertionFailureMessage( gtest_ar_, "f1.is_ready()", "false", "true").c_str()) = ::testing::Message();
-  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(f1.get())) == 1)>::Compare("f1.get()", "120", f1.get(), 120))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 129, gtest_ar.failure_message()) = ::testing::Message();
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(fStatus1)) == 1)>::Compare("fStatus1", "boost::future_state::ready", fStatus1, boost::future_state::ready))) ; else return ::testing::internal::AssertHelper(::testing::TestPartResult::kFatalFailure, "ThreadPoolTest.cpp", 129, gtest_ar.failure_message()) = ::testing::Message();
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar_ = ::testing::AssertionResult((f1.is_ready()))) ; else return ::testing::internal::AssertHelper(::testing::TestPartResult::kFatalFailure, "ThreadPoolTest.cpp", 130, ::testing::internal::GetBoolAssertionFailureMessage( gtest_ar_, "f1.is_ready()", "false", "true").c_str()) = ::testing::Message();
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(f1.get())) == 1)>::Compare("f1.get()", "120", f1.get(), 120))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 131, gtest_ar.failure_message()) = ::testing::Message();
 }
 
 int result = 0;
@@ -111709,38 +111715,87 @@ void Add3(const int &v1, const int &v2, const int &v3) {
 }
 
 class ThreadPoolTest_TestSubmit_Test : public ThreadPoolTest { public: ThreadPoolTest_TestSubmit_Test() {} private: virtual void TestBody(); static ::testing::TestInfo* const test_info_ __attribute__ ((unused)); ThreadPoolTest_TestSubmit_Test(ThreadPoolTest_TestSubmit_Test const &); void operator=(ThreadPoolTest_TestSubmit_Test const &);};::testing::TestInfo* const ThreadPoolTest_TestSubmit_Test ::test_info_ = ::testing::internal::MakeAndRegisterTestInfo( "ThreadPoolTest", "TestSubmit", 
-# 150 "ThreadPoolTest.cpp" 3 4
+# 152 "ThreadPoolTest.cpp" 3 4
 __null
-# 150 "ThreadPoolTest.cpp"
+# 152 "ThreadPoolTest.cpp"
 , 
-# 150 "ThreadPoolTest.cpp" 3 4
+# 152 "ThreadPoolTest.cpp" 3 4
 __null
-# 150 "ThreadPoolTest.cpp"
-, ::testing::internal::CodeLocation("ThreadPoolTest.cpp", 150), (::testing::internal::GetTypeId<ThreadPoolTest>()), ThreadPoolTest::SetUpTestCase, ThreadPoolTest::TearDownTestCase, new ::testing::internal::TestFactoryImpl< ThreadPoolTest_TestSubmit_Test>);void ThreadPoolTest_TestSubmit_Test::TestBody() {
+# 152 "ThreadPoolTest.cpp"
+, ::testing::internal::CodeLocation("ThreadPoolTest.cpp", 152), (::testing::internal::GetTypeId<ThreadPoolTest>()), ThreadPoolTest::SetUpTestCase, ThreadPoolTest::TearDownTestCase, new ::testing::internal::TestFactoryImpl< ThreadPoolTest_TestSubmit_Test>);void ThreadPoolTest_TestSubmit_Test::TestBody() {
   m_pThreadPool->Submit(Add1, 1);
   boost::this_thread::sleep(boost::posix_time::milliseconds(30));
-  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(result)) == 1)>::Compare("result", "1", result, 1))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 153, gtest_ar.failure_message()) = ::testing::Message();
-# 170 "ThreadPoolTest.cpp"
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(result)) == 1)>::Compare("result", "1", result, 1))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 155, gtest_ar.failure_message()) = ::testing::Message();
+  m_pThreadPool->Submit(Add2, 1, 10);
+  boost::this_thread::sleep(boost::posix_time::milliseconds(30));
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(result)) == 1)>::Compare("result", "11", result, 11))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 158, gtest_ar.failure_message()) = ::testing::Message();
+  m_pThreadPool->Submit(Add3, 1, 10, 100);
+  boost::this_thread::sleep(boost::posix_time::milliseconds(30));
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(result)) == 1)>::Compare("result", "111", result, 111))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 161, gtest_ar.failure_message()) = ::testing::Message();
+  m_pThreadPool->SubmitPrioritized(Add1, 1);
+  boost::this_thread::sleep(boost::posix_time::milliseconds(30));
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(result)) == 1)>::Compare("result", "1", result, 1))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 164, gtest_ar.failure_message()) = ::testing::Message();
+  m_pThreadPool->SubmitPrioritized(Add2, 1, 10);
+  boost::this_thread::sleep(boost::posix_time::milliseconds(30));
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(result)) == 1)>::Compare("result", "11", result, 11))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 167, gtest_ar.failure_message()) = ::testing::Message();
+  m_pThreadPool->SubmitPrioritized(Add3, 1, 10, 100);
+  boost::this_thread::sleep(boost::posix_time::milliseconds(30));
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(result)) == 1)>::Compare("result", "111", result, 111))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 170, gtest_ar.failure_message()) = ::testing::Message();
 }
 
 class ThreadPoolTest_TestSubmitCallable_Test : public ThreadPoolTest { public: ThreadPoolTest_TestSubmitCallable_Test() {} private: virtual void TestBody(); static ::testing::TestInfo* const test_info_ __attribute__ ((unused)); ThreadPoolTest_TestSubmitCallable_Test(ThreadPoolTest_TestSubmitCallable_Test const &); void operator=(ThreadPoolTest_TestSubmitCallable_Test const &);};::testing::TestInfo* const ThreadPoolTest_TestSubmitCallable_Test ::test_info_ = ::testing::internal::MakeAndRegisterTestInfo( "ThreadPoolTest", "TestSubmitCallable", 
-# 172 "ThreadPoolTest.cpp" 3 4
+# 173 "ThreadPoolTest.cpp" 3 4
 __null
-# 172 "ThreadPoolTest.cpp"
+# 173 "ThreadPoolTest.cpp"
 , 
-# 172 "ThreadPoolTest.cpp" 3 4
+# 173 "ThreadPoolTest.cpp" 3 4
 __null
-# 172 "ThreadPoolTest.cpp"
-, ::testing::internal::CodeLocation("ThreadPoolTest.cpp", 172), (::testing::internal::GetTypeId<ThreadPoolTest>()), ThreadPoolTest::SetUpTestCase, ThreadPoolTest::TearDownTestCase, new ::testing::internal::TestFactoryImpl< ThreadPoolTest_TestSubmitCallable_Test>);void ThreadPoolTest_TestSubmitCallable_Test::TestBody() {
+# 173 "ThreadPoolTest.cpp"
+, ::testing::internal::CodeLocation("ThreadPoolTest.cpp", 173), (::testing::internal::GetTypeId<ThreadPoolTest>()), ThreadPoolTest::SetUpTestCase, ThreadPoolTest::TearDownTestCase, new ::testing::internal::TestFactoryImpl< ThreadPoolTest_TestSubmitCallable_Test>);void ThreadPoolTest_TestSubmitCallable_Test::TestBody() {
   int num = 5;
   unique_future<int> f1 = m_pThreadPool->SubmitCallable(Factorial, num);
   f1.timed_wait(boost::posix_time::milliseconds(100));
   boost::future_state::state fStatus1 = f1.get_state();
-  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(fStatus1)) == 1)>::Compare("fStatus1", "boost::future_state::ready", fStatus1, boost::future_state::ready))) ; else return ::testing::internal::AssertHelper(::testing::TestPartResult::kFatalFailure, "ThreadPoolTest.cpp", 177, gtest_ar.failure_message()) = ::testing::Message();
-  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(f1.get())) == 1)>::Compare("f1.get()", "120", f1.get(), 120))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 178, gtest_ar.failure_message()) = ::testing::Message();
-# 187 "ThreadPoolTest.cpp"
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(fStatus1)) == 1)>::Compare("fStatus1", "boost::future_state::ready", fStatus1, boost::future_state::ready))) ; else return ::testing::internal::AssertHelper(::testing::TestPartResult::kFatalFailure, "ThreadPoolTest.cpp", 178, gtest_ar.failure_message()) = ::testing::Message();
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(f1.get())) == 1)>::Compare("f1.get()", "120", f1.get(), 120))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 179, gtest_ar.failure_message()) = ::testing::Message();
+
+  int a = 1;
+  int b = 11;
+  unique_future<int> f2 = m_pThreadPool->SubmitCallablePrioritized(Add, a, b);
+  f2.timed_wait(boost::posix_time::milliseconds(100));
+  boost::future_state::state fStatus2 = f2.get_state();
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(fStatus2)) == 1)>::Compare("fStatus2", "boost::future_state::ready", fStatus2, boost::future_state::ready))) ; else return ::testing::internal::AssertHelper(::testing::TestPartResult::kFatalFailure, "ThreadPoolTest.cpp", 186, gtest_ar.failure_message()) = ::testing::Message();
+  switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(f2.get())) == 1)>::Compare("f2.get()", "12", f2.get(), 12))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 187, gtest_ar.failure_message()) = ::testing::Message();
 }
-# 224 "ThreadPoolTest.cpp"
+
+struct callback {
+  callback() {}
+  void operator()(int result, int num) {
+    switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(num)) == 1)>::Compare("num", "5", num, 5))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 193, gtest_ar.failure_message()) = ::testing::Message();
+    switch (0) case 0: default: if (const ::testing::AssertionResult gtest_ar = (::testing::internal:: EqHelper<(sizeof(::testing::internal::IsNullLiteralHelper(result)) == 1)>::Compare("result", "120", result, 120))) ; else ::testing::internal::AssertHelper(::testing::TestPartResult::kNonFatalFailure, "ThreadPoolTest.cpp", 194, gtest_ar.failure_message()) = ::testing::Message();
+  }
+};
+
+class ThreadPoolTest_TestSubmitAsync_Test : public ThreadPoolTest { public: ThreadPoolTest_TestSubmitAsync_Test() {} private: virtual void TestBody(); static ::testing::TestInfo* const test_info_ __attribute__ ((unused)); ThreadPoolTest_TestSubmitAsync_Test(ThreadPoolTest_TestSubmitAsync_Test const &); void operator=(ThreadPoolTest_TestSubmitAsync_Test const &);};::testing::TestInfo* const ThreadPoolTest_TestSubmitAsync_Test ::test_info_ = ::testing::internal::MakeAndRegisterTestInfo( "ThreadPoolTest", "TestSubmitAsync", 
+# 198 "ThreadPoolTest.cpp" 3 4
+__null
+# 198 "ThreadPoolTest.cpp"
+, 
+# 198 "ThreadPoolTest.cpp" 3 4
+__null
+# 198 "ThreadPoolTest.cpp"
+, ::testing::internal::CodeLocation("ThreadPoolTest.cpp", 198), (::testing::internal::GetTypeId<ThreadPoolTest>()), ThreadPoolTest::SetUpTestCase, ThreadPoolTest::TearDownTestCase, new ::testing::internal::TestFactoryImpl< ThreadPoolTest_TestSubmitAsync_Test>);void ThreadPoolTest_TestSubmitAsync_Test::TestBody() {
+  m_pThreadPool->SubmitAsync(
+      boost::bind(boost::type<void>(), callback(), _1, _2), Factorial, 5);
+
+
+
+
+
+
+
+}
+# 230 "ThreadPoolTest.cpp"
 }
 }
 
