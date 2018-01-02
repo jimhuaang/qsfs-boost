@@ -14,39 +14,30 @@
 // | limitations under the License.
 // +-------------------------------------------------------------------------
 
-#ifndef QSFS_DATA_IOSTREAM_H_
-#define QSFS_DATA_IOSTREAM_H_
+#ifndef QSFS_DATA_STREAMUTILS_H_
+#define QSFS_DATA_STREAMUTILS_H_
 
 #include <stddef.h>
 
 #include <iostream>
-#include <string>  // for std::char_traits
 
-#include "boost/noncopyable.hpp"
-
-#include "data/StreamBuf.h"
+#include "boost/shared_ptr.hpp"
 
 namespace QS {
 
 namespace Data {
 
-/**
- * An iostream to use QS::StreamBuf under the hood.
- */
-class IOStream : public std::basic_iostream<char, std::char_traits<char> >,
-                 private boost::noncopyable {
-  typedef std::basic_iostream<char, std::char_traits<char> > Base;
+namespace StreamUtils {
 
- public:
-  IOStream(Buffer buf, size_t lengthToRead);
+size_t GetStreamInputSize(const boost::shared_ptr<std::iostream> &stream);
+size_t GetStreamOutputSize(const boost::shared_ptr<std::iostream> &stream);
 
-  ~IOStream() {}
+size_t GetStreamSize(const boost::shared_ptr<std::iostream> &stream);
 
- private:
-  IOStream() {}
-};
-
+}  // namespace StreamUtils
 }  // namespace Data
 }  // namespace QS
 
-#endif  // QSFS_DATA_IOSTREAM_H_
+
+// NOLINITNEXT
+#endif  // QSFS_DATA_STREAMUTILS_H_

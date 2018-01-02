@@ -14,8 +14,8 @@
 // | limitations under the License.
 // +-------------------------------------------------------------------------
 
-#ifndef INCLUDE_DATA_STREAMBUF_H_
-#define INCLUDE_DATA_STREAMBUF_H_
+#ifndef QSFS_DATA_STREAMBUF_H_
+#define QSFS_DATA_STREAMBUF_H_
 
 #include <stddef.h>  // for size_t
 
@@ -66,7 +66,7 @@ class StreamBuf : public std::streambuf, private boost::noncopyable {
   size_t m_lengthToRead;  // length in bytes to actually use in the buffer
                           // e.g. you have a 1kb buffer, but only want
                           // stream to see 500 b of it.
-  friend class IOStream;
+
   friend class QS::Client::QSTransferManager;
   friend class StreamBufTest;
 };
@@ -74,4 +74,4 @@ class StreamBuf : public std::streambuf, private boost::noncopyable {
 }  // namespace Data
 }  // namespace QS
 
-#endif  // INCLUDE_DATA_STREAMBUF_H_
+#endif  // QSFS_DATA_STREAMBUF_H_
