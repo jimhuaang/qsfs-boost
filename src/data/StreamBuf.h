@@ -46,6 +46,8 @@ class StreamBuf : public std::streambuf, private boost::noncopyable {
 
   ~StreamBuf() {}
 
+  Buffer GetBuffer() const { return m_buffer; }
+
  protected:
   pos_type seekoff(off_type off, std::ios_base::seekdir dir,
                    std::ios_base::openmode which = std::ios_base::in |
@@ -55,8 +57,6 @@ class StreamBuf : public std::streambuf, private boost::noncopyable {
                                                    std::ios_base::out);
 
  private:
-  Buffer &GetBuffer() { return m_buffer; }
-
   char *begin() { return &(*m_buffer)[0]; }
   char *end() { return begin() + m_lengthToRead; }
 

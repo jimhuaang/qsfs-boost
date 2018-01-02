@@ -63,6 +63,15 @@ add_library(
   #base/Utils.cpp
   )
 
+add_library(
+  qsfsLogging OBJECT
+  base/Logging.cpp
+  base/LogLevel.cpp
+  base/Utils.cpp
+  base/StringUtils.cpp
+  configure/Default.cpp
+)
+
 #
 # install headers
 #

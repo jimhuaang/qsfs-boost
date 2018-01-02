@@ -27,14 +27,21 @@ if (BUILD_TESTING)
   add_executable(
     LoggingTest
     LoggingTest.cpp
-    ${QSFS_SOURCE_DIR}/base/Logging.cpp
-    ${QSFS_SOURCE_DIR}/base/LogLevel.cpp
-    ${QSFS_SOURCE_DIR}/base/Utils.cpp
-    ${QSFS_SOURCE_DIR}/base/StringUtils.cpp
-    ${QSFS_SOURCE_DIR}/configure/Default.cpp
+    $<TARGET_OBJECTS:qsfsLogging>
   )
   target_link_libraries(LoggingTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_logging COMMAND LoggingTest)
+
+  add_executable(
+    StreamTest
+    StreamTest.cpp
+    ${QSFS_SOURCE_DIR}/data/IOStream.cpp
+    ${QSFS_SOURCE_DIR}/data/StreamBuf.cpp
+    ${QSFS_SOURCE_DIR}/data/StreamUtils.cpp
+    $<TARGET_OBJECTS:qsfsLogging>
+  )
+  target_link_libraries(StreamTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_stream COMMAND StreamTest)
 
   add_executable(
     StringUtilsTest
