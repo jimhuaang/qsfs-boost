@@ -44,6 +44,15 @@ if (BUILD_TESTING)
   add_test(NAME qsfs_stream COMMAND StreamTest)
 
   add_executable(
+    ResourceManagerTest
+    ResourceManagerTest.cpp
+    ${QSFS_SOURCE_DIR}/data/ResourceManager.cpp
+    $<TARGET_OBJECTS:qsfsLogging>
+  )
+  target_link_libraries(ResourceManagerTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_resourcemanager COMMAND ResourceManagerTest)
+
+  add_executable(
     StringUtilsTest
     StringUtilsTest.cpp
     ${QSFS_SOURCE_DIR}/base/StringUtils.cpp
