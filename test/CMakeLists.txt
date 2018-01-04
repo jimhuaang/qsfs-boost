@@ -9,6 +9,17 @@ if (BUILD_TESTING)
   add_test(NAME qsfs_exception COMMAND ExceptionTest)
 
   add_executable(
+    FileMetaDataManagerTest
+    FileMetaDataManagerTest.cpp
+    ${QSFS_SOURCE_DIR}/data/FileMetaData.cpp
+    ${QSFS_SOURCE_DIR}/data/FileMetaDataManager.cpp
+    $<TARGET_OBJECTS:qsfsLogging>
+    ${QSFS_SOURCE_DIR}/configure/Options.cpp
+  )
+  target_link_libraries(FileMetaDataManagerTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_file_metadata_manager COMMAND FileMetaDataManagerTest)
+
+  add_executable(
     HashUtilsTest
     HashUtilsTest.cpp
   )
@@ -33,6 +44,15 @@ if (BUILD_TESTING)
   add_test(NAME qsfs_logging COMMAND LoggingTest)
 
   add_executable(
+    ResourceManagerTest
+    ResourceManagerTest.cpp
+    ${QSFS_SOURCE_DIR}/data/ResourceManager.cpp
+    $<TARGET_OBJECTS:qsfsLogging>
+  )
+  target_link_libraries(ResourceManagerTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_resource_manager COMMAND ResourceManagerTest)
+
+  add_executable(
     StreamTest
     StreamTest.cpp
     ${QSFS_SOURCE_DIR}/data/IOStream.cpp
@@ -42,15 +62,6 @@ if (BUILD_TESTING)
   )
   target_link_libraries(StreamTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_stream COMMAND StreamTest)
-
-  add_executable(
-    ResourceManagerTest
-    ResourceManagerTest.cpp
-    ${QSFS_SOURCE_DIR}/data/ResourceManager.cpp
-    $<TARGET_OBJECTS:qsfsLogging>
-  )
-  target_link_libraries(ResourceManagerTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
-  add_test(NAME qsfs_resourcemanager COMMAND ResourceManagerTest)
 
   add_executable(
     StringUtilsTest
