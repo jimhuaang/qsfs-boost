@@ -2,7 +2,19 @@ if (BUILD_TESTING)
   set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_LIST_DIR}/bin)
 
   add_executable(
-    NodeTest
+    DirectoryEntryTest
+    EntryTest.cpp
+    ${QSFS_SOURCE_DIR}/data/Entry.cpp
+    ${QSFS_SOURCE_DIR}/data/FileMetaData.cpp
+    ${QSFS_SOURCE_DIR}/data/FileMetaDataManager.cpp
+    $<TARGET_OBJECTS:qsfsLogging>
+    ${QSFS_SOURCE_DIR}/configure/Options.cpp
+  )
+  target_link_libraries(DirectoryEntryTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_directory_entry COMMAND DirectoryEntryTest)
+
+  add_executable(
+    DirectoryNodeTest
     NodeTest.cpp
     ${QSFS_SOURCE_DIR}/data/Entry.cpp
     ${QSFS_SOURCE_DIR}/data/Node.cpp
@@ -11,8 +23,8 @@ if (BUILD_TESTING)
     $<TARGET_OBJECTS:qsfsLogging>
     ${QSFS_SOURCE_DIR}/configure/Options.cpp
   )
-  target_link_libraries(NodeTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
-  add_test(NAME qsfs_directory_node COMMAND NodeTest)
+  target_link_libraries(DirectoryNodeTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_directory_node COMMAND DirectoryNodeTest)
 
   add_executable(
     ExceptionTest

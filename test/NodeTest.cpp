@@ -34,7 +34,9 @@
 #include "data/Entry.h"
 #include "data/Node.h"
 
-namespace {
+namespace QS {
+
+namespace Data {
 
 using boost::make_shared;
 using boost::scoped_ptr;
@@ -102,8 +104,6 @@ shared_ptr<Node> NodeTest::pRootNode;
 shared_ptr<Node> NodeTest::pFileNode1;
 shared_ptr<Node> NodeTest::pLinkNode;
 scoped_ptr<Node> NodeTest::pEmptyNode;
-}  // namespace
-
 
 TEST_F(NodeTest, DefaultCtor) {
   EXPECT_FALSE(pEmptyNode->operator bool());
@@ -153,6 +153,9 @@ TEST_F(NodeTest, PublicFunctions) {
   EXPECT_FALSE(pRootNode->Find(pLinkNode->GetFilePath()));
   EXPECT_TRUE(pRootNode->IsEmpty());
 }
+
+}  // namespace Data
+}  // namespace QS
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

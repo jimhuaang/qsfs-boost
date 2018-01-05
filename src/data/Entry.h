@@ -30,10 +30,13 @@
 
 #include "data/FileMetaData.h"
 
+#include <iostream>
+
 namespace QS {
 
 namespace Data {
 
+class DirectoryTree;
 class File;
 class Node;
 
@@ -41,7 +44,7 @@ class Node;
  * Representation of an Entry of a Node in the directory tree.
  */
 class Entry {
- public:
+ private:
   Entry(const std::string &filePath, uint64_t fileSize, time_t atime,
         time_t mtime, uid_t uid, gid_t gid, mode_t fileMode,
         FileType::Value fileType = FileType::File,
@@ -51,7 +54,7 @@ class Entry {
 
   explicit Entry(const boost::shared_ptr<FileMetaData> &fileMetaData);
 
-  Entry(){};
+ public:
   ~Entry(){};
 
   // You always need to check if the entry is operable before
@@ -108,11 +111,16 @@ class Entry {
   void Rename(const std::string &newFilePath);
 
  private:
+  Entry(){};
+
   // Using weak_ptr as FileMetaDataManger will control file mete data life cycle
   boost::weak_ptr<FileMetaData> m_metaData;  // file meta data
 
-  friend class Node;
+  friend class DirectoryTree;
+  friend class EntryTest;
   friend class File;  // for SetFileSize
+  friend class Node;
+  friend class NodeTest;
 };
 
 }  // namespace Data
