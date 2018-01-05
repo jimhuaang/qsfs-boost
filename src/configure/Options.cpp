@@ -17,8 +17,8 @@
 #include "configure/Options.h"
 
 #include <iomanip>
-#include <iostream>
 #include <memory>
+#include <ostream>
 #include <string>
 
 #include "boost/exception/to_string.hpp"

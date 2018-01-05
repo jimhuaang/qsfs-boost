@@ -28,8 +28,6 @@
 
 #include "base/ThreadPool.h"
 
-#include <iostream>
-
 namespace QS {
 
 namespace Threading {

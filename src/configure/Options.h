@@ -19,7 +19,7 @@
 
 #include <stdint.h>  // for uint16_t
 
-#include <iostream>
+#include <ostream>
 #include <string>
 
 #include "base/LogLevel.h"
