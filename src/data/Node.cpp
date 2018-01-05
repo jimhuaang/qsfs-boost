@@ -190,8 +190,11 @@ void Node::RenameChild(const string &oldFilePath, const string &newFilePath) {
     shared_ptr<Node> &child = it->second;
     child->Rename(newFilePath);
 
+    // Need to emplace before erase, otherwise the shared_ptr 
+    // will probably get deleted when erasing cause its' reference
+    // count to be 0.
+    m_children.emplace(newFilePath, child);
     ChildrenMapIterator hint = m_children.erase(it);
-    m_children.emplace_hint(hint, newFilePath, child);
   } else {
     DebugWarning("Node not exist, no rename " + FormatPath(oldFilePath));
   }
