@@ -143,6 +143,8 @@ class Node : private boost::noncopyable {
  private:
   Entry &GetEntry() { return m_entry; }
 
+  FilePathToNodeUnorderedMap &GetChildren();
+
   void SetNeedUpload(bool needUpload) {
     if (m_entry) {
       m_entry.SetNeedUpload(needUpload);
@@ -161,11 +163,7 @@ class Node : private boost::noncopyable {
     }
   }
 
-  void Rename(const std::string &newFilePath) {
-    if (m_entry) {
-      m_entry.Rename(newFilePath);
-    }
-  }
+  void Rename(const std::string &newFilePath);
 
   void SetEntry(const Entry &entry) { m_entry = entry; }
   void SetParent(const boost::shared_ptr<Node> &parent) { m_parent = parent; }

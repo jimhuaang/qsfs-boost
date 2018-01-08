@@ -49,12 +49,12 @@ namespace Data {
 class FileMetaData;
 class Node;
 
-typedef boost::unordered_map<std::string, boost::weak_ptr<Node>,
+typedef boost::unordered_map<std::string, boost::shared_ptr<Node>,
                              HashUtils::StringHash>
-    FilePathToWeakNodeUnorderedMap;
-typedef FilePathToWeakNodeUnorderedMap::iterator TreeNodeMapIterator;
-typedef FilePathToWeakNodeUnorderedMap::const_iterator
-    TreeNodeMapConstIterator;
+    FilePathToNodeUnorderedMap;
+typedef FilePathToNodeUnorderedMap::iterator TreeNodeMapIterator;
+typedef FilePathToNodeUnorderedMap::const_iterator TreeNodeMapConstIterator;
+
 typedef boost::unordered_multimap<std::string, boost::weak_ptr<Node>,
                                   HashUtils::StringHash>
     ParentFilePathToChildrenMultiMap;
@@ -69,7 +69,7 @@ typedef ParentFilePathToChildrenMultiMap::const_iterator
 class DirectoryTree : private boost::noncopyable {
  public:
   DirectoryTree(time_t mtime, uid_t uid, gid_t gid, mode_t mode);
-  DirectoryTree() {}
+
   ~DirectoryTree() { m_map.clear(); }
 
  public:
@@ -84,7 +84,7 @@ class DirectoryTree : private boost::noncopyable {
   //
   // @param  : file path (absolute path)
   // @return : node
-  boost::weak_ptr<Node> Find(const std::string &filePath) const;
+  boost::shared_ptr<Node> Find(const std::string &filePath) const;
 
   // Return if dir tree has node
   //
@@ -96,6 +96,7 @@ class DirectoryTree : private boost::noncopyable {
   //
   // @param  : dir name which should be ending with "/"
   // @return : node list
+  // Notes: FindChildren do not find children recursively
   std::vector<boost::weak_ptr<Node> > FindChildren(
       const std::string &dirName) const;
 
@@ -146,18 +147,13 @@ class DirectoryTree : private boost::noncopyable {
   // This will remove node and all its childrens (recursively)
   void Remove(const std::string &path);
 
-  // Creat a hard link to a file
-  //
-  // @param  : the file path, the hard link path
-  // @return : the node of hard link to the file or null if fail to link
-  boost::shared_ptr<Node> HardLink(const std::string &filePath,
-                                   const std::string &hardlinkPath);
-
  private:
+  DirectoryTree() {}
+
   boost::shared_ptr<Node> m_root;
   // boost::shared_ptr<Node> m_currentNode;
   mutable boost::recursive_mutex m_mutex;
-  FilePathToWeakNodeUnorderedMap m_map;  // record all nodes map
+  FilePathToNodeUnorderedMap m_map;  // record all nodes map
 
   // As we grow directory tree gradually, that means the directory tree can
   // be a partial part of the entire tree, at some point some nodes haven't
@@ -168,6 +164,7 @@ class DirectoryTree : private boost::noncopyable {
 
   friend class QS::Client::QSClient;
   friend class QS::FileSystem::Drive;
+  friend class DirectoryTreeTest;
 };
 
 }  // namespace Data

@@ -42,10 +42,8 @@ using boost::make_shared;
 using boost::scoped_ptr;
 using boost::shared_ptr;
 using QS::Data::Entry;
-
 using QS::Data::FileType;
 using QS::Data::Node;
-
 using std::string;
 using ::testing::Test;
 
@@ -132,12 +130,12 @@ TEST_F(NodeTest, PublicFunctions) {
   EXPECT_FALSE(pRootNode->Find(pFileNode1->GetFilePath()));
   pRootNode->Insert(pFileNode1);
   EXPECT_EQ(pRootNode->Find(pFileNode1->GetFilePath()), pFileNode1);
-  EXPECT_EQ(pRootNode->GetChildren().size(), 1U);
+  EXPECT_EQ(const_cast<const Node*>(pRootNode.get())->GetChildren().size(), 1U);
 
   EXPECT_FALSE(pRootNode->Find(pLinkNode->GetFilePath()));
   pRootNode->Insert(pLinkNode);
   EXPECT_EQ(pRootNode->Find(pLinkNode->GetFilePath()), pLinkNode);
-  EXPECT_EQ(pRootNode->GetChildren().size(), 2U);
+  EXPECT_EQ(const_cast<const Node*>(pRootNode.get())->GetChildren().size(), 2U);
 
   string oldFilePath = pFileNode1->GetFilePath();
   string newFilePath("myNewFile1");

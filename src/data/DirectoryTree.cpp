@@ -73,7 +73,7 @@ shared_ptr<Node> DirectoryTree::GetRoot() const {
 // }
 
 // --------------------------------------------------------------------------
-weak_ptr<Node> DirectoryTree::Find(const string &filePath) const {
+shared_ptr<Node> DirectoryTree::Find(const string &filePath) const {
   lock_guard<recursive_mutex> lock(m_mutex);
   TreeNodeMapConstIterator it = m_map.find(filePath);
   if (it != m_map.end()) {
@@ -81,7 +81,7 @@ weak_ptr<Node> DirectoryTree::Find(const string &filePath) const {
   } else {
     // Too many info, so disable it
     // DebugInfo("Node (" + filePath + ") is not existing in directory tree");
-    return weak_ptr<Node>();
+    return shared_ptr<Node>();
   }
 }
 
@@ -126,7 +126,7 @@ shared_ptr<Node> DirectoryTree::Grow(const shared_ptr<FileMetaData> &fileMeta) {
 
   string filePath = fileMeta->GetFilePath();
 
-  shared_ptr<Node> node = Find(filePath).lock();
+  shared_ptr<Node> node = Find(filePath);
   if (node && *node) {
     if (fileMeta->GetMTime() > node->GetMTime()) {
       DebugInfo("Update Node " + FormatPath(filePath));
@@ -143,7 +143,7 @@ shared_ptr<Node> DirectoryTree::Grow(const shared_ptr<FileMetaData> &fileMeta) {
     assert(!dirName.empty());
     TreeNodeMapIterator it = m_map.find(dirName);
     if (it != m_map.end()) {
-      if (shared_ptr<Node> parent = it->second.lock()) {
+      if (shared_ptr<Node> parent = it->second) {
         parent->Insert(node);
         node->SetParent(parent);
       } else {
@@ -216,7 +216,7 @@ shared_ptr<Node> DirectoryTree::UpdateDirectory(
   }
 
   // Update
-  shared_ptr<Node> node = Find(path).lock();
+  shared_ptr<Node> node = Find(path);
   if (node && *node) {
     if (!node->IsDirectory()) {
       DebugWarning("Not a directory " + FormatPath(path));
@@ -243,8 +243,7 @@ shared_ptr<Node> DirectoryTree::UpdateDirectory(
         }
       }
       BOOST_FOREACH (const string &childId, deleteChildrenIds) {
-        m_map.erase(childId);
-        node->Remove(childId);
+        Remove(childId);
       }
     }
 
@@ -272,10 +271,10 @@ shared_ptr<Node> DirectoryTree::Rename(const string &oldFilePath,
   }
 
   lock_guard<recursive_mutex> lock(m_mutex);
-  shared_ptr<Node> node = Find(oldFilePath).lock();
+  shared_ptr<Node> node = Find(oldFilePath);
   if (node && *node) {
     // Check parameter
-    if (Find(newFilePath).lock()) {
+    if (Find(newFilePath)) {
       DebugWarning("Node exist, no rename " + FormatPath(newFilePath));
       return node;
     }
@@ -317,7 +316,7 @@ void DirectoryTree::Remove(const string &path) {
   }
 
   lock_guard<recursive_mutex> lock(m_mutex);
-  shared_ptr<Node> node = Find(path).lock();
+  shared_ptr<Node> node = Find(path);
   if (!(node && *node)) {
     DebugInfo("No such file or directory, no remove " + FormatPath(path));
     return;
@@ -332,6 +331,15 @@ void DirectoryTree::Remove(const string &path) {
     parent->Remove(path);
   }
   m_map.erase(path);
+  pair<ChildrenMultiMapConstIterator, ChildrenMultiMapConstIterator> range =
+      m_parentToChildrenMap.equal_range(node->MyDirName());
+  for (ChildrenMultiMapConstIterator it = range.first; it != range.second;
+       ++it) {
+    shared_ptr<Node> node = it->second.lock();
+    if (node && node->GetFilePath() == path){
+      m_parentToChildrenMap.erase(it);
+    }
+  }
   m_parentToChildrenMap.erase(path);
 
   if (!node->IsDirectory()) {
@@ -360,40 +368,6 @@ void DirectoryTree::Remove(const string &path) {
       }
     }
   }
-}
-
-// --------------------------------------------------------------------------
-shared_ptr<Node> DirectoryTree::HardLink(const string &filePath,
-                                         const string &hardlinkPath) {
-  // DO not use this for now.
-  // HardLink currently shared meta data of target file when create it,
-  // Still need to synchronize with target file, to support this we may need
-  // to refactory Node to contain a shared_ptr<Entry>.
-  DebugInfo("Hard link " + FormatPath(filePath, hardlinkPath));
-  lock_guard<recursive_mutex> lock(m_mutex);
-  shared_ptr<Node> node = Find(filePath).lock();
-  if (!(node && *node)) {
-    DebugWarning("No such file " + FormatPath(filePath));
-    return shared_ptr<Node>();
-  }
-  if (node->IsDirectory()) {
-    DebugError("Unable to hard link to a directory " +
-               FormatPath(filePath, hardlinkPath));
-    return shared_ptr<Node>();
-  }
-
-  shared_ptr<Node> lnkNode = make_shared<Node>(Entry(node->GetEntry()), node);
-  if (!(lnkNode && *lnkNode)) {
-    DebugWarning("Fail to hard link " + FormatPath(filePath, hardlinkPath));
-    return shared_ptr<Node>();
-  }
-  lnkNode->SetHardLink(true);
-  node->Insert(lnkNode);
-  node->IncreaseNumLink();
-  m_map.emplace(hardlinkPath, lnkNode);
-  m_parentToChildrenMap.emplace(node->GetFilePath(), lnkNode);
-  // m_currentNode = lnkNode;
-  return lnkNode;
 }
 
 // --------------------------------------------------------------------------

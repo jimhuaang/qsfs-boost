@@ -27,6 +27,20 @@ if (BUILD_TESTING)
   add_test(NAME qsfs_directory_node COMMAND DirectoryNodeTest)
 
   add_executable(
+    DirectoryTreeTest
+    DirectoryTreeTest.cpp
+    ${QSFS_SOURCE_DIR}/data/DirectoryTree.cpp
+    ${QSFS_SOURCE_DIR}/data/Entry.cpp
+    ${QSFS_SOURCE_DIR}/data/Node.cpp
+    ${QSFS_SOURCE_DIR}/data/FileMetaData.cpp
+    ${QSFS_SOURCE_DIR}/data/FileMetaDataManager.cpp
+    $<TARGET_OBJECTS:qsfsLogging>
+    ${QSFS_SOURCE_DIR}/configure/Options.cpp
+  )
+  target_link_libraries(DirectoryTreeTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_directory_tree COMMAND DirectoryTreeTest)
+
+  add_executable(
     ExceptionTest
     ExceptionTest.cpp
   )

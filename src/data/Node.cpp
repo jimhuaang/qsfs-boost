@@ -28,6 +28,7 @@
 
 #include "base/LogMacros.h"
 #include "base/StringUtils.h"
+#include "base/Utils.h"
 #include "data/FileMetaDataManager.h"
 
 namespace QS {
@@ -36,6 +37,7 @@ namespace Data {
 
 using boost::shared_ptr;
 using QS::StringUtils::FormatPath;
+using QS::Utils::AppendPathDelim;
 using std::deque;
 using std::pair;
 using std::set;
@@ -86,11 +88,21 @@ shared_ptr<Node> Node::Find(const string &childFileName) const {
 
 // --------------------------------------------------------------------------
 bool Node::HaveChild(const string &childFilePath) const {
+  ChildrenMapConstIterator p = m_children.begin();
+  for ( ; p != m_children.end(); ++p){
+    string f = p->first;
+    const shared_ptr<Node> & n= p->second;
+  }
   return m_children.find(childFilePath) != m_children.end();
 }
 
 // --------------------------------------------------------------------------
 const FilePathToNodeUnorderedMap &Node::GetChildren() const {
+  return m_children;
+}
+
+// --------------------------------------------------------------------------
+FilePathToNodeUnorderedMap &Node::GetChildren() {
   return m_children;
 }
 
@@ -173,6 +185,39 @@ void Node::Remove(const string &childFilePath) {
 }
 
 // --------------------------------------------------------------------------
+void Node::Rename(const string &newFilePath) {
+  if (m_entry) {
+    string oldFilePath = m_entry.GetFilePath();
+    if (oldFilePath == newFilePath) {
+      return;
+    }
+    if (m_children.find(newFilePath) != m_children.end()) {
+      DebugWarning("Cannot rename, target node already exist " +
+                   FormatPath(oldFilePath, newFilePath));
+      return;
+    }
+
+    m_entry.Rename(newFilePath);
+
+    if (m_children.empty()) {
+      return;
+    }
+
+    deque<shared_ptr<Node> > childs;
+    BOOST_FOREACH (FilePathToNodeUnorderedMap::value_type &p, m_children) {
+      childs.push_back(p.second);
+    }
+    m_children.clear();
+    BOOST_FOREACH (shared_ptr<Node> &child, childs) {
+      string newPath = AppendPathDelim(newFilePath) + child->MyBaseName();
+      m_children.emplace(newPath, child);
+      child->Rename(newPath);
+    }
+
+  }
+}
+
+// --------------------------------------------------------------------------
 void Node::RenameChild(const string &oldFilePath, const string &newFilePath) {
   if (oldFilePath == newFilePath) {
     DebugInfo("Same file name, no rename " + FormatPath(oldFilePath));
@@ -194,7 +239,7 @@ void Node::RenameChild(const string &oldFilePath, const string &newFilePath) {
     // will probably get deleted when erasing cause its' reference
     // count to be 0.
     m_children.emplace(newFilePath, child);
-    ChildrenMapIterator hint = m_children.erase(it);
+    m_children.erase(it);
   } else {
     DebugWarning("Node not exist, no rename " + FormatPath(oldFilePath));
   }
