@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "boost/noncopyable.hpp"
+#include "boost/shared_ptr.hpp"
 
 namespace QS {
 
@@ -34,19 +35,18 @@ namespace Data {
 
 class IOSTream;
 
-typedef std::vector<char> *Buffer;
+typedef boost::shared_ptr<std::vector<char> >Buffer;
 
 /**
  * A stream buf to use with std::iostream
- * that uses a preallocated buffer under the hood.
  */
 class StreamBuf : public std::streambuf, private boost::noncopyable {
  public:
   StreamBuf(Buffer buf, size_t lenghtToRead);
 
-  ~StreamBuf() {}
+  ~StreamBuf();
 
-  Buffer GetBuffer() const { return m_buffer; }
+  const Buffer &GetBuffer() const { return m_buffer; }
 
  protected:
   pos_type seekoff(off_type off, std::ios_base::seekdir dir,
@@ -57,6 +57,9 @@ class StreamBuf : public std::streambuf, private boost::noncopyable {
                                                    std::ios_base::out);
 
  private:
+  Buffer &GetBuffer() { return m_buffer; }
+  Buffer ReleaseBuffer();
+
   char *begin() { return &(*m_buffer)[0]; }
   char *end() { return begin() + m_lengthToRead; }
 
@@ -67,6 +70,7 @@ class StreamBuf : public std::streambuf, private boost::noncopyable {
                           // e.g. you have a 1kb buffer, but only want
                           // stream to see 500 b of it.
 
+  friend class IOStream;
   friend class QS::Client::QSTransferManager;
   friend class StreamBufTest;
 };

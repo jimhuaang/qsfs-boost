@@ -38,9 +38,10 @@ class IOStream : public std::basic_iostream<char, std::char_traits<char> >,
   typedef std::basic_iostream<char, std::char_traits<char> > Base;
 
  public:
+  explicit IOStream(size_t bufSize);
   IOStream(Buffer buf, size_t lengthToRead);
 
-  ~IOStream() {}
+  ~IOStream();
 
  private:
   IOStream() {}

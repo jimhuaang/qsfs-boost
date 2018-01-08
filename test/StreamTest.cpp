@@ -42,8 +42,6 @@ using std::stringstream;
 using std::vector;
 using ::testing::Test;
 
-typedef scoped_ptr<vector<char> > ScopedBuffer;
-
 // default log dir
 static const char *defaultLogDir = "/tmp/qsfs.test.logs/";
 void InitLog() {
@@ -51,11 +49,11 @@ void InitLog() {
   QS::Logging::Log::Instance().Initialize(defaultLogDir);
 }
 
-void InitStreamWithNullBuffer() { StreamBuf streamBuf(NULL, 1); }
+void InitStreamWithNullBuffer() { StreamBuf streamBuf(Buffer(), 1); }
 
 void InitStreamWithOverflowLength() {
-  ScopedBuffer buf(new vector<char>(1));
-  StreamBuf streamBuf(buf.get(), 2);
+  Buffer buf(new vector<char>(1));
+  StreamBuf streamBuf(buf, 2);
 }
 
 class StreamBufTest : public Test {
@@ -68,8 +66,8 @@ class StreamBufTest : public Test {
     buf.push_back('0');
     buf.push_back('1');
     buf.push_back('2');
-    ScopedBuffer buf_(new vector<char>(buf));
-    StreamBuf streamBuf(buf_.get(), buf.size() - 1);
+    Buffer buf_(new vector<char>(buf));
+    StreamBuf streamBuf(buf_, buf.size() - 1);
     EXPECT_TRUE(*(streamBuf.GetBuffer()) == buf);
     EXPECT_EQ(*(streamBuf.begin()), '0');
     EXPECT_EQ(*(streamBuf.end()), '2');
@@ -91,29 +89,39 @@ TEST_F(StreamBufTest, Ctor) {
   buf.push_back('1');
   buf.push_back('2');
 
-  ScopedBuffer buf_(new vector<char>(buf));
-  const StreamBuf streamBuf(buf_.get(), buf.size());
+  Buffer buf_(new vector<char>(buf));
+  const StreamBuf streamBuf(buf_, buf.size());
   EXPECT_TRUE(*(streamBuf.GetBuffer()) == buf);
 }
 
 TEST_F(StreamBufTest, PrivateFunc) { TestPrivateFun(); }
 
-TEST(IOStreamTest, Ctor) {
+TEST(IOStreamTest, Ctor1) {
+  IOStream iostream(10);
+  iostream.seekg(0, std::ios_base::beg);
+  StreamBuf * buf = dynamic_cast<StreamBuf *>(iostream.rdbuf());
+  EXPECT_EQ(const_cast<const StreamBuf *>(buf)->GetBuffer()->size(), 10u);
+  vector<char> buf1 = vector<char>(10);
+  EXPECT_TRUE(*(const_cast<const StreamBuf *>(buf)->GetBuffer()) == buf1);
+}
+
+
+TEST(IOStreamTest, Ctor2) {
   vector<char> buf0;
   buf0.reserve(3);
   buf0.push_back('0');
   buf0.push_back('1');
   buf0.push_back('2');
-  ScopedBuffer buf(new vector<char>(buf0));
+  Buffer buf(new vector<char>(buf0));
 
-  IOStream iostream(buf.get(), buf->size());
+  IOStream iostream(buf, buf->size());
   iostream.seekg(0, std::ios_base::beg);
   StreamBuf *streambuf = dynamic_cast<StreamBuf *>(iostream.rdbuf());
   EXPECT_TRUE(*(const_cast<const StreamBuf *>(streambuf)->GetBuffer()) == buf0);
 
-  ScopedBuffer buf1(new vector<char>(buf0));
+  Buffer buf1(new vector<char>(buf0));
 
-  IOStream iostream1(buf1.get(), 2);
+  IOStream iostream1(buf1, 2);
   iostream1.seekg(0, std::ios_base::beg);
   StreamBuf *streambuf1 = dynamic_cast<StreamBuf *>(iostream1.rdbuf());
   EXPECT_TRUE(*(const_cast<const StreamBuf *>(streambuf1)->GetBuffer()) ==
@@ -126,15 +134,15 @@ TEST(IOStreamTest, Read1) {
   buf0.push_back('0');
   buf0.push_back('1');
   buf0.push_back('2');
-  ScopedBuffer buf(new vector<char>(buf0));
+  Buffer buf(new vector<char>(buf0));
 
-  IOStream stream(buf.get(), 3);
+  IOStream stream(buf, 3);
   stringstream ss;
   stream.seekg(0, std::ios_base::beg);
   ss << stream.rdbuf();
   EXPECT_EQ(ss.str(), string("012"));
 
-  IOStream stream1(buf.get(), 2);
+  IOStream stream1(buf, 2);
   stringstream ss1;
   stream1.seekg(0, std::ios_base::beg);
   ss1 << stream1.rdbuf();
@@ -147,9 +155,9 @@ TEST(IOStreamTest, Read2) {
   buf0.push_back('0');
   buf0.push_back('1');
   buf0.push_back('2');
-  ScopedBuffer buf(new vector<char>(buf0));
+  Buffer buf(new vector<char>(buf0));
 
-  IOStream stream(buf.get(), 3);
+  IOStream stream(buf, 3);
   stream.seekg(1, std::ios_base::beg);
   stringstream ss;
   ss << stream.rdbuf();
@@ -157,8 +165,8 @@ TEST(IOStreamTest, Read2) {
 }
 
 TEST(IOStreamTest, Write1) {
-  ScopedBuffer buf(new vector<char>(3));
-  IOStream stream(buf.get(), 3);
+  Buffer buf(new vector<char>(3));
+  IOStream stream(buf, 3);
   stringstream ss("012");
   stream << ss.rdbuf();
   stream.seekg(0, std::ios_base::beg);
@@ -170,8 +178,8 @@ TEST(IOStreamTest, Write1) {
   buf0.push_back('2');
   EXPECT_TRUE(*(const_cast<const StreamBuf *>(streambuf)->GetBuffer()) == buf0);
 
-  ScopedBuffer buf1(new vector<char>(2));
-  IOStream stream1(buf1.get(), 2);
+  Buffer buf1(new vector<char>(2));
+  IOStream stream1(buf1, 2);
   stringstream ss1("012");
   stream1 << ss1.rdbuf();
   stream1.seekg(0, std::ios_base::beg);
@@ -185,8 +193,8 @@ TEST(IOStreamTest, Write1) {
 }
 
 TEST(IOStreamTest, Write2) {
-  ScopedBuffer buf(new vector<char>(3));
-  IOStream stream(buf.get(), 3);
+  Buffer buf(new vector<char>(3));
+  IOStream stream(buf, 3);
   stringstream ss("012");
   stream.seekp(1, std::ios_base::beg);
   stream << ss.rdbuf();
@@ -206,10 +214,10 @@ TEST(StreamUtilsTest, Default) {
   buf0.push_back('0');
   buf0.push_back('1');
   buf0.push_back('2');
-  ScopedBuffer buf(new vector<char>(buf0));
+  Buffer buf(new vector<char>(buf0));
 
   boost::shared_ptr<IOStream> stream =
-      boost::make_shared<IOStream>(buf.get(), 2);
+      boost::make_shared<IOStream>(buf, 2);
   EXPECT_EQ(StreamUtils::GetStreamSize(stream), 2u);
   EXPECT_EQ(StreamUtils::GetStreamInputSize(stream), 2u);
   EXPECT_EQ(StreamUtils::GetStreamOutputSize(stream), 2u);
