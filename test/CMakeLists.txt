@@ -5,10 +5,8 @@ if (BUILD_TESTING)
     DirectoryEntryTest
     EntryTest.cpp
     ${QSFS_SOURCE_DIR}/data/Entry.cpp
-    ${QSFS_SOURCE_DIR}/data/FileMetaData.cpp
-    ${QSFS_SOURCE_DIR}/data/FileMetaDataManager.cpp
+    $<TARGET_OBJECTS:qsfsFileMetaData>
     $<TARGET_OBJECTS:qsfsLogging>
-    ${QSFS_SOURCE_DIR}/configure/Options.cpp
   )
   target_link_libraries(DirectoryEntryTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_directory_entry COMMAND DirectoryEntryTest)
@@ -18,10 +16,8 @@ if (BUILD_TESTING)
     NodeTest.cpp
     ${QSFS_SOURCE_DIR}/data/Entry.cpp
     ${QSFS_SOURCE_DIR}/data/Node.cpp
-    ${QSFS_SOURCE_DIR}/data/FileMetaData.cpp
-    ${QSFS_SOURCE_DIR}/data/FileMetaDataManager.cpp
+    $<TARGET_OBJECTS:qsfsFileMetaData>
     $<TARGET_OBJECTS:qsfsLogging>
-    ${QSFS_SOURCE_DIR}/configure/Options.cpp
   )
   target_link_libraries(DirectoryNodeTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_directory_node COMMAND DirectoryNodeTest)
@@ -32,10 +28,8 @@ if (BUILD_TESTING)
     ${QSFS_SOURCE_DIR}/data/DirectoryTree.cpp
     ${QSFS_SOURCE_DIR}/data/Entry.cpp
     ${QSFS_SOURCE_DIR}/data/Node.cpp
-    ${QSFS_SOURCE_DIR}/data/FileMetaData.cpp
-    ${QSFS_SOURCE_DIR}/data/FileMetaDataManager.cpp
+    $<TARGET_OBJECTS:qsfsFileMetaData>
     $<TARGET_OBJECTS:qsfsLogging>
-    ${QSFS_SOURCE_DIR}/configure/Options.cpp
   )
   target_link_libraries(DirectoryTreeTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_directory_tree COMMAND DirectoryTreeTest)
@@ -50,10 +44,8 @@ if (BUILD_TESTING)
   add_executable(
     FileMetaDataManagerTest
     FileMetaDataManagerTest.cpp
-    ${QSFS_SOURCE_DIR}/data/FileMetaData.cpp
-    ${QSFS_SOURCE_DIR}/data/FileMetaDataManager.cpp
+    $<TARGET_OBJECTS:qsfsFileMetaData>
     $<TARGET_OBJECTS:qsfsLogging>
-    ${QSFS_SOURCE_DIR}/configure/Options.cpp
   )
   target_link_libraries(FileMetaDataManagerTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_file_metadata_manager COMMAND FileMetaDataManagerTest)
@@ -83,6 +75,18 @@ if (BUILD_TESTING)
   add_test(NAME qsfs_logging COMMAND LoggingTest)
 
   add_executable(
+    PageTest
+    PageTest.cpp
+   # ${QSFS_SOURCE_DIR}/base/Utils.cpp
+    ${QSFS_SOURCE_DIR}/configure/Options.cpp
+    ${QSFS_SOURCE_DIR}/data/Page.cpp
+    $<TARGET_OBJECTS:qsfsStream>
+    $<TARGET_OBJECTS:qsfsLogging>
+  )
+  target_link_libraries(PageTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_page COMMAND PageTest)
+
+  add_executable(
     ResourceManagerTest
     ResourceManagerTest.cpp
     ${QSFS_SOURCE_DIR}/data/ResourceManager.cpp
@@ -94,9 +98,7 @@ if (BUILD_TESTING)
   add_executable(
     StreamTest
     StreamTest.cpp
-    ${QSFS_SOURCE_DIR}/data/IOStream.cpp
-    ${QSFS_SOURCE_DIR}/data/StreamBuf.cpp
-    ${QSFS_SOURCE_DIR}/data/StreamUtils.cpp
+    $<TARGET_OBJECTS:qsfsStream>
     $<TARGET_OBJECTS:qsfsLogging>
   )
   target_link_libraries(StreamTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
@@ -123,13 +125,7 @@ if (BUILD_TESTING)
     TimeUtilsTest
     TimeUtilsTest.cpp
     ${QSFS_SOURCE_DIR}/base/TimeUtils.cpp
-    #${QSFS_SOURCE_DIR}/base/LogLevel.cpp
-    #${QSFS_SOURCE_DIR}/base/Logging.cpp
-    #${QSFS_SOURCE_DIR}/base/Utils.cpp
-    #${QSFS_SOURCE_DIR}/base/StringUtils.cpp
-    #${QSFS_SOURCE_DIR}/configure/Default.cpp
   )
-  #target_link_libraries(TimeUtilsTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
   target_link_libraries(TimeUtilsTest gtest ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_timeutils COMMAND TimeUtilsTest)
 

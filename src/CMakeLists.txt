@@ -64,12 +64,26 @@ add_library(
   )
 
 add_library(
+  qsfsFileMetaData OBJECT
+  data/FileMetaData.cpp
+  data/FileMetaDataManager.cpp
+  configure/Options.cpp
+)
+
+add_library(
   qsfsLogging OBJECT
   base/Logging.cpp
   base/LogLevel.cpp
   base/Utils.cpp
   base/StringUtils.cpp
   configure/Default.cpp
+)
+
+add_library(
+  qsfsStream OBJECT
+  data/IOStream.cpp
+  data/StreamBuf.cpp
+  data/StreamUtils.cpp
 )
 
 #
