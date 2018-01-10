@@ -52,7 +52,6 @@ using boost::shared_ptr;
 using boost::to_string;
 using boost::tuple;
 using QS::StringUtils::PointerAddress;
-using QS::Utils::FileExists;
 using std::iostream;
 using std::list;
 using std::make_pair;

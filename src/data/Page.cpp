@@ -25,6 +25,7 @@
 #include "base/LogMacros.h"
 #include "base/StringUtils.h"
 #include "base/Utils.h"
+#include "base/UtilsWithLog.h"
 #include "configure/Options.h"
 #include "data/IOStream.h"
 #include "data/StreamUtils.h"
@@ -49,9 +50,9 @@ using QS::Data::IOStream;
 using QS::Data::StreamUtils::GetStreamSize;
 using QS::StringUtils::FormatPath;
 using QS::StringUtils::PointerAddress;
-using QS::Utils::CreateDirectoryIfNotExists;
-using QS::Utils::FileExists;
 using QS::Utils::GetDirName;
+using QS::UtilsWithLog::CreateDirectoryIfNotExists;
+using QS::UtilsWithLog::FileExists;
 using std::fstream;
 using std::iostream;
 using std::stringstream;

@@ -78,6 +78,7 @@ if (BUILD_TESTING)
     PageTest
     PageTest.cpp
    ${QSFS_SOURCE_DIR}/data/Page.cpp
+   ${QSFS_SOURCE_DIR}/base/UtilsWithLog.cpp
    ${QSFS_SOURCE_DIR}/configure/Options.cpp
     $<TARGET_OBJECTS:qsfsStream>
     $<TARGET_OBJECTS:qsfsLogging>

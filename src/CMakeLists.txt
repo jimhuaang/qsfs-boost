@@ -42,26 +42,11 @@ install (
   RUNTIME DESTINATION "${INSTALL_RUNTIME_DIR}" COMPONENT bin
 )
 
-add_library(
-  Configure
-  ${QSFS_CONFIGURE_SRCS}
-)
-#add_library(
-#  Base
-#  ${QSFS_BASE_SRCS}
-#)
-#target_link_libraries(Base glog flags boost_thread ${CMAKE_THREAD_LIBS_INIT})
 
 #
 # make libs referenced by unit test
 #
 # use OBJECT lib type, as we do not need to produce any library files
-add_library(
-  qsfsBaseUtils OBJECT
-  base/StringUtils.cpp
-  #base/TimeUtils.cpp
-  #base/Utils.cpp
-  )
 
 add_library(
   qsfsFileMetaData OBJECT

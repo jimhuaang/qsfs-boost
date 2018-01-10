@@ -29,6 +29,7 @@
 
 #include "base/Logging.h"
 #include "base/Utils.h"
+#include "base/UtilsWithLog.h"
 #include "configure/Options.h"
 #include "data/Page.h"
 #include "data/StreamUtils.h"
@@ -41,7 +42,7 @@ using boost::array;
 using boost::make_shared;
 using boost::shared_ptr;
 using QS::Data::StreamUtils::GetStreamSize;
-using QS::Utils::RemoveFileIfExists;
+using QS::UtilsWithLog::RemoveFileIfExists;
 using std::string;
 using std::stringstream;
 using ::testing::Test;
