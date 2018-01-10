@@ -87,14 +87,14 @@ std::pair<bool, std::string> HavePermission(struct stat *st);
 // Get the disk free space
 //
 // @param  : absolute path
-// @return : uint64_t
+// @return : uint64_t, error msg
 std::pair<uint64_t, std::string> GetFreeDiskSpace(
     const std::string &absolutePath);
 
 // Check if disk has available free space
 //
 // @param  : absolute path, free space needed
-// @return : bool
+// @return : bool, error msg
 std::pair<bool, std::string> IsSafeDiskSpace(const std::string &absolutePath,
                                              uint64_t freeSpace);
 

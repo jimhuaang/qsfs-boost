@@ -99,6 +99,21 @@ if (BUILD_TESTING)
   add_test(NAME qsfs_file COMMAND FileTest)
 
   add_executable(
+    CacheTest
+    CacheTest.cpp
+    ${QSFS_SOURCE_DIR}/data/Page.cpp
+    ${QSFS_SOURCE_DIR}/data/File.cpp
+    ${QSFS_SOURCE_DIR}/data/Cache.cpp
+    ${QSFS_SOURCE_DIR}/base/UtilsWithLog.cpp
+    ${QSFS_SOURCE_DIR}/base/TimeUtils.cpp
+    ${QSFS_SOURCE_DIR}/configure/Options.cpp
+    $<TARGET_OBJECTS:qsfsStream>
+    $<TARGET_OBJECTS:qsfsLogging>
+  )
+  target_link_libraries(CacheTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_cache COMMAND CacheTest)
+
+  add_executable(
     ResourceManagerTest
     ResourceManagerTest.cpp
     ${QSFS_SOURCE_DIR}/data/ResourceManager.cpp
