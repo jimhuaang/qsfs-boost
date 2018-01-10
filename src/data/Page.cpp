@@ -21,7 +21,6 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <utility>
 
 #include "base/LogMacros.h"
 #include "base/StringUtils.h"
@@ -128,7 +127,7 @@ Page::Page(off_t offset, size_t len, const char *buffer, const string &diskfile)
 // --------------------------------------------------------------------------
 Page::Page(off_t offset, size_t len, const shared_ptr<iostream> &instream)
     : m_offset(offset), m_size(len), m_body(make_shared<IOStream>(len)) {
-  bool isValidInput = offset >= 0 && len > 0 && instream;
+  bool isValidInput = offset >= 0 && len >= 0 && instream;
   assert(isValidInput);
   if (!isValidInput) {
     DebugError("Try to new a page with invalid input " +

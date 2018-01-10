@@ -14,8 +14,8 @@
 // | limitations under the License.
 // +-------------------------------------------------------------------------
 
-#ifndef INCLUDE_DATA_PAGE_H_
-#define INCLUDE_DATA_PAGE_H_
+#ifndef QSFS_DATA_PAGE_H_
+#define QSFS_DATA_PAGE_H_
 
 #include <stddef.h>  // for size_t
 
@@ -252,4 +252,4 @@ std::string ToStringLine(off_t offset, size_t size);
 }  // namespace Data
 }  // namespace QS
 
-#endif  // INCLUDE_DATA_PAGE_H_
+#endif  // QSFS_DATA_PAGE_H_

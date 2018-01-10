@@ -77,14 +77,26 @@ if (BUILD_TESTING)
   add_executable(
     PageTest
     PageTest.cpp
-   # ${QSFS_SOURCE_DIR}/base/Utils.cpp
-    ${QSFS_SOURCE_DIR}/configure/Options.cpp
-    ${QSFS_SOURCE_DIR}/data/Page.cpp
+   ${QSFS_SOURCE_DIR}/data/Page.cpp
+   ${QSFS_SOURCE_DIR}/configure/Options.cpp
     $<TARGET_OBJECTS:qsfsStream>
     $<TARGET_OBJECTS:qsfsLogging>
   )
   target_link_libraries(PageTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_page COMMAND PageTest)
+
+  add_executable(
+    FileTest
+    FileTest.cpp
+    ${QSFS_SOURCE_DIR}/data/Page.cpp
+    ${QSFS_SOURCE_DIR}/data/File.cpp
+    ${QSFS_SOURCE_DIR}/base/UtilsWithLog.cpp
+    ${QSFS_SOURCE_DIR}/configure/Options.cpp
+    $<TARGET_OBJECTS:qsfsStream>
+    $<TARGET_OBJECTS:qsfsLogging>
+  )
+  target_link_libraries(FileTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  add_test(NAME qsfs_file COMMAND FileTest)
 
   add_executable(
     ResourceManagerTest
