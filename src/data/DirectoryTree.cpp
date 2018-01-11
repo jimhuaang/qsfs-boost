@@ -95,12 +95,12 @@ bool DirectoryTree::Has(const string &filePath) const {
 vector<weak_ptr<Node> > DirectoryTree::FindChildren(
     const string &dirName) const {
   lock_guard<recursive_mutex> lock(m_mutex);
-  pair<ChildrenMultiMapConstIterator, ChildrenMultiMapConstIterator> range =
-      m_parentToChildrenMap.equal_range(dirName);
   vector<weak_ptr<Node> > childs;
-  for (ChildrenMultiMapConstIterator it = range.first; it != range.second;
-       ++it) {
-    childs.push_back(it->second);
+  for (pair<ChildrenMultiMapConstIterator, ChildrenMultiMapConstIterator> range =
+          m_parentToChildrenMap.equal_range(dirName);
+          range.first != range.second;
+          ++range.first) {
+    childs.push_back(range.first->second);
   }
   return childs;
 }
@@ -331,13 +331,19 @@ void DirectoryTree::Remove(const string &path) {
     parent->Remove(path);
   }
   m_map.erase(path);
-  pair<ChildrenMultiMapConstIterator, ChildrenMultiMapConstIterator> range =
-      m_parentToChildrenMap.equal_range(node->MyDirName());
-  for (ChildrenMultiMapConstIterator it = range.first; it != range.second;
-       ++it) {
-    shared_ptr<Node> node = it->second.lock();
-    if (node && node->GetFilePath() == path){
-      m_parentToChildrenMap.erase(it);
+  string nodeDir = node->MyDirName();
+  for(ChildrenMultiMapIterator it = m_parentToChildrenMap.begin(); 
+          it != m_parentToChildrenMap.end();) {
+    if(it->first == nodeDir) {
+      shared_ptr<Node> n = it->second.lock();
+      if (n && n->GetFilePath() == path) {
+        // erase will invalidate iterator, so should not increment it after that
+        it = m_parentToChildrenMap.erase(it);
+      } else {
+        ++it;
+      }
+    } else {
+      ++it;
     }
   }
   m_parentToChildrenMap.erase(path);

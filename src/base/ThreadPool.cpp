@@ -57,6 +57,7 @@ void ThreadPool::SubmitToThread(const Task &task, bool prioritized) {
     } else {
       m_tasks.push_back(taskCpy);
     }
+    taskCpy = NULL;
   }
   lock_guard<mutex> lock(m_syncLock);
   m_syncConditionVar.notify_one();

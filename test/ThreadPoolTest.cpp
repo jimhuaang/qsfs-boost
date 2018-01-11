@@ -98,8 +98,9 @@ class ThreadPoolTest : public Test {
     boost::future_state::state fStatus = f.get_state();
     ASSERT_EQ(fStatus, boost::future_state::waiting);
 
-    m_pThreadPool->PopTask();
+    Task *task = m_pThreadPool->PopTask();
     EXPECT_FALSE(m_pThreadPool->HasTasks());
+    delete task;
 
     // Should never invoke f.get(), as after stoping thredpool, task will
     // neverget a chance to execute, so this will hang the program there.

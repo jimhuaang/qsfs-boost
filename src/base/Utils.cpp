@@ -378,13 +378,17 @@ std::string GetDirName(const std::string &path) {
   }
 
   char *cpy = strdup(path.c_str());
-  return AppendPathDelim(dirname(cpy));
+  string ret = AppendPathDelim(dirname(cpy));
+  free(cpy);
+  return ret;
 }
 
 // --------------------------------------------------------------------------
 std::string GetBaseName(const std::string &path) {
   char *cpy = strdup(path.c_str());
-  return basename(cpy);
+  string ret(basename(cpy));
+  free(cpy);
+  return ret;
 }
 
 // --------------------------------------------------------------------------

@@ -66,6 +66,7 @@ void TaskHandle::operator()() {
       if (task) {
         (*task)();
         delete task;
+        task = NULL;
       }
     }
 
