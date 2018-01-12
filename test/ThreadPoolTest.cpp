@@ -17,7 +17,6 @@
 #include "gtest/gtest.h"
 
 #include "boost/bind.hpp"
-#include "boost/function.hpp"
 #include "boost/make_shared.hpp"
 #include "boost/shared_ptr.hpp"
 #include "boost/thread/future.hpp"
@@ -37,7 +36,6 @@ namespace Threading {
 // so they can be friends of class ThreadPool.
 
 using boost::bind;
-using boost::function;
 using boost::unique_future;
 using boost::make_shared;
 using boost::packaged_task;
