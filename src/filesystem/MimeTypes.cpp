@@ -49,9 +49,7 @@ void InitializeMimeTypes(const std::string &mimeFile) {
   MimeTypes &instance = MimeTypes::Instance();
   boost::call_once(
       initOnceFlag,
-      bind(boost::type<void>(),
-           bind(boost::type<void>(), &MimeTypes::Initialize, &instance, _1),
-           mimeFile));
+      bind(boost::type<void>(), &MimeTypes::Initialize, &instance, mimeFile));
 }
 
 // --------------------------------------------------------------------------
