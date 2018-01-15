@@ -15,6 +15,7 @@ option (REGISTER_BUILD_DIR "Request entry of build directory in CMake's package 
 set (CMAKE_C_COMPILER   "/opt/gcc-4.1.2/bin/gcc" CACHE PATH "" FORCE)
 set (CMAKE_CXX_COMPILER "/opt/gcc-4.1.2/bin/g++" CACHE PATH "" FORCE)
 SET (ENV{LIBRARY_PATH} "/usr/lib/x86_64-linux-gnu/:$LIBRARY_PATH" CACHE INTERNAL "" FORCE)
+include_directories(/usr/include/x86_64-linux-gnu)
 
 #
 # system info
@@ -105,6 +106,9 @@ if(NOT googlelog_INSTALLED)
   include(cmake/glog.cmake)
 endif()
 
+if (NOT qingstorsdk_INSTALLED)
+  include (cmake/qingstorsdk.cmake)
+endif()
 
 #
 # linter target (make lint)
