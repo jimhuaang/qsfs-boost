@@ -223,7 +223,8 @@ vector<shared_ptr<FileMetaData> > ListObjectsOutputToFileMetaDatas(
     Predicate p(dirPath);
     using boost::lambda::_1;
     if (std::find_if(metas.begin(), metas.end(),
-                     boost::bind(&Predicate::compare, &p, _1)) == metas.end()) {
+                     boost::bind(boost::type<bool>(), &Predicate::compare, &p,
+                                 _1)) == metas.end()) {
       if (dirItselfAsKey != NULL) {
         metas.push_back(ObjectKeyToDirMetaData(*dirItselfAsKey, atime));
       } else {

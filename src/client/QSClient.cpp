@@ -396,8 +396,9 @@ ClientError<QSError::Value> QSClient::MoveDirectory(const string &sourceDirPath,
       if (async) {  // asynchronously
         GetExecutor()->SubmitAsync(
             bind(boost::type<void>(), receivedHandler, _1),
-            bind(&QSClient::MoveObject, this, _1, _2), sourceSubFile,
-            targetSubFile);
+            bind(boost::type<ClientError<QSError::Value> >(),
+                 &QSClient::MoveObject, this, _1, _2),
+            sourceSubFile, targetSubFile);
       } else {  // synchronizely
         receivedHandler(MoveObject(sourceSubFile, targetSubFile));
       }
@@ -414,8 +415,9 @@ ClientError<QSError::Value> QSClient::MoveDirectory(const string &sourceDirPath,
       if (async) {  // asynchronously
         GetExecutor()->SubmitAsync(
             bind(boost::type<void>(), receivedHandler, _1),
-            bind(&QSClient::MoveDirectory, this, _1, _2, false), sourceSubDir,
-            targetSubDir);
+            bind(boost::type<ClientError<QSError::Value> >(),
+                 &QSClient::MoveDirectory, this, _1, _2, false),
+            sourceSubDir, targetSubDir);
 
       } else {  // synchronizely
         receivedHandler(MoveDirectory(sourceSubDir, targetSubDir));
@@ -426,7 +428,8 @@ ClientError<QSError::Value> QSClient::MoveDirectory(const string &sourceDirPath,
   // move dir itself
   if (async) {  // asynchronously
     GetExecutor()->SubmitAsync(bind(boost::type<void>(), receivedHandler, _1),
-                               bind(&QSClient::MoveObject, this, _1, _2),
+                               bind(boost::type<ClientError<QSError::Value> >(),
+                                    &QSClient::MoveObject, this, _1, _2),
                                sourceDir, targetDir);
   } else {  // synchronizely
     receivedHandler(MoveObject(sourceDir, targetDir));
