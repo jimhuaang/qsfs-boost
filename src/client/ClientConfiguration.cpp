@@ -195,6 +195,9 @@ void ClientConfiguration::InitializeByOptions() {
   if (options.IsDebug()) {
     m_logLevel = ClientLogLevel::Debug;
   }
+  if (options.IsDebugCurl()) {
+    m_logLevel = ClientLogLevel::Verbose;
+  }
 
   if (!QS::Utils::CreateDirectoryIfNotExists(options.GetLogDirectory())) {
     throw QSException(string("Unable to create log directory : ") +

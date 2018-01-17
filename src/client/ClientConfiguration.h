@@ -39,6 +39,7 @@ class QSClient;
 
 struct ClientLogLevel {  // SDK log level
   enum Value {
+    Verbose = -2,
     Debug = -1,
     Info = 0,
     Warn = 1,

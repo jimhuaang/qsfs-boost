@@ -75,8 +75,8 @@ QSError::Value StringToQSError(const string &errorCode) {
   map["NoSuchMultipartUpload"]      = QSError::NO_SUCH_MULTIPART_UPLOAD;
   map["NoSuchUpload"]               = QSError::NO_SUCH_UPLOAD;
   map["ParameterMissing"]           = QSError::PARAMETER_MISSING;
-  map["RequestDeferred"]            = QSError::REQUEST_DEFERRED;
-  map["RequestExpired"]             = QSError::REQUEST_EXPIRED;
+  map["RequestWaiting"]             = QSError::REQUEST_WAITING;
+  map["RequestUninitialized"]       = QSError::REQUEST_UNINITIALIZED;
   map["SDKConfigureFileInvalid"]    = QSError::SDK_CONFIGURE_FILE_INAVLID;
   map["SDKNoRequiredParameter"]     = QSError::SDK_NO_REQUIRED_PARAMETER;
   map["SDKRequestNotMade"]          = QSError::SDK_REQUEST_NOT_MADE;
@@ -101,8 +101,8 @@ std::string QSErrorToString(QSError::Value err){
   map[QSError::NO_SUCH_MULTIPART_UPLOAD]       = "NoSuchMultipartUpload";
   map[QSError::NO_SUCH_UPLOAD]                 = "NoSuchUpload";
   map[QSError::PARAMETER_MISSING]              = "ParameterMissing";
-  map[QSError::REQUEST_DEFERRED]               = "RequestDeferred";
-  map[QSError::REQUEST_EXPIRED]                = "RequestExpired";
+  map[QSError::REQUEST_WAITING]                = "RequestWaiting";
+  map[QSError::REQUEST_UNINITIALIZED]          = "RequestUninitialized";
   map[QSError::SDK_CONFIGURE_FILE_INAVLID]     = "SDKConfigureFileInvalid";
   map[QSError::SDK_NO_REQUIRED_PARAMETER]      = "SDKNoRequiredParameter";
   map[QSError::SDK_REQUEST_NOT_MADE]           = "SDKRequestNotMade";

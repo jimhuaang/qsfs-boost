@@ -41,8 +41,8 @@ struct QSError {
     NO_SUCH_MULTIPART_UPLOAD,
     NO_SUCH_UPLOAD,
     PARAMETER_MISSING,
-    REQUEST_DEFERRED,
-    REQUEST_EXPIRED,
+    REQUEST_WAITING,  // future state
+    REQUEST_UNINITIALIZED,  // future state
 
     // sdk error
     SDK_CONFIGURE_FILE_INAVLID,
