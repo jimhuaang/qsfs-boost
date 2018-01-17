@@ -20,14 +20,12 @@
 #include <stdint.h>
 
 #include <iostream>
-//#include <memory>
 #include <string>
 
 #include "boost/noncopyable.hpp"
 #include "boost/shared_ptr.hpp"
 
 #include "base/Size.h"
-//#include "configure/Default.h"
 #include "client/ClientConfiguration.h"
 #include "data/ResourceManager.h"
 
