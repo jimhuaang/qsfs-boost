@@ -28,6 +28,7 @@
 namespace QS {
 
 namespace Data {
+class Cache;
 class IOStream;
 }  // namespace Data
 
@@ -64,16 +65,17 @@ class QSTransferManager : public TransferManager {
   //
   // @param  : file path, file size
   // @return : transfer handle
-  boost::shared_ptr<TransferHandle> UploadFile(const std::string &filePath,
-                                               uint64_t fileSize,
-                                               bool async = false);
+  boost::shared_ptr<TransferHandle> UploadFile(
+      const std::string &filePath, uint64_t fileSize, time_t fileMtimeSince,
+      const boost::shared_ptr<QS::Data::Cache> &cache, bool async = false);
 
   // Retry a failed upload
   //
   // @param  : tranfser handle to retry
   // @return : transfer handle after been retried
   boost::shared_ptr<TransferHandle> RetryUpload(
-      const boost::shared_ptr<TransferHandle> &handle, bool async = false);
+      const boost::shared_ptr<TransferHandle> &handle, time_t fileMtimeSince,
+      const boost::shared_ptr<QS::Data::Cache> &cache, bool async = false);
 
   // Abort a multipart upload
   //
@@ -97,11 +99,14 @@ class QSTransferManager : public TransferManager {
 
   bool PrepareUpload(const boost::shared_ptr<TransferHandle> &handle);
   void DoSinglePartUpload(const boost::shared_ptr<TransferHandle> &handle,
-                          bool async = false);
+                          const boost::shared_ptr<QS::Data::Cache> &cache,
+                          time_t mtimeSince, bool async = false);
   void DoMultiPartUpload(const boost::shared_ptr<TransferHandle> &handle,
-                         bool async = false);
+                         const boost::shared_ptr<QS::Data::Cache> &cache,
+                         time_t mtimeSince, bool async = false);
   void DoUpload(const boost::shared_ptr<TransferHandle> &handlebool,
-                bool async = false);
+                const boost::shared_ptr<QS::Data::Cache> &cache,
+                time_t mtimeSince, bool async = false);
 
  private:
   // Internal use only

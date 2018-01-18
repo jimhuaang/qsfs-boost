@@ -18,6 +18,7 @@
 #define QSFS_CLIENT_TRANSFERMANAGER_H_
 
 #include <stdint.h>
+#include <time.h>
 
 #include <iostream>
 #include <string>
@@ -32,6 +33,7 @@
 namespace QS {
 
 namespace Data {
+class Cache;
 class ResourceManager;
 }  // namespace Data
 
@@ -104,14 +106,16 @@ class TransferManager : private boost::noncopyable {
   // @param  : file path, file size
   // @return : transfer handle
   virtual boost::shared_ptr<TransferHandle> UploadFile(
-      const std::string &filePath, uint64_t fileSize, bool async = false) = 0;
+      const std::string &filePath, uint64_t fileSize, time_t fileMTimeSince,
+      const boost::shared_ptr<QS::Data::Cache> &cache, bool async = false) = 0;
 
   // Retry a failed upload
   //
   // @param  : tranfser handle to retry
   // @return : transfer handle after been retried
   virtual boost::shared_ptr<TransferHandle> RetryUpload(
-      const boost::shared_ptr<TransferHandle> &handle, bool async = false) = 0;
+      const boost::shared_ptr<TransferHandle> &handle, time_t fileMTimeSince,
+      const boost::shared_ptr<QS::Data::Cache> &cache, bool async = false) = 0;
 
   // Abort a multipart upload
   //
