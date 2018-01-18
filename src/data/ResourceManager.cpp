@@ -43,7 +43,7 @@ bool ResourceManager::ResourcesAvailable() {
 }
 
 // --------------------------------------------------------------------------
-void ResourceManager::PutResource(Resource resource) {
+void ResourceManager::PutResource(const Resource &resource) {
   if (resource) {
     m_resources.push_back(resource);
   }
@@ -67,7 +67,7 @@ Resource ResourceManager::Acquire() {
 }
 
 // --------------------------------------------------------------------------
-void ResourceManager::Release(Resource resource) {
+void ResourceManager::Release(const Resource &resource) {
   unique_lock<mutex> lock(m_queueLock);
   if (resource) {
     m_resources.push_back(resource);

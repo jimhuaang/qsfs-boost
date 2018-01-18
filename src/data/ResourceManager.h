@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "boost/noncopyable.hpp"
+#include "boost/shared_ptr.hpp"
 #include "boost/thread/condition_variable.hpp"
 #include "boost/thread/mutex.hpp"
 
@@ -34,7 +35,7 @@ class QSTransferManager;
 
 namespace Data {
 
-typedef std::vector<char> *Resource;
+typedef boost::shared_ptr<std::vector<char> >Resource;
 
 /**
  * Resouce manager with Acquire/Release semantics.
@@ -76,7 +77,7 @@ class ResourceManager : private boost::noncopyable {
   // @return : void
   //
   // Does not block or even touch the semaphore.
-  void PutResource(Resource resource);
+  void PutResource(const Resource &resource);
 
   // Returns a resource with exclusive ownership
   //
@@ -93,7 +94,7 @@ class ResourceManager : private boost::noncopyable {
   // @return : void
   //
   // This will unblock one thread waiting Acquire call if any are waiting.
-  void Release(Resource resource);
+  void Release(const Resource &resource);
 
   // Waits for all acquired resources to be released, then empty the queue
   //

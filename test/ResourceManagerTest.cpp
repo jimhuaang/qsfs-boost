@@ -54,16 +54,17 @@ class ResourceManagerTest : public Test {
 
   void TestPutResource() {
     ResourceManager manager;
-    manager.PutResource(new vector<char>(10));
-    manager.PutResource(new vector<char>(10));
-    manager.PutResource(new vector<char>(10));
-    manager.PutResource(new vector<char>(10));
-    manager.PutResource(new vector<char>(10));
+    manager.PutResource(Resource(new vector<char>(10)));
+    manager.PutResource(Resource(new vector<char>(10)));
+    manager.PutResource(Resource(new vector<char>(10)));
+    manager.PutResource(Resource(new vector<char>(10)));
+    manager.PutResource(Resource(new vector<char>(10)));
     EXPECT_TRUE(manager.ResourcesAvailable());
 
-    BOOST_FOREACH (Resource resource, manager.ShutdownAndWait(5)) {
+    vector<Resource> resources = manager.ShutdownAndWait(5);
+    BOOST_FOREACH (Resource &resource, resources) {
       if (resource) {
-        delete resource;
+        resource.reset();
       }
     }
 
@@ -72,7 +73,7 @@ class ResourceManagerTest : public Test {
 
   void TestAcquireReleaseResource() {
     ResourceManager manager;
-    manager.PutResource(new vector<char>(10));
+    manager.PutResource(Resource(new vector<char>(10)));
 
     packaged_task<Resource> task = packaged_task<Resource>(boost::bind(
         boost::type<Resource>(), &ResourceManager::Acquire, &manager));
@@ -92,14 +93,14 @@ class ResourceManagerTest : public Test {
     // resource is released, so resource is available now
     EXPECT_TRUE(manager.ResourcesAvailable());
 
-    BOOST_FOREACH( Resource resource, manager.ShutdownAndWait(1)) {
-      if(resource) {
-        delete resource;
+    vector<Resource> resources = manager.ShutdownAndWait(1);
+    BOOST_FOREACH (Resource &resource, resources) {
+      if (resource) {
+        resource.reset();
       }
     }
     EXPECT_FALSE(manager.ResourcesAvailable());
   }
-
 };
 
 TEST_F(ResourceManagerTest, Default) { TestDefaultCtor(); }

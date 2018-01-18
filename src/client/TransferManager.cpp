@@ -39,6 +39,7 @@ namespace Client {
 
 using boost::make_shared;
 using boost::shared_ptr;
+using QS::Data::Resource;
 using QS::Data::ResourceManager;
 using QS::Threading::ThreadPool;
 using std::vector;
@@ -63,10 +64,11 @@ TransferManager::~TransferManager() {
   if (!m_bufferManager) {
     return;
   }
-  BOOST_FOREACH (vector<char> *resource,
-                 m_bufferManager->ShutdownAndWait(GetBufferCount())) {
+  vector<Resource> resources =
+      m_bufferManager->ShutdownAndWait(GetBufferCount());
+  BOOST_FOREACH (Resource &resource, resources) {
     if (resource) {
-      delete resource;
+      resource.reset();
     }
   }
 }
@@ -100,7 +102,7 @@ void TransferManager::InitializeResources() {
     return;
   }
   for (uint64_t i = 0; i < GetBufferMaxHeapSize(); i += GetBufferSize()) {
-    m_bufferManager->PutResource(new vector<char>(GetBufferSize()));
+    m_bufferManager->PutResource(Resource(new vector<char>(GetBufferSize())));
   }
 }
 
