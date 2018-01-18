@@ -95,6 +95,10 @@ class Part {
 
   friend class TransferHandle;
   friend class QSTransferManager;
+  friend struct ReceivedHandlerSingleDownload;
+  friend struct ReceivedHandlerMultipleDownload;
+  friend struct ReceivedHandlerSingleUpload;
+  friend struct ReceivedHandlerMultipleUpload;
 };
 
 struct TransferStatus {
@@ -281,6 +285,10 @@ class TransferHandle : private boost::noncopyable {
 
   friend class QSTransferManager;
   friend class Part;
+  friend struct ReceivedHandlerSingleDownload;
+  friend struct ReceivedHandlerMultipleDownload;
+  friend struct ReceivedHandlerSingleUpload;
+  friend struct ReceivedHandlerMultipleUpload;
 };
 
 }  // namespace Client

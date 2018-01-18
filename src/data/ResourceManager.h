@@ -31,6 +31,8 @@ namespace QS {
 namespace Client {
 class TransferManager;
 class QSTransferManager;
+struct ReceivedHandlerMultipleDownload;
+struct ReceivedHandlerMultipleUpload;
 }  // namespace  Client
 
 namespace Data {
@@ -129,6 +131,8 @@ class ResourceManager : private boost::noncopyable {
 
   friend class QS::Client::TransferManager;
   friend class QS::Client::QSTransferManager;
+  friend struct QS::Client::ReceivedHandlerMultipleDownload;
+  friend struct QS::Client::ReceivedHandlerMultipleUpload;
   friend class ResourceManagerTest;
 };
 

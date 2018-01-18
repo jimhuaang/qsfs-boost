@@ -29,6 +29,9 @@ namespace QS {
 
 namespace Client {
 class QSTransferManager;
+struct ReceivedHandlerMultipleDownload;
+struct ReceivedHandlerSingleUpload;
+struct ReceivedHandlerMultipleUpload;
 }  // namespace Client
 
 namespace Data {
@@ -72,6 +75,9 @@ class StreamBuf : public std::streambuf, private boost::noncopyable {
 
   friend class IOStream;
   friend class QS::Client::QSTransferManager;
+  friend struct QS::Client::ReceivedHandlerMultipleDownload;
+  friend struct QS::Client::ReceivedHandlerSingleUpload;
+  friend struct QS::Client::ReceivedHandlerMultipleUpload;
   friend class StreamBufTest;
 };
 

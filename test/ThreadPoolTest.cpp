@@ -184,6 +184,13 @@ TEST_F(ThreadPoolTest, TestSubmitCallable) {
   EXPECT_EQ(f2.get(), 12);
 }
 
+struct callback0 {
+  callback0() {}
+  void operator()(int result) {
+    EXPECT_EQ(result, 120);
+  }
+};
+
 struct callback {
   callback() {}
   void operator()(int result, int num) {
@@ -202,6 +209,8 @@ struct callback1 {
 };
 
 TEST_F(ThreadPoolTest, TestSubmitAsync) {
+  m_pThreadPool->SubmitAsync(
+      boost::bind(boost::type<void>(), callback0(), _1), Factorial, 5);
   m_pThreadPool->SubmitAsync(
       boost::bind(boost::type<void>(), callback(), _1, _2), Factorial, 5);
 
