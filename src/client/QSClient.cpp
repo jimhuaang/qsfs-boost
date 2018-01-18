@@ -59,7 +59,6 @@
 #include "data/DirectoryTree.h"
 #include "data/FileMetaData.h"
 #include "data/Node.h"
-//#include "filesystem/Drive.h"
 #include "filesystem/MimeTypes.h"
 
 namespace QS {
@@ -93,7 +92,6 @@ using QS::Data::Cache;
 using QS::Data::DirectoryTree;
 using QS::Data::FileMetaData;
 using QS::Data::Node;
-// using QS::FileSystem::Drive;
 using QS::FileSystem::GetDirectoryMimeType;
 using QS::FileSystem::GetSymlinkMimeType;
 using QS::FileSystem::LookupMimeType;
@@ -199,13 +197,10 @@ ClientError<QSError::Value> QSClient::HeadBucket() {
 
 // --------------------------------------------------------------------------
 // DeleteFile is used to delete a file or an empty directory.
-ClientError<QSError::Value> QSClient::DeleteFile(const string &filePath) {
-  // TODO(jim):
-  // auto &drive = Drive::Instance();
-  // auto &dirTree = drive.GetDirectoryTree();
-  shared_ptr<DirectoryTree> dirTree;
-  assert(dirTree);
-  // TODO(jim):
+ClientError<QSError::Value> QSClient::DeleteFile(
+    const string &filePath, const shared_ptr<DirectoryTree> &dirTree,
+    const shared_ptr<Cache> &cache) {
+  assert(dirTree && cache);
   shared_ptr<Node> node = dirTree->Find(filePath);
   if (node && *node) {
     // In case of hard links, multiple node have the same file, do not delete
@@ -221,9 +216,6 @@ ClientError<QSError::Value> QSClient::DeleteFile(const string &filePath) {
   if (IsGoodQSError(err)) {
     dirTree->Remove(filePath);
 
-    // TODO(jim):
-    // auto &cache = drive.GetCache();
-    shared_ptr<Cache> cache;
     if (cache && cache->HasFile(filePath)) {
       cache->Erase(filePath);
     }
@@ -320,20 +312,17 @@ ClientError<QSError::Value> QSClient::MakeDirectory(const string &dirPath) {
 }
 
 // --------------------------------------------------------------------------
-ClientError<QSError::Value> QSClient::MoveFile(const string &sourceFilePath,
-                                               const string &destFilePath) {
+ClientError<QSError::Value> QSClient::MoveFile(
+    const string &sourceFilePath, const string &destFilePath,
+    const shared_ptr<DirectoryTree> &dirTree, const shared_ptr<Cache> &cache) {
+  assert(dirTree && cache);
+
   ClientError<QSError::Value> err = MoveObject(sourceFilePath, destFilePath);
-  // TODO(jim):
-  // auto &drive = Drive::Instance();
-  // auto &dirTree = drive.GetDirectoryTree();
-  shared_ptr<DirectoryTree> dirTree;
   if (IsGoodQSError(err)) {
     if (dirTree && dirTree->Has(sourceFilePath)) {
       dirTree->Rename(sourceFilePath, destFilePath);
     }
-    // TODO(jim):
-    // auto &cache = drive.GetCache();
-    shared_ptr<Cache> cache;
+
     if (cache && cache->HasFile(sourceFilePath)) {
       cache->Rename(sourceFilePath, destFilePath);
     }
@@ -731,7 +720,9 @@ ClientError<QSError::Value> QSClient::SymLink(const string &filePath,
 }
 
 // --------------------------------------------------------------------------
-ClientError<QSError::Value> QSClient::ListDirectory(const string &dirPath) {
+ClientError<QSError::Value> QSClient::ListDirectory(
+    const string &dirPath, const shared_ptr<DirectoryTree> &dirTree) {
+  assert(dirTree);
   uint64_t maxListCount = ClientConfiguration::Instance().GetMaxListCount();
   bool listAll = maxListCount <= 0;
 
@@ -745,15 +736,7 @@ ClientError<QSError::Value> QSClient::ListDirectory(const string &dirPath) {
     maxCountPerList = maxListCount;
   }
 
-  // TODO(jim):
-  // auto &drive = QS::FileSystem::Drive::Instance();
-  // auto &dirTree = drive.GetDirectoryTree();
-  shared_ptr<DirectoryTree> dirTree;
-  assert(dirTree);
-  // TODO(jim):
-  // auto dirNode = drive.GetNodeSimple(dirPath).lock();
-  shared_ptr<Node> dirNode;
-
+  shared_ptr<Node> dirNode = dirTree->Find(dirPath);
   bool resultTruncated = false;
   uint64_t resCount = 0;
   do {
@@ -824,9 +807,11 @@ ListObjectsOutcome QSClient::ListObjects(const string &dirPath,
 }
 
 // --------------------------------------------------------------------------
-ClientError<QSError::Value> QSClient::Stat(const string &path,
-                                           time_t modifiedSince,
-                                           bool *modified) {
+ClientError<QSError::Value> QSClient::Stat(
+    const string &path, const shared_ptr<DirectoryTree> &dirTree,
+    time_t modifiedSince, bool *modified) {
+  assert(dirTree);
+
   if (modified != NULL) {
     *modified = false;
   }
@@ -856,10 +841,6 @@ ClientError<QSError::Value> QSClient::Stat(const string &path,
     DebugInfo("Retry head object " + FormatPath(path));
   }
 
-  // TODO(jim):
-  // auto &dirTree = Drive::Instance().GetDirectoryTree();
-  shared_ptr<DirectoryTree> dirTree;
-  assert(dirTree);
   if (outcome.IsSuccess()) {
     HeadObjectOutput res = outcome.GetResult();
     if (res.GetResponseCode() == QingStor::Http::NOT_MODIFIED) {
@@ -1029,7 +1010,6 @@ void QSClient::InitializeClientImpl() {
   GetQSClientImpl()->SetBucket(shared_ptr<Bucket>(new Bucket(
       *m_qingStorConfig, clientConfig.GetBucket(), clientConfig.GetZone())));
 }
-
 
 shared_ptr<QingStor::QsConfig> QSClient::m_qingStorConfig;
 QingStor::SDKOptions QSClient::m_sdkOptions;

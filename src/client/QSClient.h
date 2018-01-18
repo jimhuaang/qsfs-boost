@@ -33,6 +33,11 @@ class QsConfig;
 
 namespace QS {
 
+namespace Data {
+class Cache;
+class DirectoryTree;
+}  // namespace Data
+
 namespace Client {
 
 class QSClientImpl;
@@ -51,7 +56,7 @@ class QSClient : public Client {
 
   // Delete a file
   //
-  // @param  : file path
+  // @param  : file path, diretory tree, cache
   // @return : ClientError
   //
   // DeleteFile is used to delete a file or an empty directory.
@@ -59,7 +64,10 @@ class QSClient : public Client {
   // you can call DeleteFile to delete any object. But if the object is
   // a nonempty directory, DeleteFile will not delete its contents (including
   // files or subdirectories belongs to it).
-  ClientError<QSError::Value> DeleteFile(const std::string &filePath);
+  ClientError<QSError::Value> DeleteFile(
+      const std::string &filePath,
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
+      const boost::shared_ptr<QS::Data::Cache> &cache);
 
   // Create an empty file
   //
@@ -81,12 +89,14 @@ class QSClient : public Client {
 
   // Move file
   //
-  // @param  : file path, new file path
+  // @param  : file path, new file path, directory tree, cache
   // @return : ClientError
   //
   // MoveFile will invoke dirTree and Cache renaming.
-  ClientError<QSError::Value> MoveFile(const std::string &sourcefilePath,
-                                       const std::string &destFilePath);
+  ClientError<QSError::Value> MoveFile(
+      const std::string &sourcefilePath, const std::string &destFilePath,
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
+      const boost::shared_ptr<QS::Data::Cache> &cache);
 
   // Move directory
   //
@@ -162,18 +172,20 @@ class QSClient : public Client {
 
   // List directory
   //
-  // @param  : dir path, falg to use thread pool or not
+  // @param  : dir path, directory tree
   // @return : ClientError
   //
   // ListDirectory will update directory in tree if dir exists and is modified
   // or grow the tree if the directory is not existing in tree.
   //
   // Notice the dirPath should end with delimiter.
-  ClientError<QSError::Value> ListDirectory(const std::string &dirPath);
+  ClientError<QSError::Value> ListDirectory(
+      const std::string &dirPath,
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree);
 
   // Get object meta data
   //
-  // @param  : file path, modifiedSince, *modified(output)
+  // @param  : file path, directory tree, modifiedSince, *modified(output)
   // @return : ClientError
   //
   // Using modifiedSince to match if the object modified since then.
@@ -184,9 +196,10 @@ class QSClient : public Client {
   //
   // Notes: the meta will be return if object is modified, otherwise
   // the response code will be 304 (NOT MODIFIED) and no meta returned.
-  ClientError<QSError::Value> Stat(const std::string &path,
-                                   time_t modifiedSince = 0,
-                                   bool *modified = NULL);
+  ClientError<QSError::Value> Stat(
+      const std::string &path,
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
+      time_t modifiedSince = 0, bool *modified = NULL);
 
   // Get information about mounted bucket
   //
