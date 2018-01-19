@@ -58,7 +58,8 @@ class QSClientImpl : public ClientImpl {
   // @return : HeadBucketOutcome
   HeadBucketOutcome HeadBucket(
       uint32_t msTimeDuration =
-          ClientConfiguration::Instance().GetTransactionTimeDuration()) const;
+          ClientConfiguration::Instance().GetTransactionTimeDuration(),
+      bool useThreadPool = true) const;
 
   // List bucket objects
   //
@@ -78,8 +79,8 @@ class QSClientImpl : public ClientImpl {
       QingStor::ListObjectsInput *input, bool *resultTruncated = NULL,
       uint64_t *resCount = NULL, uint64_t maxCount = 0,
       uint32_t msTimeDuration =
-          ClientConfiguration::Instance().GetTransactionTimeDuration() *
-          10) const;
+          ClientConfiguration::Instance().GetTransactionTimeDuration() * 10,
+      bool useThreadPool = true) const;
 
   //
   // Object Level Operations

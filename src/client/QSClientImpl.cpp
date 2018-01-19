@@ -23,8 +23,11 @@
 #include <vector>
 
 #include "boost/bind.hpp"
+#include "boost/make_shared.hpp"
 #include "boost/shared_ptr.hpp"
+#include "boost/thread.hpp"
 #include "boost/thread/future.hpp"
+#include "boost/typeof/typeof.hpp"
 
 #include "qingstor/Bucket.h"
 #include "qingstor/HttpCommon.h"
@@ -45,6 +48,8 @@ namespace QS {
 namespace Client {
 
 using boost::bind;
+using boost::make_shared;
+using boost::packaged_task;
 using boost::posix_time::milliseconds;
 using boost::shared_ptr;
 using boost::unique_future;
@@ -185,11 +190,26 @@ pair<QsError, HeadBucketOutput> DoHeadBucket(const shared_ptr<Bucket> &bucket) {
 }
 
 // --------------------------------------------------------------------------
-HeadBucketOutcome QSClientImpl::HeadBucket(uint32_t msTimeDuration) const {
+HeadBucketOutcome QSClientImpl::HeadBucket(uint32_t msTimeDuration,
+                                           bool useThreadPool) const {
   string exceptionName = "QingStorHeadBucket";
 
-  unique_future<pair<QsError, HeadBucketOutput> > fHeadBucket =
-      GetExecutor()->SubmitCallablePrioritized(DoHeadBucket, m_bucket);
+  unique_future<pair<QsError, HeadBucketOutput> > fHeadBucket;
+  if (useThreadPool) {
+    fHeadBucket =
+        GetExecutor()->SubmitCallablePrioritized(DoHeadBucket, m_bucket);
+  } else {
+    shared_ptr<packaged_task<pair<QsError, HeadBucketOutput> > > task =
+        make_shared<packaged_task<pair<QsError, HeadBucketOutput> > >(
+            bind(boost::type<pair<QsError, HeadBucketOutput> >(), DoHeadBucket,
+                 m_bucket));
+    fHeadBucket = task->get_future();
+    boost::thread t(boost::bind<void>(
+        QS::Threading::PackageFunctor1<BOOST_TYPEOF(&DoHeadBucket),
+                                       const shared_ptr<Bucket> &>(task)));
+    t.detach();
+  }
+
   fHeadBucket.timed_wait(milliseconds(msTimeDuration));
   boost::future_state::state fState = fHeadBucket.get_state();
   if (fState == boost::future_state::ready) {
@@ -217,11 +237,9 @@ pair<QsError, ListObjectsOutput> DoListObjects(const shared_ptr<Bucket> &bucket,
 }
 
 // --------------------------------------------------------------------------
-ListObjectsOutcome QSClientImpl::ListObjects(ListObjectsInput *input,
-                                             bool *resultTruncated,
-                                             uint64_t *resCount,
-                                             uint64_t maxCount,
-                                             uint32_t msTimeDuration) const {
+ListObjectsOutcome QSClientImpl::ListObjects(
+    ListObjectsInput *input, bool *resultTruncated, uint64_t *resCount,
+    uint64_t maxCount, uint32_t msTimeDuration, bool useThreadPool) const {
   string exceptionName = "QingStorListObjects";
   if (input == NULL) {
     return ListObjectsOutcome(
@@ -257,8 +275,21 @@ ListObjectsOutcome QSClientImpl::ListObjects(ListObjectsInput *input,
     }
 
     unique_future<pair<QsError, ListObjectsOutput> > fListObjects;
-    fListObjects = GetExecutor()->SubmitCallablePrioritized(DoListObjects,
-                                                            m_bucket, input);
+    if (useThreadPool) {
+      fListObjects = GetExecutor()->SubmitCallablePrioritized(DoListObjects,
+                                                              m_bucket, input);
+    } else {
+      shared_ptr<packaged_task<pair<QsError, ListObjectsOutput> > > task =
+          make_shared<packaged_task<pair<QsError, ListObjectsOutput> > >(
+              bind(boost::type<pair<QsError, ListObjectsOutput> >(),
+                   DoListObjects, m_bucket, input));
+      fListObjects = task->get_future();
+      boost::thread t(boost::bind<void>(
+          QS::Threading::PackageFunctor2<BOOST_TYPEOF(&DoListObjects),
+                                         const shared_ptr<Bucket> &,
+                                         ListObjectsInput *>(task)));
+      t.detach();
+    }
     fListObjects.timed_wait(milliseconds(msTimeDuration));
     boost::future_state::state fState = fListObjects.get_state();
     if (fState == boost::future_state::ready) {
