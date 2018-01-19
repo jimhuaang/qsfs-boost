@@ -52,7 +52,7 @@ class QSClient : public Client {
   //
   // @param  : flag to use thread pool worker thread or not
   // @return : ClientError
-  ClientError<QSError::Value> HeadBucket();
+  ClientError<QSError::Value> HeadBucket(bool useThreadPool = true);
 
   // Delete a file
   //
@@ -181,7 +181,8 @@ class QSClient : public Client {
   // Notice the dirPath should end with delimiter.
   ClientError<QSError::Value> ListDirectory(
       const std::string &dirPath,
-      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree);
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
+      bool useThreadPool = true);
 
   // Get object meta data
   //
@@ -245,7 +246,8 @@ class QSClient : public Client {
   ListObjectsOutcome ListObjects(const std::string &dirPath,
                                  bool *resultTruncated = NULL,
                                  uint64_t *resCount = NULL,
-                                 uint64_t maxCount = 0);
+                                 uint64_t maxCount = 0,
+                                 bool useThreadPool = true);
 
  public:
   static const boost::shared_ptr<QingStor::QsConfig> &GetQingStorConfig();

@@ -23,6 +23,10 @@
 #include "client/Client.h"
 
 namespace QS {
+namespace Data {
+class Cache;
+class DirectoryTree;
+}  // namespace Data
 
 namespace Client {
 
@@ -35,13 +39,18 @@ class NullClient : public Client {
   ~NullClient() {}
 
  public:
-  ClientError<QSError::Value> HeadBucket(bool useThreadPool);
+  ClientError<QSError::Value> HeadBucket(bool useThreadPool = true);
 
-  ClientError<QSError::Value> DeleteFile(const std::string &filePath);
+  ClientError<QSError::Value> DeleteFile(
+      const std::string &filePath,
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
+      const boost::shared_ptr<QS::Data::Cache> &cache);
   ClientError<QSError::Value> MakeFile(const std::string &filePath);
   ClientError<QSError::Value> MakeDirectory(const std::string &dirPath);
-  ClientError<QSError::Value> MoveFile(const std::string &filePath,
-                                       const std::string &newFilePath);
+  ClientError<QSError::Value> MoveFile(
+      const std::string &filePath, const std::string &newFilePath,
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
+      const boost::shared_ptr<QS::Data::Cache> &cache);
   ClientError<QSError::Value> MoveDirectory(const std::string &sourceDirPath,
                                             const std::string &targetDirPath,
                                             bool async = false);
@@ -72,12 +81,15 @@ class NullClient : public Client {
       const std::string &filePath, uint64_t fileSize,
       const boost::shared_ptr<std::iostream> &buffer);
 
-  ClientError<QSError::Value> ListDirectory(const std::string &dirPath,
-                                            bool useThreadPool);
+  ClientError<QSError::Value> ListDirectory(
+      const std::string &dirPath,
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
+      bool useThreadPool);
 
-  ClientError<QSError::Value> Stat(const std::string &path,
-                                   time_t modifiedSince = 0,
-                                   bool *modified = NULL);
+  ClientError<QSError::Value> Stat(
+      const std::string &path,
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
+      time_t modifiedSince = 0, bool *modified = NULL);
   ClientError<QSError::Value> Statvfs(struct statvfs *stvfs);
 };
 

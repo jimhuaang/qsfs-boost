@@ -21,6 +21,8 @@
 #include <vector>
 
 #include "client/QSError.h"
+#include "data/Cache.h"
+#include "data/DirectoryTree.h"
 
 namespace QS {
 
@@ -39,7 +41,10 @@ ClientError<QSError::Value> NullClient::HeadBucket(bool useThreadPool) {
   return GoodState();
 }
 
-ClientError<QSError::Value> NullClient::DeleteFile(const string &filePath) {
+ClientError<QSError::Value> NullClient::DeleteFile(
+    const string &filePathconst,
+    const shared_ptr<QS::Data::DirectoryTree> &dirTree,
+    const shared_ptr<QS::Data::Cache> &cache) {
   return GoodState();
 }
 
@@ -51,8 +56,10 @@ ClientError<QSError::Value> NullClient::MakeDirectory(const string &dirPath) {
   return GoodState();
 }
 
-ClientError<QSError::Value> NullClient::MoveFile(const string &filePath,
-                                                 const string &newFilePath) {
+ClientError<QSError::Value> NullClient::MoveFile(
+    const string &filePath, const string &newFilePath,
+    const shared_ptr<QS::Data::DirectoryTree> &dirTree,
+    const shared_ptr<QS::Data::Cache> &cache) {
   return GoodState();
 }
 
@@ -100,14 +107,15 @@ ClientError<QSError::Value> NullClient::SymLink(const string &filePath,
   return GoodState();
 }
 
-ClientError<QSError::Value> NullClient::ListDirectory(const string &dirPath,
-                                                      bool useThreadPool) {
+ClientError<QSError::Value> NullClient::ListDirectory(
+    const string &dirPath, const shared_ptr<QS::Data::DirectoryTree> &dirTree,
+    bool useThreadPool) {
   return GoodState();
 }
 
-ClientError<QSError::Value> NullClient::Stat(const string &path,
-                                             time_t modifiedSince,
-                                             bool *modified) {
+ClientError<QSError::Value> NullClient::Stat(
+    const string &path, const shared_ptr<QS::Data::DirectoryTree> &dirTree,
+    time_t modifiedSince, bool *modified) {
   return GoodState();
 }
 

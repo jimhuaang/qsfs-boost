@@ -38,6 +38,10 @@
 #include "client/RetryStrategy.h"
 
 namespace QS {
+namespace Data {
+class Cache;
+class DirectoryTree;
+}  // namespace Data
 
 namespace FileSystem {
 class Drive;
@@ -69,7 +73,7 @@ class Client : private boost::noncopyable {
 
   // Delete a file
   //
-  // @param  : file path
+  // @param  : file path, dir tree, cache
   // @return : ClientError
   //
   // DeleteFile is used to delete a file or an empty directory.
@@ -78,7 +82,9 @@ class Client : private boost::noncopyable {
   // a nonempty directory, DeleteFile will not delete its contents (including
   // files or subdirectories belongs to it).
   virtual ClientError<QSError::Value> DeleteFile(
-      const std::string &filePath) = 0;
+      const std::string &filePath,
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
+      const boost::shared_ptr<QS::Data::Cache> &cache) = 0;
 
   // Create an empty file
   //
@@ -95,12 +101,14 @@ class Client : private boost::noncopyable {
 
   // Move file
   //
-  // @param  : file path, new file path
+  // @param  : file path, new file path, dir tree, cache
   // @return : ClientError
   //
   // MoveFile will invoke dirTree and Cache renaming.
   virtual ClientError<QSError::Value> MoveFile(
-      const std::string &filePath, const std::string &newFilePath) = 0;
+      const std::string &filePath, const std::string &newFilePath,
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
+      const boost::shared_ptr<QS::Data::Cache> &cache) = 0;
 
   // Move directory
   //
@@ -176,7 +184,7 @@ class Client : private boost::noncopyable {
 
   // List directory
   //
-  // @param  : dir path, flag to use thread pool worker thread or not
+  // @param  : dir path,dir tree, flag to use thread pool worker thread or not
   // @return : ClientError
   //
   // ListDirectory will update directory in tree if dir exists and is modified
@@ -184,11 +192,13 @@ class Client : private boost::noncopyable {
   //
   // Notice the dirPath should end with delimiter.
   virtual ClientError<QSError::Value> ListDirectory(
-      const std::string &dirPath, bool useThreadPool = true) = 0;
+      const std::string &dirPath,
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
+      bool useThreadPool = true) = 0;
 
   // Get object meta data
   //
-  // @param  : file path, modifiedSince, *modified(output)
+  // @param  : file path, dir tree, modifiedSince, *modified(output)
   // @return : ClientError
   //
   // Using modifiedSince to match if the object modified since then.
@@ -196,9 +206,10 @@ class Client : private boost::noncopyable {
   // Using modified to gain output of object modified status since given time.
   //
   // Stat will update the dir tree if the node is modified
-  virtual ClientError<QSError::Value> Stat(const std::string &path,
-                                           time_t modifiedSince = 0,
-                                           bool *modified = NULL) = 0;
+  virtual ClientError<QSError::Value> Stat(
+      const std::string &path,
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
+      time_t modifiedSince = 0, bool *modified = NULL) = 0;
 
   // Get information about mounted bucket
   //
@@ -232,4 +243,3 @@ class Client : private boost::noncopyable {
 }  // namespace QS
 
 #endif  // QSFS_CLIENT_CLIENT_H_
-
