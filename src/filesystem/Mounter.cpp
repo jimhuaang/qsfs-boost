@@ -36,7 +36,7 @@
 #include "configure/IncludeFuse.h"  // for fuse.h
 #include "configure/Options.h"
 #include "filesystem/Drive.h"
-//#include "filesystem/Operations.h"
+#include "filesystem/Operations.h"
 
 namespace QS {
 
@@ -137,8 +137,7 @@ void Mounter::UnMount(const string &mountPoint, bool logOn) const {
 bool Mounter::DoMount(const Options &options, bool logOn,
                       void *user_data) const {
   static fuse_operations qsfsOperations;
-  // TODO(jim):
-  // InitializeFUSECallbacks(&qsfsOperations);
+  InitializeFUSECallbacks(&qsfsOperations);
 
   // Do really mount
   struct fuse_args &fuseArgs = const_cast<Options &>(options).GetFuseArgs();

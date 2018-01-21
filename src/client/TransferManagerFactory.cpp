@@ -20,7 +20,7 @@
 
 #include "client/ClientConfiguration.h"
 #include "client/NullTransferManager.h"
-//#include "client/QSTransferManager.h"
+#include "client/QSTransferManager.h"
 #include "client/TransferManager.h"
 #include "client/URI.h"
 
@@ -36,9 +36,9 @@ shared_ptr<TransferManager> TransferManagerFactory::Create(
   Http::Host::Value host = ClientConfiguration::Instance().GetHost();
   switch (host) {
     case Http::Host::QingStor: {
-    //TODO(jim):
-/*       transferManager =
-          shared_ptr<QSTransferManager>(new QSTransferManager(config)); */
+
+    transferManager =
+        shared_ptr<QSTransferManager>(new QSTransferManager(config));
       break;
     }
     // Add other cases here
