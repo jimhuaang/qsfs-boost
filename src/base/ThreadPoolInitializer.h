@@ -34,7 +34,7 @@ class ThreadPool;
 
 class ThreadPoolInitializer : public Singleton<ThreadPoolInitializer> {
  public:
-  ~ThreadPoolInitializer(){};
+  ~ThreadPoolInitializer() {}
 
  public:
   void Register(ThreadPool* threadPool);
@@ -45,7 +45,7 @@ class ThreadPoolInitializer : public Singleton<ThreadPoolInitializer> {
   friend void* QS::FileSystem::qsfs_init(struct fuse_conn_info* conn);
 
  private:
-  ThreadPoolInitializer(){};
+  ThreadPoolInitializer() {}
 
   std::set<ThreadPool*> m_threadPools;
 

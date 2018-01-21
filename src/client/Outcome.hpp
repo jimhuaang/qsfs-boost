@@ -49,7 +49,7 @@ class Outcome {
     return *this;
   }
 
-  ~Outcome() {};
+  ~Outcome() {}
 
  public:
   const Result &GetResult() const { return m_result; }

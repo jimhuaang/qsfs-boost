@@ -110,8 +110,8 @@ File::ConsecutivePageRangeAtFront() const {
 bool File::HasData(off_t start, size_t size) const {
   lock_guard<recursive_mutex> lock(m_mutex);
   off_t stop = static_cast<off_t>(start + size);
-  pair<PageSetConstIterator, PageSetConstIterator> range = IntesectingRange(
-      start, stop);
+  pair<PageSetConstIterator, PageSetConstIterator> range =
+      IntesectingRange(start, stop);
   if (range.first == range.second) {
     if (range.first == m_pages.end()) {
       if (size == 0 && start <= static_cast<off_t>(m_size)) {
@@ -143,8 +143,8 @@ ContentRangeDeque File::GetUnloadedRanges(off_t start, size_t size) const {
   }
 
   off_t stop = static_cast<off_t>(start + size);
-  pair<PageSetConstIterator, PageSetConstIterator> range = IntesectingRange(
-      start, stop);
+  pair<PageSetConstIterator, PageSetConstIterator> range =
+      IntesectingRange(start, stop);
 
   if (range.first == range.second) {
     return ranges;
@@ -232,8 +232,8 @@ tuple<size_t, list<shared_ptr<Page> >, ContentRangeDeque> File::Read(
       return make_tuple(outcomeSize, outcomePages, unloadedRanges);
     }
 
-    pair<PageSetConstIterator, PageSetConstIterator> range = IntesectingRange(
-        offset, offset + len);
+    pair<PageSetConstIterator, PageSetConstIterator> range =
+        IntesectingRange(offset, offset + len);
     PageSetConstIterator it1 = range.first;
     PageSetConstIterator it2 = range.second;
     off_t offset_ = offset;
@@ -291,8 +291,8 @@ tuple<bool, size_t, size_t> File::Write(off_t offset, size_t len,
   size_t addedSize = 0;
   // If pages is empty.
   if (m_pages.empty()) {
-    tuple<PageSetConstIterator, bool, size_t, size_t> res = UnguardedAddPage(
-        offset, len, buffer);
+    tuple<PageSetConstIterator, bool, size_t, size_t> res =
+        UnguardedAddPage(offset, len, buffer);
     if (boost::get<1>(res)) {
       if (mtime > m_mtime) {
         SetTime(mtime);
@@ -305,8 +305,8 @@ tuple<bool, size_t, size_t> File::Write(off_t offset, size_t len,
   }
 
   bool success = true;
-  pair<PageSetConstIterator, PageSetConstIterator> range = IntesectingRange(
-      offset, offset + len);
+  pair<PageSetConstIterator, PageSetConstIterator> range =
+      IntesectingRange(offset, offset + len);
   PageSetConstIterator it1 = range.first;
   PageSetConstIterator it2 = range.second;
   off_t offset_ = offset;
@@ -319,8 +319,8 @@ tuple<bool, size_t, size_t> File::Write(off_t offset, size_t len,
     const shared_ptr<Page> &page = *it1;
     if (offset_ < page->m_offset) {  // Insert new page for bytes not present.
       size_t lenNewPage = static_cast<size_t>(page->m_offset - offset_);
-      tuple<PageSetConstIterator, bool, size_t, size_t> res = UnguardedAddPage(
-          offset_, lenNewPage, buffer + start_);
+      tuple<PageSetConstIterator, bool, size_t, size_t> res =
+          UnguardedAddPage(offset_, lenNewPage, buffer + start_);
       if (!boost::get<1>(res)) {
         success = false;
         return make_tuple(false, addedSizeInCache, addedSize);
@@ -363,8 +363,8 @@ tuple<bool, size_t, size_t> File::Write(off_t offset, size_t len,
   }  // end of while
   // Insert new page for bytes not present.
   if (len_ > 0) {
-    tuple<PageSetConstIterator, bool, size_t, size_t> res = UnguardedAddPage(
-        offset_, len_, buffer + start_);
+    tuple<PageSetConstIterator, bool, size_t, size_t> res =
+        UnguardedAddPage(offset_, len_, buffer + start_);
     if (boost::get<1>(res)) {
       success = true;
 
@@ -387,23 +387,23 @@ tuple<bool, size_t, size_t> File::Write(off_t offset, size_t len,
                                         time_t mtime) {
   lock_guard<recursive_mutex> lock(m_mutex);
   if (m_pages.empty()) {
-    tuple<PageSetConstIterator, bool, size_t, size_t> res = UnguardedAddPage(
-        offset, len, stream);
+    tuple<PageSetConstIterator, bool, size_t, size_t> res =
+        UnguardedAddPage(offset, len, stream);
     if (boost::get<1>(res) && mtime > m_mtime) {
       SetTime(mtime);
     }
-    return make_tuple(boost::get<1>(res), boost::get<2>(res), 
+    return make_tuple(boost::get<1>(res), boost::get<2>(res),
                       boost::get<3>(res));
   } else {
     PageSetConstIterator it = LowerBoundPage(offset);
     const shared_ptr<Page> &page = *it;
     if (it == m_pages.end()) {
-      tuple<PageSetConstIterator, bool, size_t, size_t> res = UnguardedAddPage(
-        offset, len, stream);
+      tuple<PageSetConstIterator, bool, size_t, size_t> res =
+          UnguardedAddPage(offset, len, stream);
       if (boost::get<1>(res) && mtime > m_mtime) {
         SetTime(mtime);
       }
-      return make_tuple(boost::get<1>(res), boost::get<2>(res), 
+      return make_tuple(boost::get<1>(res), boost::get<2>(res),
                         boost::get<3>(res));
     } else if (page->Offset() == offset && page->Size() == len) {
       if (mtime >= m_mtime) {
@@ -468,7 +468,7 @@ void File::RemoveDiskFileIfExists(bool logOn) const {
   if (UseDiskFile()) {
     string diskFile = AskDiskFilePath();
     if (logOn) {
-      if(QS::UtilsWithLog::FileExists(diskFile))
+      if (QS::UtilsWithLog::FileExists(diskFile))
         QS::UtilsWithLog::RemoveFileIfExists(diskFile);
     } else {
       if (QS::Utils::FileExists(diskFile))
@@ -496,8 +496,8 @@ PageSetConstIterator File::LowerBoundPage(off_t offset) const {
 
 // --------------------------------------------------------------------------
 PageSetConstIterator File::LowerBoundPageNoLock(off_t offset) const {
-  shared_ptr<Page> tmpPage = make_shared<Page>(offset, 0, 
-                                               make_shared<IOStream>(0));
+  shared_ptr<Page> tmpPage =
+      make_shared<Page>(offset, 0, make_shared<IOStream>(0));
   return m_pages.lower_bound(tmpPage);
 }
 
@@ -509,8 +509,8 @@ PageSetConstIterator File::UpperBoundPage(off_t offset) const {
 
 // --------------------------------------------------------------------------
 PageSetConstIterator File::UpperBoundPageNoLock(off_t offset) const {
-  shared_ptr<Page> tmpPage = make_shared<Page>(offset, 0,
-                                               make_shared<IOStream>(0));
+  shared_ptr<Page> tmpPage =
+      make_shared<Page>(offset, 0, make_shared<IOStream>(0));
   return m_pages.upper_bound(tmpPage);
 }
 
@@ -552,7 +552,8 @@ tuple<PageSetConstIterator, bool, size_t, size_t> File::UnguardedAddPage(
   size_t addedSize = 0;
   size_t addedSizeInCache = 0;
   if (UseDiskFile()) {
-    res = m_pages.insert(make_shared<Page>(offset, len, buffer, AskDiskFilePath()));
+    res = m_pages.insert(
+        make_shared<Page>(offset, len, buffer, AskDiskFilePath()));
     // do not count size of data stored in disk file
   } else {
     res = m_pages.insert(make_shared<Page>(offset, len, buffer));
@@ -579,7 +580,8 @@ tuple<PageSetConstIterator, bool, size_t, size_t> File::UnguardedAddPage(
   size_t addedSize = 0;
   size_t addedSizeInCache = 0;
   if (UseDiskFile()) {
-    res = m_pages.insert(make_shared<Page>(offset, len, stream, AskDiskFilePath()));
+    res = m_pages.insert(
+        make_shared<Page>(offset, len, stream, AskDiskFilePath()));
   } else {
     res = m_pages.insert(make_shared<Page>(offset, len, stream));
     if (res.second) {

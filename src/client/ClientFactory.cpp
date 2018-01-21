@@ -40,7 +40,7 @@ shared_ptr<Client> ClientFactory::MakeClient() {
   Http::Host::Value host = ClientConfiguration::Instance().GetHost();
   switch (host) {
     case Http::Host::QingStor: {
-      //client = make_shared<QSClient>();
+      client = make_shared<QSClient>();
       break;
     }
     // Add other cases here
@@ -58,7 +58,7 @@ shared_ptr<ClientImpl> ClientFactory::MakeClientImpl() {
   Http::Host::Value host = ClientConfiguration::Instance().GetHost();
   switch (host) {
     case Http::Host::QingStor: {
-      //clientImpl = make_shared<QSClientImpl>();
+      clientImpl = make_shared<QSClientImpl>();
       break;
     }
     // Add other cases here

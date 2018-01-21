@@ -37,7 +37,7 @@ class ClientFactory : public Singleton<ClientFactory> {
   ~ClientFactory() {}
 
  private:
-  ClientFactory() {};
+  ClientFactory() {}
 
   boost::shared_ptr<Client> MakeClient();
   boost::shared_ptr<ClientImpl> MakeClientImpl();

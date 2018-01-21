@@ -37,9 +37,7 @@ using boost::shared_ptr;
 Client::Client(const shared_ptr<ClientImpl> &impl,
                const shared_ptr<QS::Threading::ThreadPool> &executor,
                RetryStrategy retryStratety)
-    : m_impl(impl),
-      m_executor(executor),
-      m_retryStrategy(retryStratety) {
+    : m_impl(impl), m_executor(executor), m_retryStrategy(retryStratety) {
   QS::Threading::ThreadPoolInitializer::Instance().Register(m_executor.get());
 }
 
@@ -49,7 +47,8 @@ Client::~Client() {
 }
 
 // --------------------------------------------------------------------------
-void Client::RetryRequestSleep(boost::posix_time::milliseconds sleepTime) const {
+void Client::RetryRequestSleep(
+    boost::posix_time::milliseconds sleepTime) const {
   boost::unique_lock<boost::mutex> lock(m_retryLock);
   m_retrySignal.timed_wait(lock, sleepTime);
 }

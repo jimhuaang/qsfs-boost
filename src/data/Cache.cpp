@@ -190,7 +190,7 @@ pair<size_t, ContentRangeDeque> Cache::Read(const string &fileId, off_t offset,
     unloadedRanges.push_back(make_pair(offset, len));
     return make_pair(0, unloadedRanges);
   }
-  tuple<size_t, list<shared_ptr<Page> >, ContentRangeDeque> outcome = 
+  tuple<size_t, list<shared_ptr<Page> >, ContentRangeDeque> outcome =
       file->Read(offset, len, mtimeSince);
   size_t readedFileSize = boost::get<0>(outcome);
   list<shared_ptr<Page> > &pagelist = boost::get<1>(outcome);

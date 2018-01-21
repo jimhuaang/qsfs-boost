@@ -26,7 +26,8 @@ namespace Exception {
 
 struct QSException : public std::runtime_error {
   explicit QSException(const std::string& msg) : std::runtime_error(msg) {}
-  explicit QSException(const char* msg) : std::runtime_error(std::string(msg)) {}
+  explicit QSException(const char* msg)
+      : std::runtime_error(std::string(msg)) {}
 
   std::string get() const { return this->what(); }
 };

@@ -53,7 +53,7 @@ void InitLog() {
 time_t mtime_ = time(NULL);
 uid_t uid_ = 1000U;
 gid_t gid_ = 1000U;
-mode_t dirMode_  = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
+mode_t dirMode_ = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
 mode_t fileMode_ = S_IRWXU | S_IRWXG | S_IROTH;
 mode_t rootMode_ = S_IRWXU | S_IRWXG | S_IRWXO;
 
@@ -68,10 +68,15 @@ class DirectoryTreeTest : public Test {
     tree.Grow(file1);
     EXPECT_TRUE(tree.Has("/file1"));
     shared_ptr<Node> node_file1 = tree.Find("/file1");
-    EXPECT_EQ(*(const_cast<const Node*>(node_file1.get())->GetEntry().GetMetaData().lock()), *file1);
+    EXPECT_EQ(*(const_cast<const Node *>(node_file1.get())
+                    ->GetEntry()
+                    .GetMetaData()
+                    .lock()),
+              *file1);
 
-    shared_ptr<FileMetaData> dir1 = make_shared<FileMetaData>(
-      "/folder1", 1024, mtime_, mtime_, uid_, gid_, dirMode_, FileType::Directory);
+    shared_ptr<FileMetaData> dir1 =
+        make_shared<FileMetaData>("/folder1", 1024, mtime_, mtime_, uid_, gid_,
+                                  dirMode_, FileType::Directory);
     tree.Grow(dir1);
     // Notice: directory will be appended with "/" automatically
     // When you try to find it, remember to append "/" at end
@@ -80,24 +85,28 @@ class DirectoryTreeTest : public Test {
       vector<weak_ptr<Node> > childs = tree.FindChildren("/");
       EXPECT_EQ(childs.size(), 2U);
     }
-    
-    shared_ptr<FileMetaData> file1InFolder = make_shared<FileMetaData>(
-      "/folder1/file1", 10, mtime_, mtime_, uid_, gid_, fileMode_, FileType::File);
+
+    shared_ptr<FileMetaData> file1InFolder =
+        make_shared<FileMetaData>("/folder1/file1", 10, mtime_, mtime_, uid_,
+                                  gid_, fileMode_, FileType::File);
     tree.Grow(file1InFolder);
     EXPECT_EQ(tree.FindChildren("/").size(), 2U);
     EXPECT_EQ(tree.FindChildren("/folder1/").size(), 1U);
     shared_ptr<Node> node_dir1 = tree.Find("/folder1/");
     EXPECT_TRUE(node_dir1->HaveChild("/folder1/file1"));
-    EXPECT_EQ(*(node_dir1->GetChildrenIds().begin()), file1InFolder->GetFilePath());
+    EXPECT_EQ(*(node_dir1->GetChildrenIds().begin()),
+              file1InFolder->GetFilePath());
     shared_ptr<Node> node_file1InFolder = tree.Find("/folder1/file1");
-    EXPECT_EQ(node_file1InFolder->GetParent()->GetFilePath(), dir1->GetFilePath());
+    EXPECT_EQ(node_file1InFolder->GetParent()->GetFilePath(),
+              dir1->GetFilePath());
 
     // Notice: the dir name is appended "/" automatically
     shared_ptr<Node> node_dir2 = tree.Rename("/folder1/", "/folder2/");
     EXPECT_FALSE(tree.Has("/folder1/"));
     EXPECT_TRUE(tree.Has("/folder2/"));
     EXPECT_TRUE(node_dir2->HaveChild("/folder2/file1"));
-    EXPECT_EQ(node_file1InFolder->GetParent()->GetFilePath(), node_dir2->GetFilePath());
+    EXPECT_EQ(node_file1InFolder->GetParent()->GetFilePath(),
+              node_dir2->GetFilePath());
 
     tree.Remove("/file1");
     EXPECT_FALSE(tree.Has("/file1"));
@@ -110,40 +119,45 @@ class DirectoryTreeTest : public Test {
 
   void OperationsTest2() {
     DirectoryTree tree(mtime_, uid_, gid_, rootMode_);
-    shared_ptr<FileMetaData> dir1 = make_shared<FileMetaData>(
-      "/folder1", 1024, mtime_, mtime_, uid_, gid_, dirMode_, FileType::Directory);
+    shared_ptr<FileMetaData> dir1 =
+        make_shared<FileMetaData>("/folder1", 1024, mtime_, mtime_, uid_, gid_,
+                                  dirMode_, FileType::Directory);
     tree.Grow(dir1);
-    shared_ptr<FileMetaData> file1InFolder = make_shared<FileMetaData>(
-      "/folder1/file1", 10, mtime_, mtime_, uid_, gid_, fileMode_, FileType::File);
+    shared_ptr<FileMetaData> file1InFolder =
+        make_shared<FileMetaData>("/folder1/file1", 10, mtime_, mtime_, uid_,
+                                  gid_, fileMode_, FileType::File);
     tree.Grow(file1InFolder);
 
-    shared_ptr<FileMetaData> file1InFolder_ = make_shared<FileMetaData>(
-      "/folder1/file1", 100, mtime_, mtime_, uid_, gid_, fileMode_, FileType::File);
-    shared_ptr<FileMetaData> file2InFolder = make_shared<FileMetaData>(
-      "/folder1/file2", 10, mtime_, mtime_, uid_, gid_, fileMode_, FileType::File);
-    shared_ptr<FileMetaData> folder1InFolder = make_shared<FileMetaData>(
-      "/folder1/folder1", 1024, mtime_, mtime_, uid_, gid_, dirMode_, FileType::Directory);
+    shared_ptr<FileMetaData> file1InFolder_ =
+        make_shared<FileMetaData>("/folder1/file1", 100, mtime_, mtime_, uid_,
+                                  gid_, fileMode_, FileType::File);
+    shared_ptr<FileMetaData> file2InFolder =
+        make_shared<FileMetaData>("/folder1/file2", 10, mtime_, mtime_, uid_,
+                                  gid_, fileMode_, FileType::File);
+    shared_ptr<FileMetaData> folder1InFolder =
+        make_shared<FileMetaData>("/folder1/folder1", 1024, mtime_, mtime_,
+                                  uid_, gid_, dirMode_, FileType::Directory);
     vector<shared_ptr<FileMetaData> > newMetas;
     newMetas.reserve(3);
     newMetas.push_back(file1InFolder_);
     newMetas.push_back(file2InFolder);
     newMetas.push_back(folder1InFolder);
-    tree.UpdateDirectory("/folder1/",newMetas);
+    tree.UpdateDirectory("/folder1/", newMetas);
     EXPECT_TRUE(tree.Has("/folder1/file1"));
     EXPECT_TRUE(tree.Has("/folder1/file2"));
     EXPECT_TRUE(tree.Has("/folder1/folder1/"));
     EXPECT_EQ(tree.FindChildren("/").size(), 1U);
     EXPECT_EQ(tree.FindChildren("/folder1/").size(), 3U);
 
-
-    shared_ptr<FileMetaData> file1InFolder11 = make_shared<FileMetaData>(
-      "/folder1/folder1/file1", 100, mtime_, mtime_, uid_, gid_, fileMode_, FileType::File);
+    shared_ptr<FileMetaData> file1InFolder11 =
+        make_shared<FileMetaData>("/folder1/folder1/file1", 100, mtime_, mtime_,
+                                  uid_, gid_, fileMode_, FileType::File);
     tree.Grow(file1InFolder11);
     EXPECT_TRUE(tree.Has("/folder1/folder1/file1"));
     EXPECT_EQ(tree.FindChildren("/folder1/folder1/").size(), 1U);
 
     newMetas.pop_back();
-    tree.UpdateDirectory("/folder1/",newMetas);
+    tree.UpdateDirectory("/folder1/", newMetas);
     EXPECT_TRUE(tree.Has("/folder1/file1"));
     EXPECT_TRUE(tree.Has("/folder1/file2"));
     EXPECT_FALSE(tree.Has("/folder1/folder1/"));
@@ -164,17 +178,12 @@ TEST_F(DirectoryTreeTest, Ctor) {
   EXPECT_EQ(root->GetFileMode(), rootMode_);
 }
 
-TEST_F(DirectoryTreeTest, Operations1) {
-  OperationsTest1();
-}
+TEST_F(DirectoryTreeTest, Operations1) { OperationsTest1(); }
 
-TEST_F(DirectoryTreeTest, Operations2) {
-  OperationsTest2();
-}
+TEST_F(DirectoryTreeTest, Operations2) { OperationsTest2(); }
 
-}  // namespace QS
 }  // namespace Data
-
+}  // namespace QS
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

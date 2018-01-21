@@ -28,7 +28,6 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/thread/recursive_mutex.hpp"
 
-
 namespace QS {
 
 namespace Data {
@@ -73,7 +72,7 @@ class Page {
   mutable boost::recursive_mutex m_mutex;
 
  private:
-  Page() : m_offset(0), m_size(0) {};
+  Page() : m_offset(0), m_size(0) {}
 
  public:
   // Construct Page from a block of bytes
@@ -99,7 +98,8 @@ class Page {
   //
   // From stream, number of len bytes will be writen.
   // The owning file's offset is 'offset'.
-  Page(off_t offset, size_t len, const boost::shared_ptr<std::iostream> &stream);
+  Page(off_t offset, size_t len,
+       const boost::shared_ptr<std::iostream> &stream);
 
   // Construct Page from a stream (store it in disk file)
   //

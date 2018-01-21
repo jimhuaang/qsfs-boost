@@ -1364,7 +1364,7 @@ int qsfs_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
 
     // Put the children into filler
     vector<weak_ptr<Node> > childs = drive.FindChildren(dirPath, false);
-    BOOST_FOREACH (weak_ptr<Node>& child, childs) {
+    BOOST_FOREACH(weak_ptr<Node>& child, childs) {
       if (shared_ptr<Node> childNode = child.lock()) {
         string filename = childNode->MyBaseName();
         assert(!filename.empty());

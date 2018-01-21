@@ -91,7 +91,7 @@ void ThreadPool::Initialize() {
 
 // --------------------------------------------------------------------------
 void ThreadPool::StopProcessing() {
-  BOOST_FOREACH (TaskHandle *taskHandle, m_taskHandles) { taskHandle->Stop(); }
+  BOOST_FOREACH(TaskHandle *taskHandle, m_taskHandles) { taskHandle->Stop(); }
   lock_guard<mutex> lock(m_syncLock);
   m_syncConditionVar.notify_all();
 }

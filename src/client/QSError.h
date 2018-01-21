@@ -52,7 +52,7 @@ struct QSError {
     SDK_UNEXPECTED_RESPONSE,
 
     // specifics for http response
-    KEY_NOT_EXIST  //Not Found (404)
+    KEY_NOT_EXIST  // Not Found (404)
   };
 };
 

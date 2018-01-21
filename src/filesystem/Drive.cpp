@@ -24,9 +24,6 @@
 #include <sys/types.h>
 
 #include <deque>
-//#include <future>  // NOLINT
-//#include <memory>
-//#include <mutex>  // NOLINT
 #include <sstream>
 #include <string>
 #include <utility>
@@ -144,7 +141,7 @@ void Drive::CleanUp() {
   if (!GetCleanup()) {
     // abort unfinished multipart uploads
     if (!m_unfinishedMultipartUploadHandles.empty()) {
-      BOOST_FOREACH (const StringToTransferHandleMap::value_type &p,
+      BOOST_FOREACH(const StringToTransferHandleMap::value_type &p,
                      m_unfinishedMultipartUploadHandles) {
         m_transferManager->AbortMultipartUpload(p.second);
       }
@@ -350,7 +347,7 @@ void Drive::Chown(const std::string &filePath, uid_t uid, gid_t gid) {
 // --------------------------------------------------------------------------
 struct PrintMsgForDeleteFile {
   string filePath;
-  PrintMsgForDeleteFile(const string &path) : filePath(path) {}
+  explicit PrintMsgForDeleteFile(const string &path) : filePath(path) {}
 
   void operator()(const ClientError<QSError::Value> &err) {
     if (IsGoodQSError(err)) {
@@ -601,7 +598,7 @@ struct RenameDirCallback {
       deque<string> childPaths = node->GetChildrenIdsRecursively();
       size_t len = dirPath.size();
       deque<string> childTargetPaths;
-      BOOST_FOREACH (const string &path, childPaths) {
+      BOOST_FOREACH(const string &path, childPaths) {
         if (path.substr(0, len) != dirPath) {
           DebugError("Directory has an invalid child file [dir=" + dirPath +
                      " child=" + path + "]");
@@ -827,7 +824,7 @@ int Drive::WriteFile(const string &filePath, off_t offset, size_t size,
 void Drive::DownloadFileContentRanges(const string &filePath,
                                       const ContentRangeDeque &ranges,
                                       time_t mtime, bool async) {
-  BOOST_FOREACH (const ContentRangeDeque::value_type &range, ranges) {
+  BOOST_FOREACH(const ContentRangeDeque::value_type &range, ranges) {
     DownloadFileContentRange(filePath, range, mtime, async);
   }
 }

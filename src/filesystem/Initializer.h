@@ -52,7 +52,7 @@ class Initializer : private boost::noncopyable {
  public:
   explicit Initializer(const PriorityInitFuncPair &initFuncPair);
 
-  ~Initializer(){};
+  ~Initializer() {}
 
  private:
   static void Init();
@@ -62,7 +62,7 @@ class Initializer : private boost::noncopyable {
   friend int ::main(int argc, char **argv);
 
  private:
-  Initializer(){};
+  Initializer() {}
 
   struct Greater {
     bool operator()(const PriorityInitFuncPair &left,

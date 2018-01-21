@@ -20,10 +20,7 @@
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 
-//#include <atomic>  // NOLINT
-//#include <memory>
 #include <string>
-//#include <unordered_map>
 #include <utility>
 #include <vector>
 

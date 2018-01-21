@@ -27,7 +27,7 @@ namespace Threading {
 
 // --------------------------------------------------------------------------
 void ThreadPoolInitializer::DoInitialize() {
-  BOOST_FOREACH (ThreadPool *threadpool, m_threadPools) {
+  BOOST_FOREACH(ThreadPool *threadpool, m_threadPools) {
     if (threadpool != NULL) {
       threadpool->Initialize();
     }

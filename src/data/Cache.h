@@ -55,16 +55,14 @@ typedef std::list<FileIdToFilePair> CacheList;
 typedef CacheList::iterator CacheListIterator;
 typedef CacheList::const_iterator CacheListConstIterator;
 typedef boost::unordered_map<std::string, CacheListIterator,
-                             HashUtils::StringHash> FileIdToCacheListIteratorMap;
+                             HashUtils::StringHash>
+    FileIdToCacheListIteratorMap;
 typedef FileIdToCacheListIteratorMap::iterator CacheMapIterator;
 typedef FileIdToCacheListIteratorMap::const_iterator CacheMapConstIterator;
 
-
 class Cache : private boost::noncopyable {
  public:
-  explicit Cache(uint64_t capacity)
-  : m_size(0),
-    m_capacity(capacity) {}
+  explicit Cache(uint64_t capacity) : m_size(0), m_capacity(capacity) {}
 
   ~Cache() {}
 

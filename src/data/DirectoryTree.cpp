@@ -39,7 +39,6 @@
 #include "data/FileMetaData.h"
 #include "data/Node.h"
 
-
 namespace QS {
 
 namespace Data {
@@ -96,10 +95,9 @@ vector<weak_ptr<Node> > DirectoryTree::FindChildren(
     const string &dirName) const {
   lock_guard<recursive_mutex> lock(m_mutex);
   vector<weak_ptr<Node> > childs;
-  for (pair<ChildrenMultiMapConstIterator, ChildrenMultiMapConstIterator> range =
-          m_parentToChildrenMap.equal_range(dirName);
-          range.first != range.second;
-          ++range.first) {
+  for (pair<ChildrenMultiMapConstIterator, ChildrenMultiMapConstIterator>
+           range = m_parentToChildrenMap.equal_range(dirName);
+       range.first != range.second; ++range.first) {
     childs.push_back(range.first->second);
   }
   return childs;
@@ -154,7 +152,7 @@ shared_ptr<Node> DirectoryTree::Grow(const shared_ptr<FileMetaData> &fileMeta) {
     // hook up with children
     if (isDir) {
       vector<weak_ptr<Node> > childs = FindChildren(filePath);
-      BOOST_FOREACH (weak_ptr<Node> &child, childs) {
+      BOOST_FOREACH(weak_ptr<Node> &child, childs) {
         shared_ptr<Node> childNode = child.lock();
         if (childNode) {
           childNode->SetParent(node);
@@ -174,7 +172,7 @@ shared_ptr<Node> DirectoryTree::Grow(const shared_ptr<FileMetaData> &fileMeta) {
 // --------------------------------------------------------------------------
 void DirectoryTree::Grow(const vector<shared_ptr<FileMetaData> > &fileMetas) {
   lock_guard<recursive_mutex> lock(m_mutex);
-  BOOST_FOREACH (const shared_ptr<FileMetaData> &meta, fileMetas) {
+  BOOST_FOREACH(const shared_ptr<FileMetaData> &meta, fileMetas) {
     Grow(meta);
   }
 }
@@ -198,7 +196,7 @@ shared_ptr<Node> DirectoryTree::UpdateDirectory(
   // Check children metas and collect valid ones
   vector<shared_ptr<FileMetaData> > newChildrenMetas;
   set<string> newChildrenIds;
-  BOOST_FOREACH (const shared_ptr<FileMetaData> &child, childrenMetas) {
+  BOOST_FOREACH(const shared_ptr<FileMetaData> &child, childrenMetas) {
     string childDirName = child->MyDirName();
     string childFilePath = child->GetFilePath();
     if (childDirName.empty()) {
@@ -233,7 +231,7 @@ shared_ptr<Node> DirectoryTree::UpdateDirectory(
     if (!deleteChildrenIds.empty()) {
       vector<weak_ptr<Node> > childs = FindChildren(path);
       m_parentToChildrenMap.erase(path);
-      BOOST_FOREACH (weak_ptr<Node> &child, childs) {
+      BOOST_FOREACH(weak_ptr<Node> &child, childs) {
         shared_ptr<Node> childNode = child.lock();
         if (childNode && (*childNode)) {
           if (deleteChildrenIds.find(childNode->GetFilePath()) ==
@@ -242,7 +240,7 @@ shared_ptr<Node> DirectoryTree::UpdateDirectory(
           }
         }
       }
-      BOOST_FOREACH (const string &childId, deleteChildrenIds) {
+      BOOST_FOREACH(const string &childId, deleteChildrenIds) {
         Remove(childId);
       }
     }
@@ -295,7 +293,7 @@ shared_ptr<Node> DirectoryTree::Rename(const string &oldFilePath,
     m_map.erase(oldFilePath);
     if (node->IsDirectory()) {
       vector<weak_ptr<Node> > childs = FindChildren(oldFilePath);
-      BOOST_FOREACH (weak_ptr<Node> &child, childs) {
+      BOOST_FOREACH(weak_ptr<Node> &child, childs) {
         m_parentToChildrenMap.emplace(newFilePath, child);
       }
       m_parentToChildrenMap.erase(oldFilePath);
@@ -332,9 +330,9 @@ void DirectoryTree::Remove(const string &path) {
   }
   m_map.erase(path);
   string nodeDir = node->MyDirName();
-  for(ChildrenMultiMapIterator it = m_parentToChildrenMap.begin(); 
-          it != m_parentToChildrenMap.end();) {
-    if(it->first == nodeDir) {
+  for (ChildrenMultiMapIterator it = m_parentToChildrenMap.begin();
+       it != m_parentToChildrenMap.end();) {
+    if (it->first == nodeDir) {
       shared_ptr<Node> n = it->second.lock();
       if (n && n->GetFilePath() == path) {
         // erase will invalidate iterator, so should not increment it after that
@@ -354,7 +352,7 @@ void DirectoryTree::Remove(const string &path) {
   }
 
   std::queue<shared_ptr<Node> > deleteNodes;
-  BOOST_FOREACH (const FilePathToNodeUnorderedMap::value_type &p,
+  BOOST_FOREACH(const FilePathToNodeUnorderedMap::value_type &p,
                  node->GetChildren()) {
     deleteNodes.push(p.second);
   }
@@ -368,7 +366,7 @@ void DirectoryTree::Remove(const string &path) {
     m_parentToChildrenMap.erase(path_);
 
     if (node->IsDirectory()) {
-      BOOST_FOREACH (const FilePathToNodeUnorderedMap::value_type &p,
+      BOOST_FOREACH(const FilePathToNodeUnorderedMap::value_type &p,
                      node_->GetChildren()) {
         deleteNodes.push(p.second);
       }

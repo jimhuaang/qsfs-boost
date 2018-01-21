@@ -147,14 +147,14 @@ class TransferHandle : private boost::noncopyable {
   }
   uint64_t GetBytesTotalSize() const {
     boost::lock_guard<boost::mutex> locker(m_bytesTotalSizeLock);
-    return m_bytesTotalSize; 
+    return m_bytesTotalSize;
   }
   TransferDirection::Value GetDirection() const { return m_direction; }
   bool ShouldContinue() const {
     boost::lock_guard<boost::mutex> locker(m_cancelLock);
-    return !m_cancel; 
+    return !m_cancel;
   }
-  TransferStatus::Value GetStatus() const{
+  TransferStatus::Value GetStatus() const {
     boost::lock_guard<boost::mutex> locker(m_statusLock);
     return m_status;
   }
@@ -198,11 +198,11 @@ class TransferHandle : private boost::noncopyable {
   // be cancelled, either handle the callbacks or call WaitUntilFinished
   void Cancle() {
     boost::lock_guard<boost::mutex> locker(m_cancelLock);
-    m_cancel = true; 
+    m_cancel = true;
   }
   // Reset the cancellation for a retry. This will be done automatically by
   // transfer manager
-  void Restart() { 
+  void Restart() {
     boost::lock_guard<boost::mutex> locker(m_cancelLock);
     m_cancel = false;
   }

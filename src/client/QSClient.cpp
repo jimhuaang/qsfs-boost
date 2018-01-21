@@ -373,8 +373,8 @@ ClientError<QSError::Value> QSClient::MoveDirectory(const string &sourceDirPath,
 
   // move sub files
   string prefix = LTrim(sourceDir, '/');
-  BOOST_FOREACH (ListObjectsOutput &listObjOutput, listObjOutputs) {
-    BOOST_FOREACH (const KeyType &key, listObjOutput.GetKeys()) {
+  BOOST_FOREACH(ListObjectsOutput &listObjOutput, listObjOutputs) {
+    BOOST_FOREACH(const KeyType &key, listObjOutput.GetKeys()) {
       // sdk will put dir (if exists) itself into keys, ignore it
       if (prefix == const_cast<KeyType &>(key).GetKey()) {
         continue;
@@ -395,8 +395,8 @@ ClientError<QSError::Value> QSClient::MoveDirectory(const string &sourceDirPath,
   }
 
   // move sub folders
-  BOOST_FOREACH (ListObjectsOutput &listObjOutput, listObjOutputs) {
-    BOOST_FOREACH (const string &commonPrefix,
+  BOOST_FOREACH(ListObjectsOutput &listObjOutput, listObjOutputs) {
+    BOOST_FOREACH(const string &commonPrefix,
                    listObjOutput.GetCommonPrefixes()) {
       string sourceSubDir = AppendPathDelim("/" + commonPrefix);
       string targetSubDir = targetDir + sourceSubDir.substr(lenSourceDir);
@@ -588,7 +588,7 @@ ClientError<QSError::Value> QSClient::CompleteMultipartUpload(
   CompleteMultipartUploadInput input;
   input.SetUploadID(uploadId);
   vector<ObjectPartType> objParts;
-  BOOST_FOREACH (int partId, sortedPartIds) {
+  BOOST_FOREACH(int partId, sortedPartIds) {
     ObjectPartType part;
     part.SetPartNumber(partId);
     objParts.push_back(part);
@@ -751,7 +751,7 @@ ClientError<QSError::Value> QSClient::ListDirectory(
     }
 
     resCount += countPerList;
-    BOOST_FOREACH (ListObjectsOutput &listObjOutput, outcome.GetResult()) {
+    BOOST_FOREACH(ListObjectsOutput &listObjOutput, outcome.GetResult()) {
       if (!(dirNode && *dirNode)) {  // directory not existing at this moment
         // Add its children to dir tree
         vector<shared_ptr<FileMetaData> > fileMetaDatas =
@@ -883,7 +883,7 @@ ClientError<QSError::Value> QSClient::Stat(
 
         if (outcome.IsSuccess()) {
           bool dirExist = false;
-          BOOST_FOREACH (ListObjectsOutput &listObjOutput,
+          BOOST_FOREACH(ListObjectsOutput &listObjOutput,
                          outcome.GetResult()) {
             if (!listObjOutput.GetKeys().empty() ||
                 !listObjOutput.GetCommonPrefixes().empty()) {

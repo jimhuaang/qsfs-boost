@@ -30,8 +30,6 @@
 
 #include "data/FileMetaData.h"
 
-#include <iostream>
-
 namespace QS {
 
 namespace Data {
@@ -55,7 +53,7 @@ class Entry {
   explicit Entry(const boost::shared_ptr<FileMetaData> &fileMetaData);
 
  public:
-  ~Entry(){};
+  ~Entry() {}
 
   // You always need to check if the entry is operable before
   // invoke its member functions
@@ -111,7 +109,7 @@ class Entry {
   void Rename(const std::string &newFilePath);
 
  private:
-  Entry(){};
+  Entry() {}
 
   // Using weak_ptr as FileMetaDataManger will control file mete data life cycle
   boost::weak_ptr<FileMetaData> m_metaData;  // file meta data

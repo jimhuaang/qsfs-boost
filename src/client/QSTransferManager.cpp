@@ -223,7 +223,7 @@ struct ReceivedHandlerMultipleUpload {
       if (!handle->HasFailedParts() && handle->DoneTransfer()) {
         // complete multipart upload
         std::set<int> partIds;
-        BOOST_FOREACH (const PartIdToPartMapIterator::value_type &p,
+        BOOST_FOREACH(const PartIdToPartMapIterator::value_type &p,
                        handle->GetCompletedParts()) {
           partIds.insert(p.second->GetPartId());
         }
@@ -365,7 +365,7 @@ bool QSTransferManager::PrepareDownload(
 
   bool isRetry = handle->HasParts();
   if (isRetry) {
-    BOOST_FOREACH (const PartIdToPartMapIterator::value_type &p,
+    BOOST_FOREACH(const PartIdToPartMapIterator::value_type &p,
                    handle->GetFailedParts()) {
       handle->AddQueuePart(p.second);
     }
@@ -482,7 +482,7 @@ bool QSTransferManager::PrepareUpload(
 
   bool isRetry = handle->HasParts();
   if (isRetry) {
-    BOOST_FOREACH (const PartIdToPartMapIterator::value_type &p,
+    BOOST_FOREACH(const PartIdToPartMapIterator::value_type &p,
                    handle->GetFailedParts()) {
       handle->AddQueuePart(p.second);
     }

@@ -62,7 +62,7 @@ class ResourceManagerTest : public Test {
     EXPECT_TRUE(manager.ResourcesAvailable());
 
     vector<Resource> resources = manager.ShutdownAndWait(5);
-    BOOST_FOREACH (Resource &resource, resources) {
+    BOOST_FOREACH(Resource &resource, resources) {
       if (resource) {
         resource.reset();
       }
@@ -94,7 +94,7 @@ class ResourceManagerTest : public Test {
     EXPECT_TRUE(manager.ResourcesAvailable());
 
     vector<Resource> resources = manager.ShutdownAndWait(1);
-    BOOST_FOREACH (Resource &resource, resources) {
+    BOOST_FOREACH(Resource &resource, resources) {
       if (resource) {
         resource.reset();
       }

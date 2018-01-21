@@ -36,7 +36,6 @@ shared_ptr<TransferManager> TransferManagerFactory::Create(
   Http::Host::Value host = ClientConfiguration::Instance().GetHost();
   switch (host) {
     case Http::Host::QingStor: {
-
     transferManager =
         shared_ptr<QSTransferManager>(new QSTransferManager(config));
       break;

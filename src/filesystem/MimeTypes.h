@@ -41,7 +41,7 @@ typedef ExtToMimetypeMap::iterator ExtToMimetypeMapIterator;
 
 class MimeTypes : public Singleton<MimeTypes> {
  public:
-  ~MimeTypes() {};
+  ~MimeTypes() {}
 
  public:
   // Find Mime Type by extension
@@ -51,7 +51,7 @@ class MimeTypes : public Singleton<MimeTypes> {
   std::string Find(const std::string &ext);
 
  private:
-  MimeTypes() {};
+  MimeTypes() {}
   void Initialize(const std::string &mimeFile);
 
 

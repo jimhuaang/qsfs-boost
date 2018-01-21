@@ -28,13 +28,16 @@ namespace QS {
 
 namespace Client {
 
-typedef Outcome<QingStor::GetBucketStatisticsOutput, ClientError<QSError::Value> >
+typedef Outcome<QingStor::GetBucketStatisticsOutput,
+                ClientError<QSError::Value> >
     GetBucketStatisticsOutcome;
 typedef Outcome<QingStor::HeadBucketOutput, ClientError<QSError::Value> >
     HeadBucketOutcome;
-typedef Outcome<std::vector<QingStor::ListObjectsOutput>, ClientError<QSError::Value> >
+typedef Outcome<std::vector<QingStor::ListObjectsOutput>,
+                ClientError<QSError::Value> >
     ListObjectsOutcome;
-typedef Outcome<QingStor::DeleteMultipleObjectsOutput, ClientError<QSError::Value> >
+typedef Outcome<QingStor::DeleteMultipleObjectsOutput,
+                ClientError<QSError::Value> >
     DeleteMultipleObjectsOutcome;
 typedef Outcome<std::vector<QingStor::ListMultipartUploadsOutput>,
                 ClientError<QSError::Value> >
@@ -49,13 +52,16 @@ typedef Outcome<QingStor::HeadObjectOutput, ClientError<QSError::Value> >
 typedef Outcome<QingStor::PutObjectOutput, ClientError<QSError::Value> >
     PutObjectOutcome;
 
-typedef Outcome<QingStor::InitiateMultipartUploadOutput, ClientError<QSError::Value> >
+typedef Outcome<QingStor::InitiateMultipartUploadOutput,
+                ClientError<QSError::Value> >
     InitiateMultipartUploadOutcome;
 typedef Outcome<QingStor::UploadMultipartOutput, ClientError<QSError::Value> >
     UploadMultipartOutcome;
-typedef Outcome<QingStor::CompleteMultipartUploadOutput, ClientError<QSError::Value> >
+typedef Outcome<QingStor::CompleteMultipartUploadOutput,
+                ClientError<QSError::Value> >
     CompleteMultipartUploadOutcome;
-typedef Outcome<QingStor::AbortMultipartUploadOutput, ClientError<QSError::Value> >
+typedef Outcome<QingStor::AbortMultipartUploadOutput,
+                ClientError<QSError::Value> >
     AbortMultipartUploadOutcome;
 typedef Outcome<std::vector<QingStor::ListMultipartOutput>,
                 ClientError<QSError::Value> >

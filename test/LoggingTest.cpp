@@ -82,7 +82,7 @@ void LogNonFatalPossibilities() {
   DebugInfoIf(true, "test DebugInfoIf");
 }
 
-void RemoveLastLines(vector<string> &expectedMsgs, int count) {
+void RemoveLastLines(vector<string> &expectedMsgs, int count) {  // NOLINT
   for (int i = 0; i < count && (!expectedMsgs.empty()); ++i) {
     expectedMsgs.pop_back();
   }

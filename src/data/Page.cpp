@@ -86,7 +86,7 @@ class FileOpener : private boost::noncopyable {
   }
 
  private:
-  FileOpener() : m_file (NULL) {};
+  FileOpener() : m_file(NULL) {}
 
   fstream *m_file;
 };

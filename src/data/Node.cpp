@@ -98,14 +98,12 @@ const FilePathToNodeUnorderedMap &Node::GetChildren() const {
 }
 
 // --------------------------------------------------------------------------
-FilePathToNodeUnorderedMap &Node::GetChildren() {
-  return m_children;
-}
+FilePathToNodeUnorderedMap &Node::GetChildren() { return m_children; }
 
 // --------------------------------------------------------------------------
 set<string> Node::GetChildrenIds() const {
   set<string> ids;
-  BOOST_FOREACH (const FilePathToNodeUnorderedMap::value_type &p, m_children) {
+  BOOST_FOREACH(const FilePathToNodeUnorderedMap::value_type &p, m_children) {
     ids.insert(p.first);
   }
   return ids;
@@ -116,7 +114,7 @@ deque<string> Node::GetChildrenIdsRecursively() const {
   deque<string> ids;
   deque<shared_ptr<Node> > childs;
 
-  BOOST_FOREACH (const FilePathToNodeUnorderedMap::value_type &p, m_children) {
+  BOOST_FOREACH(const FilePathToNodeUnorderedMap::value_type &p, m_children) {
     ids.push_back(p.first);
     childs.push_back(p.second);
   }
@@ -126,7 +124,7 @@ deque<string> Node::GetChildrenIdsRecursively() const {
     childs.pop_front();
 
     if (child->IsDirectory()) {
-      BOOST_FOREACH (const FilePathToNodeUnorderedMap::value_type &p,
+      BOOST_FOREACH(const FilePathToNodeUnorderedMap::value_type &p,
                      child->GetChildren()) {
         ids.push_back(p.first);
         childs.push_back(p.second);
@@ -200,16 +198,15 @@ void Node::Rename(const string &newFilePath) {
     }
 
     deque<shared_ptr<Node> > childs;
-    BOOST_FOREACH (FilePathToNodeUnorderedMap::value_type &p, m_children) {
+    BOOST_FOREACH(FilePathToNodeUnorderedMap::value_type &p, m_children) {
       childs.push_back(p.second);
     }
     m_children.clear();
-    BOOST_FOREACH (shared_ptr<Node> &child, childs) {
+    BOOST_FOREACH(shared_ptr<Node> &child, childs) {
       string newPath = AppendPathDelim(newFilePath) + child->MyBaseName();
       m_children.emplace(newPath, child);
       child->Rename(newPath);
     }
-
   }
 }
 
@@ -231,7 +228,7 @@ void Node::RenameChild(const string &oldFilePath, const string &newFilePath) {
     shared_ptr<Node> &child = it->second;
     child->Rename(newFilePath);
 
-    // Need to emplace before erase, otherwise the shared_ptr 
+    // Need to emplace before erase, otherwise the shared_ptr
     // will probably get deleted when erasing cause its' reference
     // count to be 0.
     m_children.emplace(newFilePath, child);
@@ -240,7 +237,6 @@ void Node::RenameChild(const string &oldFilePath, const string &newFilePath) {
     DebugWarning("Node not exist, no rename " + FormatPath(oldFilePath));
   }
 }
-
 
 }  // namespace Data
 }  // namespace QS

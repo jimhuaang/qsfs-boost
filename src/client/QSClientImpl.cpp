@@ -605,7 +605,7 @@ pair<QsError, CompleteMultipartUploadOutput> DoCompleteMultipartUpload(
   CompleteMultipartUploadOutput output;
   QsError sdkErr = bucket->CompleteMultipartUpload(objKey, *input, output);
   return make_pair(sdkErr, output);
-};
+}
 
 // --------------------------------------------------------------------------
 CompleteMultipartUploadOutcome QSClientImpl::CompleteMultipartUpload(
@@ -649,7 +649,7 @@ pair<QsError, AbortMultipartUploadOutput> DoAbortMultipartUpload(
   AbortMultipartUploadOutput output;
   QsError sdkErr = bucket->AbortMultipartUpload(objKey, *input, output);
   return make_pair(sdkErr, output);
-};
+}
 
 // --------------------------------------------------------------------------
 AbortMultipartUploadOutcome QSClientImpl::AbortMultipartUpload(

@@ -171,7 +171,7 @@ void Parse(int argc, char **argv) {
   options.debug          = 0;
   options.curldbg        = 0;
   options.showHelp       = 0;
-  options.showVersion    = 0; 
+  options.showVersion    = 0;
 
   // Do Parse
   QS::Configure::Options &qsOptions = QS::Configure::Options::Instance();

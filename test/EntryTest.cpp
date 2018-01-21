@@ -33,7 +33,6 @@
 #include "data/Entry.h"
 #include "data/FileMetaData.h"
 
-
 namespace QS {
 
 namespace Data {
@@ -70,8 +69,14 @@ struct MetaData {
   bool isDir;
   bool isOperable;
 
-  MetaData(const string &path, uint64_t size, FileType::Value type, int nLink, bool dir, bool op)
-   : filePath(path), fileSize(size), fileType(type), numLink(nLink), isDir(dir), isOperable(op){}
+  MetaData(const string &path, uint64_t size, FileType::Value type, int nLink,
+           bool dir, bool op)
+      : filePath(path),
+        fileSize(size),
+        fileType(type),
+        numLink(nLink),
+        isDir(dir),
+        isOperable(op) {}
 
   friend ostream &operator<<(ostream &os, const MetaData &meta) {
     return os << "FileName: " << meta.filePath << " FileSize: " << meta.fileSize
@@ -90,7 +95,7 @@ class EntryTest : public Test, public WithParamInterface<MetaData> {
                                            mtime_, uid_, gid_, fileMode_,
                                            meta.fileType));
     m_pEntry = new Entry(meta.filePath, meta.fileSize, mtime_, mtime_, uid_,
-                             gid_, fileMode_, meta.fileType);
+                         gid_, fileMode_, meta.fileType);
   }
 
   void TestCopyControl() {
@@ -115,10 +120,7 @@ class EntryTest : public Test, public WithParamInterface<MetaData> {
   Entry *m_pEntry;
 };
 
-
-TEST_P(EntryTest, CopyControl) {
-  TestCopyControl();
-}
+TEST_P(EntryTest, CopyControl) { TestCopyControl(); }
 
 TEST_P(EntryTest, PublicFunctions) {
   MetaData meta = GetParam();

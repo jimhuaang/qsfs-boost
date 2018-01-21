@@ -361,11 +361,11 @@ bool IsRootDirectory(const std::string &path) { return path == "/"; }
 // --------------------------------------------------------------------------
 string AppendPathDelim(const string &path) {
   assert(!path.empty());
-  string copy(path);
+  string cpy(path);
   if (path[path.size() - 1] != PATH_DELIM) {
-    copy.append(1, PATH_DELIM);
+    cpy.append(1, PATH_DELIM);
   }
-  return copy;
+  return cpy;
 }
 
 // --------------------------------------------------------------------------

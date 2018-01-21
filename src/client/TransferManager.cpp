@@ -66,7 +66,7 @@ TransferManager::~TransferManager() {
   }
   vector<Resource> resources =
       m_bufferManager->ShutdownAndWait(GetBufferCount());
-  BOOST_FOREACH (Resource &resource, resources) {
+  BOOST_FOREACH(Resource &resource, resources) {
     if (resource) {
       resource.reset();
     }

@@ -73,7 +73,7 @@ using std::vector;
 namespace {
 struct Predicate {
   string m_path;
-  Predicate(const string &path) : m_path(path) {}
+  explicit Predicate(const string &path) : m_path(path) {}
   bool compare(const shared_ptr<FileMetaData> &meta) const {
     return meta->GetFilePath() == m_path;
   }
@@ -204,7 +204,7 @@ vector<shared_ptr<FileMetaData> > ListObjectsOutputToFileMetaDatas(
   string prefix = output.GetPrefix();
   const KeyType *dirItselfAsKey = NULL;
   // Add files
-  BOOST_FOREACH (const KeyType &key, output.GetKeys()) {
+  BOOST_FOREACH(const KeyType &key, output.GetKeys()) {
     // sdk will put dir (if exists) itself into keys, ignore it
     if (prefix == const_cast<KeyType &>(key).GetKey()) {
       dirItselfAsKey = &key;
@@ -213,7 +213,7 @@ vector<shared_ptr<FileMetaData> > ListObjectsOutputToFileMetaDatas(
     metas.push_back(ObjectKeyToFileMetaData(key, atime));
   }
   // Add subdirs
-  BOOST_FOREACH (const string &commonPrefix, output.GetCommonPrefixes()) {
+  BOOST_FOREACH(const string &commonPrefix, output.GetCommonPrefixes()) {
     metas.push_back(CommonPrefixToFileMetaData(commonPrefix, atime));
   }
 

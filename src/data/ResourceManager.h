@@ -53,7 +53,7 @@ class ResourceManager : private boost::noncopyable {
  public:
   ResourceManager() : m_shutdown(false) {}
 
-  ~ResourceManager(){};
+  ~ResourceManager() {}
 
  public:
   // Return whether or not resources are currently available for acquisition.

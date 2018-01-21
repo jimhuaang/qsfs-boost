@@ -51,7 +51,7 @@ typedef FileIdToMetaDataListIteratorMap::iterator FileIdToMetaDataMapIterator;
 
 class FileMetaDataManager : public Singleton<FileMetaDataManager> {
  public:
-  ~FileMetaDataManager(){};
+  ~FileMetaDataManager() {}
 
  public:
   size_t GetMaxCount() const { return m_maxCount; }

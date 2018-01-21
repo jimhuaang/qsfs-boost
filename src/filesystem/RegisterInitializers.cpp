@@ -89,7 +89,7 @@ void ClientConfigurationInitializer() {
 // --------------------------------------------------------------------------
 void MimeTypesInitializer() {
   string mimeFile = string();
-  BOOST_FOREACH (const string &filePath, GetMimeFiles()) {
+  BOOST_FOREACH(const string &filePath, GetMimeFiles()) {
     if (FileExists(filePath)) {
       mimeFile = filePath;
       break;
@@ -97,7 +97,7 @@ void MimeTypesInitializer() {
   }
   if (mimeFile.empty()) {
     string files = string();
-    BOOST_FOREACH (const string &filePath, GetMimeFiles()) {
+    BOOST_FOREACH(const string &filePath, GetMimeFiles()) {
       files += filePath;
       files += ";";
     }

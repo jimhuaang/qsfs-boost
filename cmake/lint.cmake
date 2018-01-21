@@ -16,24 +16,25 @@ endforeach()
 message(STATUS "found files: ${FOUND_FILES}")
 
 # find all files that should be excluded
-set(EXCLUDE_FILE_NAMES HelpText.cpp QSError.cpp)
+set(EXCLUDE_FILE_NAMES src/filesystem/HelpText.cpp src/client/QSError.cpp)
 foreach(file ${EXCLUDE_FILE_NAMES})
     file(GLOB_RECURSE FOUND_FILES ${CMAKE_SOURCE_DIR}/${file})
     set(EXCLUDED_FILES ${EXCLUDED_FILES} ${FOUND_FILES})
 endforeach()
 
 # exclude files
-#list(REMOVE_ITEM LINT_SOURCES ${EXCLUDED_FILES})
+list(REMOVE_ITEM LINT_SOURCES ${EXCLUDED_FILES})
 
 execute_process(
     COMMAND ${LINT_COMMAND}
-    --filter=-build/header_guard 
+    --filter=-build/header_guard,-build/include_what_you_use
+    --extensions=h,hpp,cpp
     ${LINT_SOURCES}
     ERROR_VARIABLE LINT_OUTPUT
     ERROR_STRIP_TRAILING_WHITESPACE
 )
 
-#message(STATUS "cpplint output: ${LINT_OUTPUT}")
+message(STATUS "cpplint output: ${LINT_OUTPUT}")
 # supress the REPLACE warning when LINT_OUTPUT is empty
 set(LINT_OUTPUT ${LINT_OUTPUT} "non-empty")
 

@@ -39,7 +39,7 @@ struct StringHash {
     }
 
     int hash = 0;
-    BOOST_FOREACH (const char &charValue, strToHash) {
+    BOOST_FOREACH(const char &charValue, strToHash) {
       hash = charValue + 31 * hash;
     }
     return hash;

@@ -100,7 +100,7 @@ bool Mounter::IsMounted(const string &mountPoint, bool logOn) const {
 // --------------------------------------------------------------------------
 bool Mounter::Mount(const Options &options, bool logOn) const {
   Drive &drive = QS::FileSystem::Drive::Instance();
-   if (!drive.IsMountable()) {
+  if (!drive.IsMountable()) {
     throw QSException("Unable to connect bucket " + options.GetBucket() +
                       " ...");
   }

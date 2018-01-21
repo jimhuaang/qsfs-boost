@@ -135,7 +135,7 @@ MetaDataListIterator FileMetaDataManager::Add(
     const std::vector<shared_ptr<FileMetaData> > &fileMetaDatas) {
   lock_guard<recursive_mutex> lock(m_mutex);
   MetaDataListIterator pos = m_metaDatas.end();
-  BOOST_FOREACH (const shared_ptr<FileMetaData> &meta, fileMetaDatas) {
+  BOOST_FOREACH(const shared_ptr<FileMetaData> &meta, fileMetaDatas) {
     pos = AddNoLock(meta);
     if (pos == m_metaDatas.end()) break;  // if fail to add an item
   }
