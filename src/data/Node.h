@@ -37,6 +37,7 @@ namespace QS {
 
 namespace FileSystem {
 class Drive;
+struct UploadFileCallback;
 }  // namespace FileSystem
 
 namespace Data {
@@ -188,6 +189,7 @@ class Node : private boost::noncopyable {
   friend class QS::Data::Cache;  // for GetEntry
   friend class QS::Data::DirectoryTree;
   friend class QS::FileSystem::Drive;  // for SetSymbolicLink, IncreaseNumLink
+  friend struct QS::FileSystem::UploadFileCallback;
 };
 
 }  // namespace Data
