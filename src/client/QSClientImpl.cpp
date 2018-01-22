@@ -100,10 +100,19 @@ ClientError<QSError::Value> BuildQSError(QsError sdkErr,
     err = SDKErrorToQSError(sdkErr);
   }
 
-  return ClientError<QSError::Value>(
-      err, exceptionName,
-      // sdk does not provide const-qualified accessor
-      SDKResponseCodeToString(rspCode), retriable);
+  if(sdkErr == QS_ERR_UNEXCEPTED_RESPONSE) {
+    QingStor::ResponseErrorInfo errInfo = output.GetResponseErrInfo();
+    string errMsg;
+    errMsg += "[code:" + errInfo.code;
+    errMsg += "; message:" + errInfo.message;
+    errMsg += "; request:" + errInfo.requestID;
+    errMsg += "; url:" + errInfo.url;
+    errMsg += "]";
+    return ClientError<QSError::Value>(err, exceptionName, errMsg, retriable);
+  } else {
+    return ClientError<QSError::Value>(err, exceptionName, 
+        SDKResponseCodeToString(rspCode), retriable);
+  }
 }
 
 // --------------------------------------------------------------------------
