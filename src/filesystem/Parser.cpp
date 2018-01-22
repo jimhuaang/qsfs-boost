@@ -167,7 +167,7 @@ void Parse(int argc, char **argv) {
   options.clearLogDir    = 0;
   options.foreground     = 0;
   options.singleThread   = 0;
-  options.qsSingleThread = 1;  // default single
+  options.qsSingleThread = 1;  // default qsfs single
   options.debug          = 0;
   options.curldbg        = 0;
   options.showHelp       = 0;
