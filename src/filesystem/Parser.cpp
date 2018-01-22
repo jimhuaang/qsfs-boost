@@ -96,7 +96,7 @@ static struct options {
   int clearLogDir;         // default not clear log dir
   int foreground;          // default not foreground
   int singleThread;        // default FUSE multi-thread
-  int qsSingleThread;      // default qsfs multi-thread
+  int qsSingleThread;      // default qsfs single-thread
   int debug;               // default no debug
   int curldbg;             // default no curl debug msg
   int showHelp;
@@ -167,7 +167,7 @@ void Parse(int argc, char **argv) {
   options.clearLogDir    = 0;
   options.foreground     = 0;
   options.singleThread   = 0;
-  options.qsSingleThread = 0;
+  options.qsSingleThread = 1;  // default single
   options.debug          = 0;
   options.curldbg        = 0;
   options.showHelp       = 0;

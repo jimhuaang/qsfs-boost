@@ -106,7 +106,8 @@ size_t GetMaxStatCount() {
 }
 
 uint16_t GetMaxListObjectsCount() {
-  return QS::Size::K1;  // default value
+  //return QS::Size::K1;  // default value
+  return 0;  // to list all object
 }
 
 static const int CLIENT_DEFAULT_POOL_SIZE = 5;

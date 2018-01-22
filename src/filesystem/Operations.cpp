@@ -1029,7 +1029,8 @@ int qsfs_read(const char* path, char* buf, size_t size, off_t offset,
 
     // Do Read
     try {
-      readSize = drive.ReadFile(path, offset, size, buf);
+      bool async = !QS::Configure::Options::Instance().IsQsfsSingleThread();
+      readSize = drive.ReadFile(path, offset, size, buf, async);
     } catch (const QSException& err) {
       errno = EAGAIN;  // try again
       throw;           // rethrow

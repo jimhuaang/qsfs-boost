@@ -469,7 +469,7 @@ void Drive::OpenFile(const string &filePath, bool async) {
 
 // --------------------------------------------------------------------------
 size_t Drive::ReadFile(const string &filePath, off_t offset, size_t size,
-                       char *buf) {
+                       char *buf, bool async) {
   pair<shared_ptr<Node>, bool> res = GetNode(filePath, false);
   shared_ptr<Node> node = res.first;
   bool modified = res.second;
@@ -525,12 +525,12 @@ size_t Drive::ReadFile(const string &filePath, off_t offset, size_t size,
     }
   }
 
-  // download asynchronously for unloaded part
+  // download unloaded part
   if (remainingSize > 0) {
     ContentRangeDeque ranges =
         m_cache->GetUnloadedRanges(filePath, 0, fileSize);
     if (!ranges.empty()) {
-      DownloadFileContentRanges(filePath, ranges, mtime, true);
+      DownloadFileContentRanges(filePath, ranges, mtime, async);
     }
   }
 
@@ -783,7 +783,7 @@ void Drive::UploadFile(const string &filePath, bool releaseFile,
   // this is need as user could open a file and edit a part of it,
   // but you need the completed file in order to upload it.
   if (!ranges.empty()) {
-    DownloadFileContentRanges(filePath, ranges, mtime, false);
+    DownloadFileContentRanges(filePath, ranges, mtime, false);  // sync
   }
 
   UploadFileCallback callback(filePath, node, m_cache, m_client,

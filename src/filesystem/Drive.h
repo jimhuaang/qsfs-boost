@@ -195,7 +195,7 @@ class Drive : public Singleton<Drive> {
   //
   // Flag doCheck control whether to check the file existence and file type.
   size_t ReadFile(const std::string &filePath, off_t offset, size_t size,
-                  char *buf);
+                  char *buf, bool async = false);
 
   // Read target of a symlink file
   //
