@@ -347,6 +347,10 @@ int qsfs_readlink(const char* path, char* link, size_t size) {
     return -EPERM;
   }
 
+  if (size == 0){
+    return 0;
+  }
+
   memset(link, 0, size);
   int ret = 0;
   try {
@@ -1022,12 +1026,6 @@ int qsfs_read(const char* path, char* buf, size_t size, off_t offset,
       throw QSException("Not a file, but a directory " + FormatPath(path));
     }
 
-    // Check access permission
-    if (!node->FileAccess(GetFuseContextUID(), GetFuseContextGID(), R_OK)) {
-      errno = EACCES;
-      throw QSException("No read permission for path " + FormatPath(path));
-    }
-
     // Do Read
     try {
       readSize = drive.ReadFile(path, offset, size, buf);
@@ -1079,12 +1077,6 @@ int qsfs_write(const char* path, const char* buf, size_t size, off_t offset,
     if (node->IsDirectory()) {
       errno = EPERM;
       throw QSException("Not a file, but a directory " + FormatPath(path));
-    }
-
-    // Check access permission
-    if (!node->FileAccess(GetFuseContextUID(), GetFuseContextGID(), W_OK)) {
-      errno = EACCES;
-      throw QSException("No write permission for path " + FormatPath(path));
     }
 
     // Do Write
@@ -1351,9 +1343,9 @@ int qsfs_readdir(const char* path, void* buf, fuse_fill_dir_t filler,
     }
 
     // Check access permission
-    if (!node->FileAccess(GetFuseContextUID(), GetFuseContextGID(), R_OK)) {
+    if (!node->FileAccess(GetFuseContextUID(), GetFuseContextGID(), X_OK)) {
       ret = -EACCES;
-      throw QSException("No read permission " + FormatPath(dirPath));
+      throw QSException("No acess permission " + FormatPath(dirPath));
     }
 
     // Put the . and .. entries in the filler
