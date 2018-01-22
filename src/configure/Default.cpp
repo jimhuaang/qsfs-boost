@@ -116,7 +116,7 @@ static const char* QS_SDK_LOG_FILE_NAME = "qingstor_sdk_log.txt";  // qs sdk log
 int GetClientDefaultPoolSize() { return CLIENT_DEFAULT_POOL_SIZE; }
 
 uint32_t GetTransactionDefaultTimeDuration() {
-  return 500;  // in milliseconds
+  return 5000;  // in milliseconds
 }
 
 int GetQSConnectionDefaultRetries() { return QS_CONNECTION_DEFAULT_RETRIES; }

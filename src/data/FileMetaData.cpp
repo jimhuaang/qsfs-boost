@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "boost/exception/to_string.hpp"
 #include "boost/make_shared.hpp"
 #include "boost/shared_ptr.hpp"
 
@@ -32,6 +33,7 @@ namespace Data {
 
 using boost::make_shared;
 using boost::shared_ptr;
+using boost::to_string;
 using QS::Configure::Default::GetDefineDirMode;
 using QS::StringUtils::AccessMaskToString;
 using QS::StringUtils::FormatPath;
@@ -192,11 +194,11 @@ string FileMetaData::MyBaseName() const {
 
 // --------------------------------------------------------------------------
 bool FileMetaData::FileAccess(uid_t uid, gid_t gid, int amode) const {
-  // DebugInfo("Check access permission " + FormatPath(m_filePath));
-  // DebugInfo("[uid:gid:mode process=" + to_string(uid) + ":" + to_string(gid)+
-  //          ":" + AccessMaskToString(amode) +
-  //          ", file=" + to_string(m_uid) + ":" + to_string(m_gid) +
-  //          ":" + ModeToString(m_fileMode) + "]");
+  DebugInfo("Check access permission " + FormatPath(m_filePath));
+  DebugInfo("[uid:gid:mode process=" + to_string(uid) + ":" + to_string(gid)+
+           ":" + AccessMaskToString(amode) +
+           ", file=" + to_string(m_uid) + ":" + to_string(m_gid) +
+           ":" + ModeToString(m_fileMode) + "]");
 
   if (m_filePath.empty()) {
     DebugWarning("object file path is empty");
