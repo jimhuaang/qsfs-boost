@@ -175,6 +175,9 @@ void Page::UnguardedPutToBody(off_t offset, size_t len, const char *buffer) {
     DebugError("null body stream " + ToStringLine(offset, len, buffer));
     return;
   }
+  if(len ==0){
+    return;
+  }
   FileOpener opener(m_body);
   if (UseDiskFileNoLock()) {
     // Notice: need to open in both output and input mode to avoid truncate file
@@ -198,6 +201,9 @@ void Page::UnguardedPutToBody(off_t offset, size_t len, const char *buffer) {
 // --------------------------------------------------------------------------
 void Page::UnguardedPutToBody(off_t offset, size_t len,
                               const shared_ptr<iostream> &instream) {
+  if(len == 0) {
+    return;
+  }
   size_t instreamLen = GetStreamSize(instream);
   if (instreamLen < len) {
     DebugWarning(
