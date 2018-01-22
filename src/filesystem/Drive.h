@@ -239,7 +239,11 @@ class Drive : public Singleton<Drive> {
   //
   // @param  : file path
   // @return : void
-  void UploadFile(const std::string &filePath, bool async = false);
+  void UploadFile(const std::string &filePath, bool releaseFile,
+                  bool updateMeta, bool async = false);
+
+  // Release a file
+  void ReleaseFile(const std::string &filePath);
 
   // Change access and modification times of a file
   //

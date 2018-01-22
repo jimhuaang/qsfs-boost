@@ -712,23 +712,30 @@ struct UploadFileCallback {
   shared_ptr<Client> client;
   shared_ptr<DirectoryTree> dirTree;
   Drive *drive;
+  bool releaseFile;
+  bool updateMeta;
 
   UploadFileCallback(const string &filePath_, const shared_ptr<Node> &node_,
                      const shared_ptr<Cache> &cache_,
                      const shared_ptr<Client> &client_,
-                     const shared_ptr<DirectoryTree> &dirTree_, Drive *drive_)
+                     const shared_ptr<DirectoryTree> &dirTree_, Drive *drive_,
+                     bool releaseFile_, bool updateMeta_)
       : filePath(filePath_),
         node(node_),
         cache(cache_),
         client(client_),
         dirTree(dirTree_),
-        drive(drive_) {}
+        drive(drive_),
+        releaseFile(releaseFile_),
+        updateMeta(updateMeta_) {}
 
   void operator()(const shared_ptr<TransferHandle> &handle) {
     if (handle && cache && client && drive) {
       node->SetNeedUpload(false);
-      node->SetFileOpen(false);
-      cache->SetFileOpen(filePath, false);
+      if (releaseFile) {
+        node->SetFileOpen(false);
+        cache->SetFileOpen(filePath, false);
+      }
       if (handle->IsMultipart()) {
         drive->m_unfinishedMultipartUploadHandles.emplace(
             handle->GetObjectKey(), handle);
@@ -739,24 +746,28 @@ struct UploadFileCallback {
       if (handle->DoneTransfer() && !handle->HasFailedParts()) {
         DebugInfo("Upload file " + FormatPath(filePath));
         // update meta mtime
-        ClientError<QSError::Value> err =
-            client->Stat(handle->GetObjectKey(), dirTree);
-        if (IsGoodQSError(err)) {
-          // update cache mtime
-          shared_ptr<Node> node1 = drive->GetNodeSimple(handle->GetObjectKey());
-          if (node1 && *node1) {
-            cache->SetTime(handle->GetObjectKey(), node1->GetMTime());
+        if (updateMeta) {
+          ClientError<QSError::Value> err =
+              client->Stat(handle->GetObjectKey(), dirTree);
+          if (IsGoodQSError(err)) {
+            // update cache mtime
+            shared_ptr<Node> node1 =
+                drive->GetNodeSimple(handle->GetObjectKey());
+            if (node1 && *node1) {
+              cache->SetTime(handle->GetObjectKey(), node1->GetMTime());
+            }
+          } else {
+            DebugError(GetMessageForQSError(err));
           }
-        } else {
-          DebugErrorIf(!IsGoodQSError(err), GetMessageForQSError(err));
-        }
-      }
+        }  // update Meta
+      }    // Done Transfer
     }
   }
 };
 
 // --------------------------------------------------------------------------
-void Drive::UploadFile(const string &filePath, bool async) {
+void Drive::UploadFile(const string &filePath, bool releaseFile,
+                       bool updateMeta, bool async) {
   pair<shared_ptr<Node>, bool> res = GetNode(filePath, false);
   shared_ptr<Node> node = res.first;
 
@@ -776,7 +787,7 @@ void Drive::UploadFile(const string &filePath, bool async) {
   }
 
   UploadFileCallback callback(filePath, node, m_cache, m_client,
-                              m_directoryTree, this);
+                              m_directoryTree, this, releaseFile, updateMeta);
   if (async) {
     GetTransferManager()->GetExecutor()->SubmitAsync(
         bind(boost::type<void>(), callback, _1),
@@ -786,6 +797,33 @@ void Drive::UploadFile(const string &filePath, bool async) {
         filePath);
   } else {
     callback(m_transferManager->UploadFile(filePath, fileSize, mtime, m_cache));
+  }
+}
+
+// --------------------------------------------------------------------------
+void Drive::ReleaseFile(const string &filePath) {
+  pair<shared_ptr<Node>, bool> res = GetNode(filePath, false);
+  shared_ptr<Node> node = res.first;
+
+  if (!(node && *node)) {
+    DebugWarning("File not exist " + FormatPath(filePath));
+    return;
+  }
+
+  node->SetNeedUpload(false);
+  node->SetFileOpen(false);
+  m_cache->SetFileOpen(filePath, false);
+
+  // update meta mtime
+  ClientError<QSError::Value> err = m_client->Stat(filePath, m_directoryTree);
+  if (IsGoodQSError(err)) {
+    // update cache mtime
+    shared_ptr<Node> node1 = GetNodeSimple(filePath);
+    if (node1 && *node1) {
+      m_cache->SetTime(filePath, node1->GetMTime());
+    }
+  } else {
+    DebugError(GetMessageForQSError(err));
   }
 }
 

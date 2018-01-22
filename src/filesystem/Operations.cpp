@@ -253,9 +253,9 @@ void InitializeFUSECallbacks(struct fuse_operations* fuseOps) {
   fuseOps->read = qsfs_read;
   fuseOps->write = qsfs_write;
   fuseOps->statfs = qsfs_statfs;
-  // fuseOps->flush = NULL;
+  fuseOps->flush = qsfs_flush;
   fuseOps->release = qsfs_release;
-  // fuseOps->fsync = NULL;
+  fuseOps->fsync = qsfs_fsync;
   // fuseOps->setxattr = NULL;
   // fuseOps->getxattr = NULL;
   // fuseOps->listxattr = NULL;
@@ -1143,12 +1143,52 @@ int qsfs_statfs(const char* path, struct statvfs* statv) {
 // this is a good place to write back data and return any errors. Since many
 // applications ignore close() errors this is not always useful.
 //
-// NOTE: the flush() method may be called more thance once for each open().
-// Filesystes shouldn't assume that flus will always be called after some
+// NOTE: the flush() method may be called more than once for each open().
+// Filesystes shouldn't assume that flush will always be called after some
 // writes, or that if will be called at all.
 int qsfs_flush(const char* path, struct fuse_file_info* fi) {
   // Currently no implementation.
-  return 0;
+
+  int mask = O_RDONLY != (fi->flags & O_ACCMODE) ? W_OK : R_OK;
+  int ret = 0;
+  try {
+    // Check parent permission
+    CheckParentDir(path, X_OK, &ret, false);
+    // Check whether path existing
+    pair<shared_ptr<Node>, string> res = GetFileSimple(path);
+    shared_ptr<Node>& node = res.first;
+    string path_ = res.second;
+    if (!(node && *node)) {
+      ret = -ENOENT;
+      throw QSException("No such file or directory " + FormatPath(path_));
+    }
+
+    // Check access permission
+    if (!node->FileAccess(GetFuseContextUID(), GetFuseContextGID(), mask)) {
+      ret = -EACCES;
+      throw QSException("No access permission " + FormatPath(path_));
+    }
+
+    // Write the file to object storage
+    if (node->IsNeedUpload()) {
+      try {
+        bool async = !QS::Configure::Options::Instance().IsQsfsSingleThread();
+        Drive::Instance().UploadFile(path_, false, true, async);
+      } catch (const QSException& err) {
+        Error(err.get());
+        return -EAGAIN;  // Try again
+      }
+    }
+
+  } catch (const QSException& err) {
+    Error(err.get());
+    if (ret == 0) {
+      ret = -errno;
+    }
+    return ret;
+  }
+
+  return ret;
 }
 
 // --------------------------------------------------------------------------
@@ -1189,16 +1229,7 @@ int qsfs_release(const char* path, struct fuse_file_info* fi) {
       throw QSException("No read permission " + FormatPath(path_));
     }
 
-    // Write the file to object storage
-    if (node->IsNeedUpload()) {
-      try {
-        bool async = !QS::Configure::Options::Instance().IsQsfsSingleThread();
-        Drive::Instance().UploadFile(path_, async);
-      } catch (const QSException& err) {
-        Error(err.get());
-        return -EAGAIN;  // Try again
-      }
-    }
+    Drive::Instance().ReleaseFile(path_);
   } catch (const QSException& err) {
     Error(err.get());
     if (ret == 0) {
@@ -1216,8 +1247,36 @@ int qsfs_release(const char* path, struct fuse_file_info* fi) {
 // If the datasync parameter is non-zero, then only the user data should be
 // flushed, not the meta data.
 int qsfs_fsync(const char* path, int datasync, struct fuse_file_info* fi) {
-  // Currently no implementation.
-  return 0;
+  int ret = 0;
+  try {
+    // Check whether path existing
+    pair<shared_ptr<Node>, string> res = GetFileSimple(path);
+    shared_ptr<Node>& node = res.first;
+    string path_ = res.second;
+    if (!(node && *node)) {
+      ret = -ENOENT;
+      throw QSException("No such file or directory " + FormatPath(path_));
+    }
+    // Write the file to object storage
+    if (node->IsNeedUpload()) {
+      try {
+        bool async = !QS::Configure::Options::Instance().IsQsfsSingleThread();
+        Drive::Instance().UploadFile(path_, false, false, async);
+      } catch (const QSException& err) {
+        Error(err.get());
+        return -EAGAIN;  // Try again
+      }
+    }
+
+  } catch (const QSException& err) {
+    Error(err.get());
+    if (ret == 0) {
+      ret = -errno;
+    }
+    return ret;
+  }
+
+  return ret;
 }
 
 // --------------------------------------------------------------------------
