@@ -261,7 +261,7 @@ ListObjectsOutcome QSClientImpl::ListObjects(
   if (input->GetLimit() <= 0) {
     return ListObjectsOutcome(ClientError<QSError::Value>(
         QSError::NO_SUCH_LIST_OBJECTS, exceptionName,
-        "ListObjectsInput with negative count limit", false));
+        "ListObjectsInput with negative or zero count limit", false));
   }
 
   if (resultTruncated != NULL) {

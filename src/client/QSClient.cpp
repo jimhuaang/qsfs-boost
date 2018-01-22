@@ -780,9 +780,11 @@ ListObjectsOutcome QSClient::ListObjects(const string &dirPath,
                                          uint64_t *resCount, uint64_t maxCount,
                                          bool useThreadPool) {
   ListObjectsInput listObjInput;
-  uint64_t limit = Constants::BucketListObjectsLimit < maxCount
-                       ? Constants::BucketListObjectsLimit
-                       : maxCount;
+  uint64_t limit = Constants::BucketListObjectsLimit;
+  if (maxCount != 0 && maxCount < limit) {
+    // maxCount ==0 means list all objects
+    limit = maxCount;
+  }
   listObjInput.SetLimit(limit);
   listObjInput.SetDelimiter(QS::Utils::GetPathDelimiter());
   string prefix = IsRootDirectory(dirPath)
@@ -790,7 +792,10 @@ ListObjectsOutcome QSClient::ListObjects(const string &dirPath,
                       : AppendPathDelim(LTrim(dirPath, '/'));
   listObjInput.SetPrefix(prefix);
 
-  uint32_t timeDuration = CalculateTimeForListObjects(maxCount);
+  uint32_t timeDuration =
+      maxCount != 0
+          ? CalculateTimeForListObjects(maxCount)
+          : CalculateTimeForListObjects(Constants::BucketListObjectsLimit);
 
   ListObjectsOutcome outcome =
       GetQSClientImpl()->ListObjects(&listObjInput, resultTruncated, resCount,

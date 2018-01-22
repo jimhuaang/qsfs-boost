@@ -690,7 +690,8 @@ int qsfs_rename(const char* path, const char* newpath) {
     // Check parent permission
     shared_ptr<Node> dir = CheckParentDir(path, W_OK | X_OK, &ret, false);
 
-    tuple<shared_ptr<Node>, bool, string> res = GetFile(path);
+    // update dir synchornizely
+    tuple<shared_ptr<Node>, bool, string> res = GetFile(path, true);
     shared_ptr<Node>& node = boost::get<0>(res);
     string path_ = boost::get<2>(res);
     if (!(node && *node)) {
@@ -706,7 +707,7 @@ int qsfs_rename(const char* path, const char* newpath) {
         GetFile(newpath, true);  // update dir synchronizely
     shared_ptr<Node>& nNode = boost::get<0>(nRes);
     string newpath_ = boost::get<2>(nRes);
-    if (nNode) {
+    if (nNode && *nNode) {
       if (nNode->IsDirectory() && !nNode->IsEmpty()) {
         ret = -ENOTEMPTY;  // directory not empty
         throw QSException("Unable to rename, directory not empty " +
