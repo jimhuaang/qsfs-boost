@@ -308,7 +308,7 @@ shared_ptr<Node> Drive::GetNodeSimple(const string &path) {
 struct statvfs Drive::GetFilesystemStatistics() {
   struct statvfs statv;
   ClientError<QSError::Value> err = GetClient()->Statvfs(&statv);
-  DebugErrorIf(!IsGoodQSError(err), GetMessageForQSError(err));
+  ErrorIf(!IsGoodQSError(err), GetMessageForQSError(err));
   return statv;
 }
 
@@ -332,6 +332,7 @@ vector<weak_ptr<Node> > Drive::FindChildren(const string &dirPath,
 
 // --------------------------------------------------------------------------
 void Drive::Chmod(const std::string &filePath, mode_t mode) {
+  Warning("chmod not supported");
   // TODO(jim): wait for sdk api of meta data
   // change meta mode: x-qs-meta-mode
   // call Stat to update meta locally
@@ -339,6 +340,7 @@ void Drive::Chmod(const std::string &filePath, mode_t mode) {
 
 // --------------------------------------------------------------------------
 void Drive::Chown(const std::string &filePath, uid_t uid, gid_t gid) {
+  Warning("chown not supported");
   // TODO(jim): wait for sdk api of meta
   // change meta uid gid; x-qs-meta-uid, x-qs-meta-gid
   // call Stat to update meta locally
@@ -351,7 +353,7 @@ struct PrintMsgForDeleteFile {
 
   void operator()(const ClientError<QSError::Value> &err) {
     if (IsGoodQSError(err)) {
-      DebugInfo("Delete file " + FormatPath(filePath));
+      Info("Delete file " + FormatPath(filePath));
     } else {
       DebugError(GetMessageForQSError(err));
     }
@@ -388,7 +390,7 @@ void Drive::MakeFile(const string &filePath, mode_t mode, dev_t dev) {
   } else if (mode & S_IFSOCK) {
     type = FileType::Socket;
   } else {
-    DebugWarning(
+    Warning(
         "Try to create a directory or symbolic link, but MakeFile is only for "
         "creation of non-directory and non-symlink nodes. ");
     return;
@@ -401,15 +403,14 @@ void Drive::MakeFile(const string &filePath, mode_t mode, dev_t dev) {
       return;
     }
 
-    DebugInfo("Create file " + FormatPath(filePath));
+    Info("Create file " + FormatPath(filePath));
 
     // QSClient::MakeFile doesn't update directory tree (refer it for details)
     // with the created file node, So we call Stat synchronizely.
     err = GetClient()->Stat(filePath, m_directoryTree);
     DebugErrorIf(!IsGoodQSError(err), GetMessageForQSError(err));
   } else {
-    DebugError(
-        "Not support to create a special file (block, char, FIFO, etc.)");
+    Error("Not support to create a special file (block, char, FIFO, etc.)");
     // This only make file of other types in local dir tree, nothing happens
     // in server. And it will be removed when synchronize with server.
     // TODO(jim): may consider to support them in server if sdk support this
@@ -428,7 +429,7 @@ void Drive::MakeDir(const string &dirPath, mode_t mode) {
     return;
   }
 
-  DebugInfo("Create dir " + FormatPath(dirPath));
+  Info("Create directory " + FormatPath(dirPath));
 
   // QSClient::MakeDirectory doesn't grow directory tree with the created dir
   // node, So we call Stat synchronizely.
@@ -443,9 +444,11 @@ void Drive::OpenFile(const string &filePath, bool async) {
   bool modified = res.second;
 
   if (!(node && *node)) {
-    DebugWarning("File not exist " + FormatPath(filePath));
+    Warning("File not exist " + FormatPath(filePath));
     return;
   }
+
+  Info("Open file " + FormatPath(filePath));
 
   uint64_t fileSize = node->GetFileSize();
   assert(fileSize >= 0);
@@ -475,7 +478,7 @@ size_t Drive::ReadFile(const string &filePath, off_t offset, size_t size,
   bool modified = res.second;
 
   if (!(node && *node)) {
-    DebugWarning("File not exist " + FormatPath(filePath));
+    Warning("File not exist " + FormatPath(filePath));
     return 0;
   }
 
@@ -512,7 +515,7 @@ size_t Drive::ReadFile(const string &filePath, off_t offset, size_t size,
     if (handle) {
       handle->WaitUntilFinished();
       if (handle->DoneTransfer() && !handle->HasFailedParts()) {
-        DebugInfo("Download file [offset:len=" + to_string(offset) + ":" +
+        Info("Download file [offset:len=" + to_string(offset) + ":" +
                   to_string(downloadSize) + "] " + FormatPath(filePath));
 
         bool success =
@@ -563,9 +566,9 @@ void Drive::RenameFile(const string &filePath, const string &newFilePath) {
     pair<shared_ptr<Node>, bool> res = GetNode(newFilePath, false);
     shared_ptr<Node> node = res.first;
     if (node) {
-      DebugInfo("Rename file " + FormatPath(filePath, newFilePath));
+      Info("Rename file " + FormatPath(filePath, newFilePath));
     } else {
-      DebugWarning("Fail to rename file " + FormatPath(filePath, newFilePath));
+      Warning("Fail to rename file " + FormatPath(filePath, newFilePath));
     }
     return;
   } else {
@@ -600,7 +603,7 @@ struct RenameDirCallback {
       deque<string> childTargetPaths;
       BOOST_FOREACH(const string &path, childPaths) {
         if (path.substr(0, len) != dirPath) {
-          DebugError("Directory has an invalid child file [dir=" + dirPath +
+          DebugError("Directory has an invalid child file [path=" + dirPath +
                      " child=" + path + "]");
           childTargetPaths.push_back(path);  // put old path
         }
@@ -627,9 +630,9 @@ struct RenameDirCallback {
             drive->GetNode(newDirPath, true, false);
         node = res.first;
         if (node) {
-          DebugInfo("Rename dir " + FormatPath(dirPath, newDirPath));
+          Info("Rename directory " + FormatPath(dirPath, newDirPath));
         } else {
-          DebugWarning("Fail to rename dir " + FormatPath(dirPath));
+          Warning("Fail to rename directory " + FormatPath(dirPath));
         }
       }
     } else {
@@ -664,13 +667,13 @@ void Drive::SymLink(const string &filePath, const string &linkPath) {
   assert(!filePath.empty() && !linkPath.empty());
   ClientError<QSError::Value> err = GetClient()->SymLink(filePath, linkPath);
   if (!IsGoodQSError(err)) {
-    DebugError("Fail to create a symbolic link [path=" + filePath +
+    Error("Fail to create a symbolic link [path=" + filePath +
                ", link=" + linkPath);
-    DebugError(GetMessageForQSError(err));
+    Error(GetMessageForQSError(err));
     return;
   }
 
-  DebugInfo("Create symlink " + FormatPath(filePath, linkPath));
+  Info("Create symlink " + FormatPath(filePath, linkPath));
 
   // QSClient::Symlink doesn't update directory tree (refer it for details)
   // with the created symlink node, So we call Stat synchronizely.
@@ -690,14 +693,13 @@ void Drive::SymLink(const string &filePath, const string &linkPath) {
 void Drive::TruncateFile(const string &filePath, size_t newSize) {
   shared_ptr<Node> node = GetNodeSimple(filePath);
   if (!(node && *node)) {
-    DebugWarning("File not exist " + FormatPath(filePath));
+    Warning("File not exist " + FormatPath(filePath));
     return;
   }
 
   if (newSize != node->GetFileSize()) {
-    DebugInfo(
-        "Truncate file [oldsize:newsize=" + to_string(node->GetFileSize()) +
-        ":" + to_string(newSize) + "]" + FormatPath(filePath));
+    Info("Truncate file [oldsize:newsize=" + to_string(node->GetFileSize()) +
+         ":" + to_string(newSize) + "]" + FormatPath(filePath));
     m_cache->Resize(filePath, newSize, time(NULL));
     node->SetFileSize(newSize);
     node->SetNeedUpload(true);
@@ -744,7 +746,7 @@ struct UploadFileCallback {
       drive->m_unfinishedMultipartUploadHandles.erase(handle->GetObjectKey());
 
       if (handle->DoneTransfer() && !handle->HasFailedParts()) {
-        DebugInfo("Upload file " + FormatPath(filePath));
+        Info("Upload file " + FormatPath(filePath));
         // update meta mtime
         if (updateMeta) {
           ClientError<QSError::Value> err =
@@ -772,7 +774,7 @@ void Drive::UploadFile(const string &filePath, bool releaseFile,
   shared_ptr<Node> node = res.first;
 
   if (!(node && *node)) {
-    DebugWarning("File not exist " + FormatPath(filePath));
+    Warning("File not exist " + FormatPath(filePath));
     return;
   }
 
@@ -806,7 +808,7 @@ void Drive::ReleaseFile(const string &filePath) {
   shared_ptr<Node> node = res.first;
 
   if (!(node && *node)) {
-    DebugWarning("File not exist " + FormatPath(filePath));
+    Warning("File not exist " + FormatPath(filePath));
     return;
   }
 
@@ -843,7 +845,7 @@ int Drive::WriteFile(const string &filePath, off_t offset, size_t size,
                      const char *buf) {
   shared_ptr<Node> node = GetNodeSimple(filePath);
   if (!(node && *node)) {
-    DebugWarning("File not exist " + FormatPath(filePath));
+    Warning("File not exist " + FormatPath(filePath));
     return 0;
   }
 

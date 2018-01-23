@@ -101,7 +101,7 @@ void MimeTypesInitializer() {
       files += filePath;
       files += ";";
     }
-    DebugInfo("Unable to find mime types [path=" + files + "]");
+    Info("Unable to find mime types [path=" + files + "]");
     QS::FileSystem::InitializeMimeTypes("");  // default initialize
   } else {
     QS::FileSystem::InitializeMimeTypes(mimeFile);

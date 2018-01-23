@@ -65,7 +65,7 @@ void MimeTypes::Initialize(const std::string &mimeFile) {
   }
   std::ifstream file(mimeFile.c_str());
   if (!file) {
-    DebugInfo("Unable to open file " + mimeFile);
+    Info("Unable to open file " + mimeFile);
     DoDefaultInitialize();
     return;
   }

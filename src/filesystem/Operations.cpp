@@ -313,7 +313,7 @@ int qsfs_getattr(const char* path, struct stat* statbuf) {
       throw QSException("No such file or directory " + FormatPath(path));
     }
   } catch (const QSException& err) {
-    Warning(err.get());
+    DebugWarning(err.get());
     if (ret == 0) {
       ret = -errno;
     }
@@ -743,7 +743,7 @@ int qsfs_rename(const char* path, const char* newpath) {
 // --------------------------------------------------------------------------
 // Create a hard link to a file
 int qsfs_link(const char* path, const char* linkpath) {
-  DebugError("Hard link not permitted [from=" + string(path) +
+  Error("Hard link not permitted [from=" + string(path) +
              " to=" + string(linkpath));
   return -EPERM;
 }
@@ -751,7 +751,7 @@ int qsfs_link(const char* path, const char* linkpath) {
 // --------------------------------------------------------------------------
 // Change the permission bits of a file
 int qsfs_chmod(const char* path, mode_t mode) {
-  DebugInfo("Trying to change permisions to " + ModeToString(mode) +
+  Info("Change permisions to " + ModeToString(mode) +
             " for path" + FormatPath(path));
   if (!IsValidPath(path)) {
     Error("Null path parameter from fuse");
@@ -806,7 +806,7 @@ int qsfs_chmod(const char* path, mode_t mode) {
 // --------------------------------------------------------------------------
 // Change the owner and group of a file
 int qsfs_chown(const char* path, uid_t uid, gid_t gid) {
-  DebugInfo("Trying to change owner and group to [uid=" + to_string(uid) +
+  Info("Change owner and group to [uid=" + to_string(uid) +
             ", gid=" + to_string(gid) + "]" + FormatPath(path));
   if (!IsValidPath(path)) {
     Error("Null path parameter from fuse");
