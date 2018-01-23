@@ -18,9 +18,7 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <stdio.h>     // for fopen
-#include <string.h>    // for strerr
-#include <sys/stat.h>  // for chmod
+#include <string.h>  // for strerr
 
 #include <string>
 #include <utility>
@@ -59,9 +57,10 @@ using QS::Configure::Default::GetDefaultZone;
 using QS::Configure::Default::GetDefineFileMode;
 using QS::Configure::Default::GetMaxListObjectsCount;
 using QS::Configure::Default::GetQSConnectionDefaultRetries;
-using QS::Configure::Default::GetQingStorSDKLogFileName;
+using QS::Configure::Default::GetSDKLogFolderBaseName;
 using QS::Configure::Default::GetTransactionDefaultTimeDuration;
 using QS::StringUtils::FormatPath;
+using QS::Utils::AppendPathDelim;
 using std::string;
 
 // --------------------------------------------------------------------------
@@ -151,7 +150,8 @@ ClientConfiguration::ClientConfiguration(const Credentials &credentials)
       m_debugCurl(false),
       m_additionalUserAgent(std::string()),
       m_logLevel(ClientLogLevel::Warn),
-      m_logFile(GetDefaultLogDirectory() + GetQingStorSDKLogFileName()),
+      m_sdkLogDirectory(AppendPathDelim(GetDefaultLogDirectory()) +
+                        GetSDKLogFolderBaseName()),
       m_transactionRetries(GetDefaultMaxRetries()),
       m_transactionTimeDuration(GetTransactionDefaultTimeDuration()),
       m_maxListCount(GetMaxListObjectsCount()),
@@ -171,7 +171,8 @@ ClientConfiguration::ClientConfiguration(const CredentialsProvider &provider)
       m_debugCurl(false),
       m_additionalUserAgent(std::string()),
       m_logLevel(ClientLogLevel::Warn),
-      m_logFile(GetDefaultLogDirectory() + GetQingStorSDKLogFileName()),
+      m_sdkLogDirectory(AppendPathDelim(GetDefaultLogDirectory()) +
+                        GetSDKLogFolderBaseName()),
       m_transactionRetries(GetDefaultMaxRetries()),
       m_transactionTimeDuration(GetTransactionDefaultTimeDuration()),
       m_maxListCount(GetMaxListObjectsCount()),
@@ -196,6 +197,7 @@ void ClientConfiguration::InitializeByOptions() {
     m_logLevel = ClientLogLevel::Debug;
   }
   if (options.IsDebugCurl()) {
+    // qingstor sdk will turn curl if set level to be verbose
     m_logLevel = ClientLogLevel::Verbose;
   }
 
@@ -205,19 +207,11 @@ void ClientConfiguration::InitializeByOptions() {
                       FormatPath(options.GetLogDirectory()));
   }
 
-  m_logFile = options.GetLogDirectory() + GetQingStorSDKLogFileName();
-  FILE *log = NULL;
-  if (options.IsClearLogDir()) {
-    log = fopen(m_logFile.c_str(), "wb");
-  } else {
-    log = fopen(m_logFile.c_str(), "ab");
-  }
-  if (log != NULL) {
-    fclose(log);
-    chmod(m_logFile.c_str(), GetDefineFileMode());
-  } else {
-    throw(string("Fail to create log file for sdk : ") + strerror(errno) + " " +
-          FormatPath(m_logFile));
+  m_sdkLogDirectory =
+      AppendPathDelim(options.GetLogDirectory()) + GetSDKLogFolderBaseName();
+  if (!QS::Utils::CreateDirectoryIfNotExists(m_sdkLogDirectory)) {
+    throw QSException(string("Unable to create sdk log directory : ") +
+                      strerror(errno) + " " + FormatPath(m_sdkLogDirectory));
   }
 
   m_transactionRetries = options.GetRetries();

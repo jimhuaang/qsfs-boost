@@ -62,7 +62,7 @@ uint16_t GetMaxListObjectsCount();  // max count for list operation
 int GetQSConnectionDefaultRetries();
 uint32_t GetTransactionDefaultTimeDuration();  // in milliseconds
 int GetClientDefaultPoolSize();
-const char* GetQingStorSDKLogFileName();
+const char* GetSDKLogFolderBaseName();
 
 size_t GetDefaultParallelTransfers();
 uint64_t GetDefaultTransferMaxBufHeapSize();

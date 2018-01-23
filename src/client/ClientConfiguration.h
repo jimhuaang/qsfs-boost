@@ -78,7 +78,7 @@ class ClientConfiguration {
     return m_additionalUserAgent;
   }
   ClientLogLevel::Value GetClientLogLevel() const { return m_logLevel; }
-  const std::string& GetClientLogFile() const { return m_logFile; }
+  const std::string& GetClientLogDirectory() const { return m_sdkLogDirectory; }
   uint16_t GetTransactionRetries() const { return m_transactionRetries; }
   uint32_t GetTransactionTimeDuration() const {
     return m_transactionTimeDuration;
@@ -109,7 +109,7 @@ class ClientConfiguration {
   bool m_debugCurl;
   std::string m_additionalUserAgent;
   ClientLogLevel::Value m_logLevel;
-  std::string m_logFile;  // log file path
+  std::string m_sdkLogDirectory;  // log directory
 
   uint16_t m_transactionRetries;       // retry times when transaction fails
   uint32_t m_transactionTimeDuration;  // default time duration for one

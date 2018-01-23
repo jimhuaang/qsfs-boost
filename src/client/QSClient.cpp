@@ -146,7 +146,7 @@ uint32_t CalculateTimeForListObjects(uint64_t maxCount) {
 const char *GetSDKLogDir() {
   static string logdir;
   const ClientConfiguration &clientConfig = ClientConfiguration::Instance();
-  logdir = GetDirName(clientConfig.GetClientLogFile());
+  logdir = AppendPathDelim(clientConfig.GetClientLogDirectory());
   return logdir.c_str();
 }
 

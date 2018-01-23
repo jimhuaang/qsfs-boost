@@ -110,7 +110,7 @@ uint16_t GetMaxListObjectsCount() {
 
 static const int CLIENT_DEFAULT_POOL_SIZE = 5;
 static const int QS_CONNECTION_DEFAULT_RETRIES = 3;  // qs sdk parameter
-static const char* QS_SDK_LOG_FILE_NAME = "qingstor_sdk_log.txt";  // qs sdk log
+static const char* QS_SDK_LOG_DIR_BASE_NAME = "sdk.log";  // qs sdk log
 
 int GetClientDefaultPoolSize() { return CLIENT_DEFAULT_POOL_SIZE; }
 
@@ -120,7 +120,7 @@ uint32_t GetTransactionDefaultTimeDuration() {
 
 int GetQSConnectionDefaultRetries() { return QS_CONNECTION_DEFAULT_RETRIES; }
 
-const char* GetQingStorSDKLogFileName() { return QS_SDK_LOG_FILE_NAME; }
+const char* GetSDKLogFolderBaseName() { return QS_SDK_LOG_DIR_BASE_NAME; }
 
 size_t GetDefaultParallelTransfers() { return 5; }
 
