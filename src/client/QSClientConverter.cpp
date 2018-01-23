@@ -14,6 +14,8 @@
 // | limitations under the License.
 // +-------------------------------------------------------------------------
 
+#define __STDC_LIMIT_MACROS  // for UINT64_MAX always put at first
+
 #include "client/QSClientConverter.h"
 
 #include <assert.h>

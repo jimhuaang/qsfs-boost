@@ -133,8 +133,10 @@ void ShowQSFSUsage() {
   "       [-n|--numtransfer=[value]] [-u|--bufsize=value]]\n"
   "       [-H|--host=[value]] [-p|--protocol=[value]]\n"
   "       [-P|--port=[value]] [-a|--agent=[value]]\n"
-  "       [-C|--clearlogdir] [-f|--foreground] \n"
-  "       [-s|--single] [-S|--Single]\n"
+  "       [-C|--clearlogdir]\n"
+  "       [-f|--foreground]\n"
+  "       [-s|--single]\n"
+  //"     [-s|--single] [-S|--Single]\n"
   "       [-d|--debug] [-U|--curldbg]\n"
   "       [-h|--help] [-V|--version]\n"
   "       [FUSE options]\n";

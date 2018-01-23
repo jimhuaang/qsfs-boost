@@ -16,49 +16,45 @@
 
 #include "filesystem/Initializer.h"
 
-#include "boost/scoped_ptr.hpp"
 #include "boost/thread/once.hpp"
 
 namespace QS {
 
 namespace FileSystem {
 
-using boost::scoped_ptr;
-
-static bool deferInitializer = true;
 boost::once_flag Initializer::m_initOnceFlag = BOOST_ONCE_INIT;
-scoped_ptr<Initializer::InitFunctionQueue> Initializer::m_queue(0);
+Initializer::InitFunctionQueue *Initializer::m_queue = NULL;
 
 Initializer::Initializer(const PriorityInitFuncPair &initFuncPair) {
   SetInitializer(initFuncPair);
 }
 
 void Initializer::RunInitializers() {
-  while (!m_queue->empty()) {
-    (m_queue->top().second)();
-    m_queue->pop();
+  if (m_queue != NULL) {
+    while (!m_queue->empty()) {
+      (m_queue->top().second)();
+      m_queue->pop();
+    }
   }
-  deferInitializer = false;
 }
 
 void Initializer::RemoveInitializers() {
-  while (!m_queue->empty()) {
-    m_queue->pop();
+  if (m_queue != NULL) {
+    while (!m_queue->empty()) {
+      m_queue->pop();
+    }
   }
-  deferInitializer = false;
 }
 
 void Initializer::SetInitializer(const PriorityInitFuncPair &pair) {
-  if (deferInitializer) {
-    boost::call_once(m_initOnceFlag, Init);
-    m_queue->push(pair);
-  } else {
-    (pair.second)();
-  }
+  boost::call_once(m_initOnceFlag, Init);
+  m_queue->push(pair);
 }
 
 void Initializer::Init() {
-  m_queue.reset(new InitFunctionQueue);
+  if (m_queue == NULL) {
+    m_queue = new InitFunctionQueue;
+  }
 }
 
 }  // namespace FileSystem

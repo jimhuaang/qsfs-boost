@@ -22,13 +22,14 @@
 
 #include "boost/shared_ptr.hpp"
 
-#include "qingstor/QsSdkOption.h"
+#include "qingstor/QingStor.h"
 
 #include "client/Client.h"
 #include "client/QSClientOutcome.h"
 
 namespace QingStor {
 class QsConfig;
+class SDKOptions;
 }  // namespace QingStor
 
 namespace QS {

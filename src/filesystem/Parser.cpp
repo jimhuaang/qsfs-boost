@@ -135,7 +135,7 @@ static const struct fuse_opt optionSpec[] = {
     OPTION("-U",    curldbg),        OPTION("--curldbg",        curldbg),
     OPTION("-h",    showHelp),       OPTION("--help",           showHelp),
     OPTION("-V",    showVersion),    OPTION("--version",        showVersion),
-    FUSE_OPT_END
+    {NULL, 0, 0}
 };
 
 }  // namespace

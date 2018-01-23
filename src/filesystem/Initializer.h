@@ -23,7 +23,6 @@
 
 #include "boost/function.hpp"
 #include "boost/noncopyable.hpp"
-#include "boost/scoped_ptr.hpp"
 #include "boost/thread/once.hpp"
 
 // Declare main in global namespace before class Initializer, since friend
@@ -74,7 +73,7 @@ class Initializer : private boost::noncopyable {
   typedef std::priority_queue<PriorityInitFuncPair,
                               std::vector<PriorityInitFuncPair>, Greater>
       InitFunctionQueue;
-  static boost::scoped_ptr<InitFunctionQueue> m_queue;
+  static InitFunctionQueue *m_queue;
   static boost::once_flag m_initOnceFlag;
 };
 
