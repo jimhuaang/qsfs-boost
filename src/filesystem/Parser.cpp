@@ -101,6 +101,8 @@ static struct options {
   int curldbg;             // default no curl debug msg
   int showHelp;
   int showVersion;
+
+  int qsfsMultiThread;       // internal use only to turn on multi thread
 } options;
 
 #define OPTION(t, p) \
@@ -135,6 +137,7 @@ static const struct fuse_opt optionSpec[] = {
     OPTION("-U",    curldbg),        OPTION("--curldbg",        curldbg),
     OPTION("-h",    showHelp),       OPTION("--help",           showHelp),
     OPTION("-V",    showVersion),    OPTION("--version",        showVersion),
+    OPTION("-M",    qsfsMultiThread),
     {NULL, 0, 0}
 };
 
@@ -172,6 +175,7 @@ void Parse(int argc, char **argv) {
   options.curldbg        = 0;
   options.showHelp       = 0;
   options.showVersion    = 0;
+  options.qsfsMultiThread = 0;
 
   // Do Parse
   QS::Configure::Options &qsOptions = QS::Configure::Options::Instance();
@@ -266,6 +270,9 @@ void Parse(int argc, char **argv) {
   qsOptions.SetForeground(options.foreground != 0);
   qsOptions.SetSingleThread(options.singleThread != 0);
   qsOptions.SetQsfsSingleThread(options.qsSingleThread != 0);
+  if (options.qsfsMultiThread != 0) {
+    qsOptions.SetQsfsSingleThread(false);
+  }
   qsOptions.SetDebug(options.debug != 0);
   qsOptions.SetDebugCurl(options.curldbg != 0);
   qsOptions.SetShowHelp(options.showHelp != 0);
