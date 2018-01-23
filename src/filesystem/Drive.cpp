@@ -648,11 +648,14 @@ void Drive::RenameDir(const string &dirPath, const string &newDirPath,
   RenameDirCallback receivedHandler(dirPath, newDirPath, m_directoryTree,
                                     m_cache, this);
 
+  // When submit asynchronize task, and task itself should be run
+  // in threadpool synchronizely.
+  // So invoke Client::MoveDirectory with async=false
   if (async) {
     GetClient()->GetExecutor()->SubmitAsyncPrioritized(
         bind(boost::type<void>(), receivedHandler, _1),
         bind(boost::type<ClientError<QSError::Value> >(),
-             &QS::Client::Client::MoveDirectory, m_client.get(), _1, _2, true),
+             &QS::Client::Client::MoveDirectory, m_client.get(), _1, _2, false),
         dirPath, newDirPath);
   } else {
     receivedHandler(GetClient()->MoveDirectory(dirPath, newDirPath, false));
