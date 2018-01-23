@@ -44,8 +44,7 @@ static const char* const QSFS_DEFAULT_LOGLEVEL_NAME = "INFO";
 static const char* const QSFS_DEFAULT_HOST = "qingstor.com";
 static const char* const QSFS_DEFAULT_PROTOCOL = "https";
 static const char* const QSFS_DEFAULT_ZONE = "pek3a";
-static const char* const MIME_FILE_DEBIAN = "/etc/mime.types";
-static const char* const MIME_FILE_CENTOS = "/usr/share/mime/types";
+static const char* const MIME_FILE_DEFAULT = "/etc/mime.types";
 
 const char* GetProgramName() { return PROGRAM_NAME; }
 
@@ -75,8 +74,7 @@ string GetDefaultZone() { return QSFS_DEFAULT_ZONE; }
 
 vector<string> GetMimeFiles() {
   vector<string> mimes;
-  mimes.push_back(MIME_FILE_DEBIAN);
-  mimes.push_back(MIME_FILE_CENTOS);
+  mimes.push_back(MIME_FILE_DEFAULT);
   return mimes;
 }
 

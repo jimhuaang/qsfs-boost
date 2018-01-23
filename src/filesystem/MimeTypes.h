@@ -54,7 +54,7 @@ class MimeTypes : public Singleton<MimeTypes> {
   MimeTypes() {}
   void Initialize(const std::string &mimeFile);
 
-
+  void DoDefaultInitialize();
 
   // extension to mime type  map
   ExtToMimetypeMap m_extToMimeTypeMap;
