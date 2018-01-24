@@ -733,12 +733,13 @@ ClientError<QSError::Value> QSClient::ListDirectory(
   // directory tree gradually. This will be helpful for the performance
   // if there are a huge number of objects to list.
   uint64_t maxCountPerList =
-      static_cast<uint64_t>(Constants::BucketListObjectsLimit * 2);
-  if (maxListCount < maxCountPerList) {
+      static_cast<uint64_t>(Constants::BucketListObjectsLimit * 2 + 1);
+  if (!listAll && maxListCount < maxCountPerList) {
     maxCountPerList = maxListCount;
   }
 
   shared_ptr<Node> dirNode = dirTree->Find(dirPath);
+  vector<shared_ptr<FileMetaData> > allFileMetaDatas;
   bool resultTruncated = false;
   uint64_t resCount = 0;
   do {
@@ -751,25 +752,30 @@ ClientError<QSError::Value> QSClient::ListDirectory(
     }
 
     resCount += countPerList;
-    BOOST_FOREACH(ListObjectsOutput &listObjOutput, outcome.GetResult()) {
-      if (!(dirNode && *dirNode)) {  // directory not existing at this moment
+    BOOST_FOREACH (ListObjectsOutput &listObjOutput, outcome.GetResult()) {
+      vector<shared_ptr<FileMetaData> > fileMetaDatas;
+      if (!(dirNode && *dirNode)) {  // directory not existing
         // Add its children to dir tree
-        vector<shared_ptr<FileMetaData> > fileMetaDatas =
-            QSClientConverter::ListObjectsOutputToFileMetaDatas(
-                listObjOutput, true);  // add dir itself
-        dirTree->Grow(fileMetaDatas);
-      } else {  // directory existing
-        vector<shared_ptr<FileMetaData> > fileMetaDatas =
-            QSClientConverter::ListObjectsOutputToFileMetaDatas(
-                listObjOutput, false);  // not add dir itself
-        if (dirNode->IsEmpty()) {
-          dirTree->Grow(fileMetaDatas);
-        } else {
-          dirTree->UpdateDirectory(dirPath, fileMetaDatas);
-        }
+        fileMetaDatas = QSClientConverter::ListObjectsOutputToFileMetaDatas(
+            listObjOutput, true);  // add dir itself
+      } else {                     // directory existing
+        fileMetaDatas = QSClientConverter::ListObjectsOutputToFileMetaDatas(
+            listObjOutput, false);  // not add dir itself
       }
+      allFileMetaDatas.insert(allFileMetaDatas.end(), fileMetaDatas.begin(),
+                              fileMetaDatas.end());
     }  // for list object output
   } while (resultTruncated && (listAll || resCount < maxListCount));
+
+  if (!(dirNode && *dirNode)) {  // directory not existing
+    dirTree->Grow(allFileMetaDatas);
+  } else {  // directory existing
+    if (dirNode->IsEmpty()) {
+      dirTree->Grow(allFileMetaDatas);
+    } else {
+      dirTree->UpdateDirectory(dirPath, allFileMetaDatas);
+    }
+  }
 
   return ClientError<QSError::Value>(QSError::GOOD, false);
 }

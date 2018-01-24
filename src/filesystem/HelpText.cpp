@@ -40,6 +40,7 @@ using QS::Configure::Default::GetDefaultProtocolName;
 using QS::Configure::Default::GetDefaultParallelTransfers;
 using QS::Configure::Default::GetDefaultTransferBufSize;
 using QS::Configure::Default::GetDefaultZone;
+using QS::Configure::Default::GetDefaultLogLevelName;
 using QS::Configure::Default::GetMaxCacheSize;
 using QS::Configure::Default::GetMaxListObjectsCount;
 using QS::Configure::Default::GetMaxStatCount;
@@ -74,7 +75,7 @@ void ShowQSFSHelp() {
                           GetDefaultLogDirectory() << "\n" <<
   "  -L, --loglevel     Min log level, message lower than this level don't logged;\n"
   "                     Specify one of following log level: INFO,WARN,ERROR,FATAL;\n"
-  "                     INFO is set by default\n"
+  "                     " << GetDefaultLogLevelName() << " is set by default\n"
   "  -r, --retries      Number of times to retry a failed transaction\n"
   "  -R, --reqtimeout   Time(milliseconds) to wait before timing out a request which\n"
   "                     is not time-consuming such as head a file, make a file, etc.\n"

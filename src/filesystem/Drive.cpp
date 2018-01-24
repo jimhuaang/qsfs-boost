@@ -278,9 +278,7 @@ pair<shared_ptr<Node>, bool> Drive::GetNode(const string &path,
   // not be considered as an error.
   // The modified time is only the meta of an object, we should not take
   // modified time as an precondition to decide if we need to update dir or not.
-  if (node && *node && node->IsDirectory() && updateIfDirectory &&
-      (QS::TimeUtils::IsExpire(node->GetCachedTime(), expireDurationInMin) ||
-       node->IsEmpty())) {
+  if (node && *node && node->IsDirectory() && updateIfDirectory ) {
     PrintErrorMsg receivedHandler;
     string path_ = AppendPathDelim(path);
     if (updateDirAsync) {

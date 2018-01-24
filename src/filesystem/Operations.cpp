@@ -246,8 +246,8 @@ void InitializeFUSECallbacks(struct fuse_operations* fuseOps) {
   fuseOps->symlink = qsfs_symlink;
   fuseOps->rename = qsfs_rename;
   // fuseOps->link = NULL;
-  fuseOps->chmod = qsfs_chmod;
-  fuseOps->chown = qsfs_chown;
+  //fuseOps->chmod = qsfs_chmod;
+  //fuseOps->chown = qsfs_chown;
   fuseOps->truncate = qsfs_truncate;
   fuseOps->open = qsfs_open;
   fuseOps->read = qsfs_read;

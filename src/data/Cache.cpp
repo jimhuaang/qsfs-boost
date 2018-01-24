@@ -185,8 +185,8 @@ pair<size_t, ContentRangeDeque> Cache::Read(const string &fileId, off_t offset,
   shared_ptr<File> &file = pos->second;
   if (mtimeSince > file->GetTime()) {
     DebugWarning("File too old, read no bytes " + FormatPath(fileId) +
-                 "[mtime]" + SecondsToRFC822GMT(mtimeSince) + " [file time]" +
-                 SecondsToRFC822GMT(file->GetTime()));
+                 "[mtime:" + SecondsToRFC822GMT(mtimeSince) +
+                 ", file time:" + SecondsToRFC822GMT(file->GetTime()) + "]");
     unloadedRanges.push_back(make_pair(offset, len));
     return make_pair(0, unloadedRanges);
   }
