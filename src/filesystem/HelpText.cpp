@@ -90,7 +90,7 @@ void ShowQSFSHelp() {
                         << to_string(GetMaxStatCount() / QS::Size::K1) << "K\n"
   "  -e, --statexpire   Expire time(minutes) for stat entries, negative value will\n"
   "                     disable stat expire, default is no expire\n"
-  "  -i, --maxlist      Max count of files of ls operation, zero value will list\n"
+  "  -i, --maxlist      Max count of files of ls operation. A value of zero will list\n"
   "                     all files, default is " << to_string(GetMaxListObjectsCount()) <<"\n"
   "  -n, --numtransfer  Max number file tranfers to run in parallel, you can increase\n"
   "                     the value when transfer large files, default is "

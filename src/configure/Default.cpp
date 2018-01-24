@@ -78,7 +78,11 @@ vector<string> GetMimeFiles() {
   return mimes;
 }
 
-uint16_t GetPathMaxLen() { return 4096; }  // TODO(jim): should be 1023?
+uint16_t GetPathMaxLen() {
+  // sepcification from qingstor
+  // https://docs.qingcloud.com/qingstor/introduce#object
+  return 1023;
+}
 uint16_t GetNameMaxLen() { return 255; }
 
 mode_t GetRootMode() { return (S_IRWXU | S_IRWXG | S_IRWXO); }

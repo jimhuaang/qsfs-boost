@@ -92,7 +92,6 @@ using QS::Exception::QSException;
 using QS::StringUtils::FormatPath;
 using QS::Utils::AppendPathDelim;
 using QS::UtilsWithLog::DeleteFilesInDirectory;
-using QS::Utils::FileExists;
 using QS::UtilsWithLog::IsDirectory;
 using QS::Utils::GetDirName;
 using QS::Utils::GetProcessEffectiveUserID;
@@ -149,7 +148,7 @@ void Drive::CleanUp() {
     // remove disk cache folder if existing
     string diskfolder =
         QS::Configure::Options::Instance().GetDiskCacheDirectory();
-    if (FileExists(diskfolder) && IsDirectory(diskfolder)) {  // log on
+    if (QS::Utils::FileExists(diskfolder) && IsDirectory(diskfolder)) {
       DeleteFilesInDirectory(diskfolder, true);  // delete folder itself
     }
 

@@ -520,8 +520,7 @@ int qsfs_unlink(const char* path) {
     // Check parent directory
     shared_ptr<Node> dir = CheckParentDir(path, W_OK | X_OK, &ret, false);
 
-    shared_ptr<Node> node =
-        drive.GetNodeSimple(path);  // getattr synchornized node
+    shared_ptr<Node> node = drive.GetNodeSimple(path);
     if (!(node && *node)) {
       ret = -ENOENT;
       throw QSException("No such file " + FormatPath(path));
@@ -958,8 +957,8 @@ int qsfs_open(const char* path, struct fuse_file_info* fi) {
           throw QSException("No read permission for path " + FormatPath(path));
         }
       } else {
-        // Check access permission
-        if (!node->FileAccess(GetFuseContextUID(), GetFuseContextGID(), W_OK)) {
+        // Check parent write permission
+        if (!parent->FileAccess(GetFuseContextUID(), GetFuseContextGID(), W_OK)) {
           ret = -EACCES;
           throw QSException("No write permission for path " + FormatPath(path));
         }
@@ -1174,8 +1173,10 @@ int qsfs_flush(const char* path, struct fuse_file_info* fi) {
     // Write the file to object storage
     if (node->IsNeedUpload()) {
       try {
+        bool releasefile = false;
+        bool updatemeta = true;
         bool async = !QS::Configure::Options::Instance().IsQsfsSingleThread();
-        Drive::Instance().UploadFile(path_, false, true, async);
+        Drive::Instance().UploadFile(path_, releasefile, updatemeta, async);
       } catch (const QSException& err) {
         Error(err.get());
         return -EAGAIN;  // Try again
@@ -1262,8 +1263,10 @@ int qsfs_fsync(const char* path, int datasync, struct fuse_file_info* fi) {
     // Write the file to object storage
     if (node->IsNeedUpload()) {
       try {
+        bool releasefile = false;
+        bool updatemeta = datasync == 0;
         bool async = !QS::Configure::Options::Instance().IsQsfsSingleThread();
-        Drive::Instance().UploadFile(path_, false, false, async);
+        Drive::Instance().UploadFile(path_, releasefile, updatemeta, async);
       } catch (const QSException& err) {
         Error(err.get());
         return -EAGAIN;  // Try again
