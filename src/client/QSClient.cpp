@@ -503,7 +503,7 @@ ClientError<QSError::Value> QSClient::DownloadFile(
   }
 
   if (outcome.IsSuccess()) {
-    GetObjectOutput res = outcome.GetResult();
+    GetObjectOutput &res = outcome.GetResult();
     iostream *bodyStream = res.GetBody();
     bodyStream->seekg(0, std::ios_base::beg);
     buffer->seekp(0, std::ios_base::beg);
@@ -537,7 +537,7 @@ ClientError<QSError::Value> QSClient::InitiateMultipartUpload(
   }
 
   if (outcome.IsSuccess()) {
-    InitiateMultipartUploadOutput res = outcome.GetResult();
+    InitiateMultipartUploadOutput &res = outcome.GetResult();
     if (uploadId != NULL) {
       *uploadId = res.GetUploadID();
     }
@@ -858,7 +858,7 @@ ClientError<QSError::Value> QSClient::Stat(
   }
 
   if (outcome.IsSuccess()) {
-    HeadObjectOutput res = outcome.GetResult();
+    HeadObjectOutput &res = outcome.GetResult();
     if (res.GetResponseCode() == QingStor::Http::NOT_MODIFIED) {
       // if is not modified, no meta is returned, so just return directly
       return ClientError<QSError::Value>(QSError::GOOD, false);
@@ -939,7 +939,7 @@ ClientError<QSError::Value> QSClient::Statvfs(struct statvfs *stvfs) {
   }
 
   if (outcome.IsSuccess()) {
-    QingStor::GetBucketStatisticsOutput res = outcome.GetResult();
+    QingStor::GetBucketStatisticsOutput &res = outcome.GetResult();
     QSClientConverter::GetBucketStatisticsOutputToStatvfs(res, stvfs);
     return ClientError<QSError::Value>(QSError::GOOD, false);
   } else {
