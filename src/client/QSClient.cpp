@@ -478,7 +478,7 @@ ClientError<QSError::Value> QSClient::MoveObject(const string &sourcePath,
 
 // --------------------------------------------------------------------------
 ClientError<QSError::Value> QSClient::DownloadFile(
-    const string &filePath, const shared_ptr<iostream> &buffer,
+    const string &filePath, shared_ptr<iostream> buffer,
     const string &range, string *eTag) {
   GetObjectInput input;
   uint32_t timeDuration = ClientConfiguration::Instance()
@@ -550,7 +550,7 @@ ClientError<QSError::Value> QSClient::InitiateMultipartUpload(
 // --------------------------------------------------------------------------
 ClientError<QSError::Value> QSClient::UploadMultipart(
     const string &filePath, const string &uploadId, int partNumber,
-    uint64_t contentLength, const shared_ptr<iostream> &buffer) {
+    uint64_t contentLength, shared_ptr<iostream> buffer) {
   UploadMultipartInput input;
   input.SetUploadID(uploadId);
   input.SetPartNumber(partNumber);
@@ -644,7 +644,7 @@ ClientError<QSError::Value> QSClient::AbortMultipartUpload(
 // --------------------------------------------------------------------------
 ClientError<QSError::Value> QSClient::UploadFile(
     const string &filePath, uint64_t fileSize,
-    const shared_ptr<iostream> &buffer) {
+    shared_ptr<iostream> buffer) {
   PutObjectInput input;
   input.SetContentLength(fileSize);
   input.SetContentType(LookupMimeType(filePath));

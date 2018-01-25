@@ -119,7 +119,7 @@ class QSClient : public Client {
   // The file data will be written to buffer.
   ClientError<QSError::Value> DownloadFile(
       const std::string &filePath,
-      const boost::shared_ptr<std::iostream> &buffer,
+      boost::shared_ptr<std::iostream> buffer,
       const std::string &range = std::string(), std::string *eTag = NULL);
 
   // Initiate multipart upload id
@@ -135,7 +135,7 @@ class QSClient : public Client {
   // @return : ClientError
   ClientError<QSError::Value> UploadMultipart(
       const std::string &filePath, const std::string &uploadId, int partNumber,
-      uint64_t contentLength, const boost::shared_ptr<std::iostream> &buffer);
+      uint64_t contentLength, boost::shared_ptr<std::iostream> buffer);
 
   // Complete multipart upload
   //
@@ -158,7 +158,7 @@ class QSClient : public Client {
   // @return : ClientError
   ClientError<QSError::Value> UploadFile(
       const std::string &filePath, uint64_t fileSize,
-      const boost::shared_ptr<std::iostream> &buffer);
+      boost::shared_ptr<std::iostream> buffer);
 
   // Create a symbolic link to a file
   //

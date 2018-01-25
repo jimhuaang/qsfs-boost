@@ -129,7 +129,7 @@ class Client : private boost::noncopyable {
   // The file data will be written to buffer.
   virtual ClientError<QSError::Value> DownloadFile(
       const std::string &filePath,
-      const boost::shared_ptr<std::iostream> &buffer,
+      boost::shared_ptr<std::iostream> buffer,
       const std::string &range = std::string(), std::string *eTag = NULL) = 0;
 
   // Initiate multipart upload id
@@ -146,7 +146,7 @@ class Client : private boost::noncopyable {
   virtual ClientError<QSError::Value> UploadMultipart(
       const std::string &filePath, const std::string &uploadId, int partNumber,
       uint64_t contentLength,
-      const boost::shared_ptr<std::iostream> &buffer) = 0;
+      boost::shared_ptr<std::iostream> buffer) = 0;
 
   // Complete multipart upload
   //
@@ -169,7 +169,7 @@ class Client : private boost::noncopyable {
   // @return : ClientError
   virtual ClientError<QSError::Value> UploadFile(
       const std::string &filePath, uint64_t fileSize,
-      const boost::shared_ptr<std::iostream> &buffer) = 0;
+      boost::shared_ptr<std::iostream> buffer) = 0;
 
   // Create a symbolic link to a file
   //

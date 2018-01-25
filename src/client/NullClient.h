@@ -57,7 +57,7 @@ class NullClient : public Client {
 
   ClientError<QSError::Value> DownloadFile(
       const std::string &filePath,
-      const boost::shared_ptr<std::iostream> &buffer, const std::string &range,
+      boost::shared_ptr<std::iostream> buffer, const std::string &range,
       std::string *eTag);
 
   ClientError<QSError::Value> InitiateMultipartUpload(
@@ -65,7 +65,7 @@ class NullClient : public Client {
 
   ClientError<QSError::Value> UploadMultipart(
       const std::string &filePath, const std::string &uploadId, int partNumber,
-      uint64_t contentLength, const boost::shared_ptr<std::iostream> &buffer);
+      uint64_t contentLength, boost::shared_ptr<std::iostream> buffer);
 
   ClientError<QSError::Value> SymLink(const std::string &filePath,
                                       const std::string &linkPath);
@@ -79,7 +79,7 @@ class NullClient : public Client {
 
   ClientError<QSError::Value> UploadFile(
       const std::string &filePath, uint64_t fileSize,
-      const boost::shared_ptr<std::iostream> &buffer);
+      boost::shared_ptr<std::iostream> buffer);
 
   ClientError<QSError::Value> ListDirectory(
       const std::string &dirPath,

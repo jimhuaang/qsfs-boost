@@ -69,7 +69,7 @@ ClientError<QSError::Value> NullClient::MoveDirectory(
 }
 
 ClientError<QSError::Value> NullClient::DownloadFile(
-    const string &filePath, const shared_ptr<std::iostream> &buffer,
+    const string &filePath, shared_ptr<std::iostream> buffer,
     const string &range, string *eTag) {
   return GoodState();
 }
@@ -81,7 +81,7 @@ ClientError<QSError::Value> NullClient::InitiateMultipartUpload(
 
 ClientError<QSError::Value> NullClient::UploadMultipart(
     const string &filePath, const string &uploadId, int partNumber,
-    uint64_t contentLength, const shared_ptr<std::iostream> &buffer) {
+    uint64_t contentLength, shared_ptr<std::iostream> buffer) {
   return GoodState();
 }
 
@@ -98,7 +98,7 @@ ClientError<QSError::Value> NullClient::AbortMultipartUpload(
 
 ClientError<QSError::Value> NullClient::UploadFile(
     const string &filePath, uint64_t fileSize,
-    const shared_ptr<std::iostream> &buffer) {
+    shared_ptr<std::iostream> buffer) {
   return GoodState();
 }
 
