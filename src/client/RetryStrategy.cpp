@@ -37,7 +37,7 @@ uint32_t RetryStrategy::CalculateDelayBeforeNextRetry(
 }
 
 RetryStrategy GetDefaultRetryStrategy() {
-  return RetryStrategy(QS::Configure::Default::GetDefaultMaxRetries(),
+  return RetryStrategy(QS::Configure::Default::GetDefaultTransactionRetries(),
                        Retry::DefaultScaleFactor);
 }
 

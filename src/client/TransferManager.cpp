@@ -54,7 +54,8 @@ TransferManager::TransferManager(const TransferManagerConfigure &config)
   }
   if (GetMaxParallelTransfers() > 0) {
     m_executor =
-        shared_ptr<ThreadPool>(new ThreadPool(config.m_maxParallelTransfers));
+        shared_ptr<ThreadPool>(
+            new QS::Threading::ThreadPool(config.m_maxParallelTransfers));
     QS::Threading::ThreadPoolInitializer::Instance().Register(m_executor.get());
   }
 }

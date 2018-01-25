@@ -37,7 +37,7 @@ std::string GetDefaultCredentialsFile();
 std::string GetDefaultDiskCacheDirectory();
 std::string GetDefaultLogDirectory();
 std::string GetDefaultLogLevelName();
-uint16_t GetDefaultMaxRetries();
+uint16_t GetDefaultTransactionRetries();
 std::string GetDefaultHostName();
 uint16_t GetDefaultPort(const std::string& protocolName);
 std::string GetDefaultProtocolName();

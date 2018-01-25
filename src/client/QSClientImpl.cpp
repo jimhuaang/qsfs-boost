@@ -100,9 +100,11 @@ ClientError<QSError::Value> BuildQSError(QsError sdkErr,
     err = SDKErrorToQSError(sdkErr);
   }
 
-  if(sdkErr == QS_ERR_UNEXCEPTED_RESPONSE) {
+  if (sdkErr == QS_ERR_UNEXCEPTED_RESPONSE) {
+    // it seems sdk response error info contain empty content,
+    // so we print repsonde code at beginning
+    string errMsg = SDKResponseCodeToString(rspCode);
     QingStor::ResponseErrorInfo errInfo = output.GetResponseErrInfo();
-    string errMsg;
     errMsg += "[code:" + errInfo.code;
     errMsg += "; message:" + errInfo.message;
     errMsg += "; request:" + errInfo.requestID;
@@ -110,8 +112,8 @@ ClientError<QSError::Value> BuildQSError(QsError sdkErr,
     errMsg += "]";
     return ClientError<QSError::Value>(err, exceptionName, errMsg, retriable);
   } else {
-    return ClientError<QSError::Value>(err, exceptionName, 
-        SDKResponseCodeToString(rspCode), retriable);
+    return ClientError<QSError::Value>(
+        err, exceptionName, SDKResponseCodeToString(rspCode), retriable);
   }
 }
 
@@ -183,7 +185,7 @@ GetBucketStatisticsOutcome QSClientImpl::GetBucketStatistics(
       return GetBucketStatisticsOutcome(output);
     } else {
       return GetBucketStatisticsOutcome(BuildQSError(
-          sdkErr, exceptionName, output, SDKShouldRetry(responseCode)));
+          sdkErr, exceptionName, output, SDKShouldRetry(sdkErr, responseCode)));
     }
   } else {
     return GetBucketStatisticsOutcome(TimeOutError(exceptionName, fState));
@@ -229,8 +231,8 @@ HeadBucketOutcome QSClientImpl::HeadBucket(uint32_t msTimeDuration,
     if (SDKResponseSuccess(sdkErr, responseCode)) {
       return HeadBucketOutcome(output);
     } else {
-      return HeadBucketOutcome(BuildQSError(sdkErr, exceptionName, output,
-                                            SDKShouldRetry(responseCode)));
+      return HeadBucketOutcome(BuildQSError(
+          sdkErr, exceptionName, output, SDKShouldRetry(sdkErr, responseCode)));
     }
   } else {
     return HeadBucketOutcome(TimeOutError(exceptionName, fState));
@@ -316,8 +318,9 @@ ListObjectsOutcome QSClientImpl::ListObjects(
         }
         result.push_back(output);
       } else {
-        return ListObjectsOutcome(BuildQSError(sdkErr, exceptionName, output,
-                                               SDKShouldRetry(responseCode)));
+        return ListObjectsOutcome(
+            BuildQSError(sdkErr, exceptionName, output,
+                         SDKShouldRetry(sdkErr, responseCode)));
       }
     } else {
       return ListObjectsOutcome(TimeOutError(exceptionName, fState));
@@ -365,8 +368,8 @@ DeleteObjectOutcome QSClientImpl::DeleteObject(const string &objKey,
     if (SDKResponseSuccess(sdkErr, responseCode)) {
       return DeleteObjectOutcome(output);
     } else {
-      return DeleteObjectOutcome(BuildQSError(sdkErr, exceptionName, output,
-                                              SDKShouldRetry(responseCode)));
+      return DeleteObjectOutcome(BuildQSError(
+          sdkErr, exceptionName, output, SDKShouldRetry(sdkErr, responseCode)));
     }
   } else {
     return DeleteObjectOutcome(TimeOutError(exceptionName, fState));
@@ -425,8 +428,8 @@ GetObjectOutcome QSClientImpl::GetObject(const string &objKey,
       }
       return GetObjectOutcome(output);
     } else {
-      return GetObjectOutcome(BuildQSError(sdkErr, exceptionName, output,
-                                           SDKShouldRetry(responseCode)));
+      return GetObjectOutcome(BuildQSError(
+          sdkErr, exceptionName, output, SDKShouldRetry(sdkErr, responseCode)));
     }
   } else {
     return GetObjectOutcome(TimeOutError(exceptionName, fState));
@@ -438,6 +441,10 @@ pair<QsError, HeadObjectOutput> DoHeadObject(const shared_ptr<Bucket> &bucket,
                                              const string &objKey,
                                              HeadObjectInput *input) {
   HeadObjectOutput output;
+  // TODO(jim): print some checking msg
+  if(input == NULL) {
+    Error(">>>>>>>>HeadObject with null HeadObjectInput <<<<<<<<<");
+  }
   QsError sdkErr = bucket->HeadObject(objKey, *input, output);
   return make_pair(sdkErr, output);
 }
@@ -468,8 +475,8 @@ HeadObjectOutcome QSClientImpl::HeadObject(const string &objKey,
     if (SDKResponseSuccess(sdkErr, responseCode)) {
       return HeadObjectOutcome(output);
     } else {
-      return HeadObjectOutcome(BuildQSError(sdkErr, exceptionName, output,
-                                            SDKShouldRetry(responseCode)));
+      return HeadObjectOutcome(BuildQSError(
+          sdkErr, exceptionName, output, SDKShouldRetry(sdkErr, responseCode)));
     }
 
   } else {
@@ -512,8 +519,8 @@ PutObjectOutcome QSClientImpl::PutObject(const string &objKey,
     if (SDKResponseSuccess(sdkErr, responseCode)) {
       return PutObjectOutcome(output);
     } else {
-      return PutObjectOutcome(BuildQSError(sdkErr, exceptionName, output,
-                                           SDKShouldRetry(responseCode)));
+      return PutObjectOutcome(BuildQSError(
+          sdkErr, exceptionName, output, SDKShouldRetry(sdkErr, responseCode)));
     }
   } else {
     return PutObjectOutcome(TimeOutError(exceptionName, fState));
@@ -557,7 +564,7 @@ InitiateMultipartUploadOutcome QSClientImpl::InitiateMultipartUpload(
       return InitiateMultipartUploadOutcome(output);
     } else {
       return InitiateMultipartUploadOutcome(BuildQSError(
-          sdkErr, exceptionName, output, SDKShouldRetry(responseCode)));
+          sdkErr, exceptionName, output, SDKShouldRetry(sdkErr, responseCode)));
     }
   } else {
     return InitiateMultipartUploadOutcome(TimeOutError(exceptionName, fState));
@@ -599,8 +606,8 @@ UploadMultipartOutcome QSClientImpl::UploadMultipart(
     if (SDKResponseSuccess(sdkErr, responseCode)) {
       return UploadMultipartOutcome(output);
     } else {
-      return UploadMultipartOutcome(BuildQSError(sdkErr, exceptionName, output,
-                                                 SDKShouldRetry(responseCode)));
+      return UploadMultipartOutcome(BuildQSError(
+          sdkErr, exceptionName, output, SDKShouldRetry(sdkErr, responseCode)));
     }
   } else {
     return UploadMultipartOutcome(TimeOutError(exceptionName, fState));
@@ -644,7 +651,7 @@ CompleteMultipartUploadOutcome QSClientImpl::CompleteMultipartUpload(
       return CompleteMultipartUploadOutcome(output);
     } else {
       return CompleteMultipartUploadOutcome(BuildQSError(
-          sdkErr, exceptionName, output, SDKShouldRetry(responseCode)));
+          sdkErr, exceptionName, output, SDKShouldRetry(sdkErr, responseCode)));
     }
   } else {
     return CompleteMultipartUploadOutcome(TimeOutError(exceptionName, fState));
@@ -687,7 +694,7 @@ AbortMultipartUploadOutcome QSClientImpl::AbortMultipartUpload(
       return AbortMultipartUploadOutcome(output);
     } else {
       return AbortMultipartUploadOutcome(BuildQSError(
-          sdkErr, exceptionName, output, SDKShouldRetry(responseCode)));
+          sdkErr, exceptionName, output, SDKShouldRetry(sdkErr, responseCode)));
     }
   } else {
     return AbortMultipartUploadOutcome(TimeOutError(exceptionName, fState));

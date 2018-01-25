@@ -186,7 +186,7 @@ ClientError<QSError::Value> QSClient::HeadBucket(bool useThreadPool) {
     RetryRequestSleep(milliseconds(sleepMilliseconds));
     outcome = GetQSClientImpl()->HeadBucket(msTimeDuration, useThreadPool);
     ++attemptedRetries;
-    DebugInfo("Retry head bucket");
+    Info("Retry head bucket");
   }
 
   if (outcome.IsSuccess()) {
@@ -236,7 +236,7 @@ ClientError<QSError::Value> QSClient::DeleteObject(const string &filePath) {
     RetryRequestSleep(milliseconds(sleepMilliseconds));
     outcome = GetQSClientImpl()->DeleteObject(filePath);
     ++attemptedRetries;
-    DebugInfo("Retry delete object " + FormatPath(filePath));
+    Info("Retry delete object " + FormatPath(filePath));
   }
 
   return outcome.IsSuccess() ? ClientError<QSError::Value>(QSError::GOOD, false)
@@ -258,7 +258,7 @@ ClientError<QSError::Value> QSClient::MakeFile(const string &filePath) {
     RetryRequestSleep(milliseconds(sleepMilliseconds));
     outcome = GetQSClientImpl()->PutObject(filePath, &input);
     ++attemptedRetries;
-    DebugInfo("Retry make file " + FormatPath(filePath));
+    Info("Retry make file " + FormatPath(filePath));
   }
 
   if (outcome.IsSuccess()) {
@@ -293,7 +293,7 @@ ClientError<QSError::Value> QSClient::MakeDirectory(const string &dirPath) {
     RetryRequestSleep(milliseconds(sleepMilliseconds));
     outcome = GetQSClientImpl()->PutObject(dir, &input);
     ++attemptedRetries;
-    DebugInfo("Retry make directory " + FormatPath(dirPath));
+    Info("Retry make directory " + FormatPath(dirPath));
   }
 
   if (outcome.IsSuccess()) {
@@ -344,7 +344,7 @@ ClientError<QSError::Value> QSClient::MoveFile(
           dirTree->Rename(sourceFilePath, destFilePath);
         }
       } else {
-        DebugInfo("Object not created : " + GetMessageForQSError(err1) +
+        Info("Object not created : " + GetMessageForQSError(err1) +
                   FormatPath(destFilePath));
       }
     }
@@ -457,7 +457,7 @@ ClientError<QSError::Value> QSClient::MoveObject(const string &sourcePath,
     RetryRequestSleep(milliseconds(sleepMilliseconds));
     outcome = GetQSClientImpl()->PutObject(targetPath, &input, timeDuration);
     ++attemptedRetries;
-    DebugInfo("Retry move object " + FormatPath(sourcePath, targetPath));
+    Info("Retry move object " + FormatPath(sourcePath, targetPath));
   }
 
   if (outcome.IsSuccess()) {
@@ -499,7 +499,7 @@ ClientError<QSError::Value> QSClient::DownloadFile(
     RetryRequestSleep(milliseconds(sleepMilliseconds));
     outcome = GetQSClientImpl()->GetObject(filePath, &input, timeDuration);
     ++attemptedRetries;
-    DebugInfo("Retry download file " + FormatPath(filePath));
+    Info("Retry download file " + FormatPath(filePath));
   }
 
   if (outcome.IsSuccess()) {
@@ -533,7 +533,7 @@ ClientError<QSError::Value> QSClient::InitiateMultipartUpload(
     RetryRequestSleep(milliseconds(sleepMilliseconds));
     outcome = GetQSClientImpl()->InitiateMultipartUpload(filePath, &input);
     ++attemptedRetries;
-    DebugInfo("Retry initiate multipart upload " + FormatPath(filePath));
+    Info("Retry initiate multipart upload " + FormatPath(filePath));
   }
 
   if (outcome.IsSuccess()) {
@@ -571,7 +571,7 @@ ClientError<QSError::Value> QSClient::UploadMultipart(
     outcome =
         GetQSClientImpl()->UploadMultipart(filePath, &input, timeDuration);
     ++attemptedRetries;
-    DebugInfo("Retry upload multipart " + FormatPath(filePath));
+    Info("Retry upload multipart " + FormatPath(filePath));
   }
 
   if (outcome.IsSuccess()) {
@@ -605,7 +605,7 @@ ClientError<QSError::Value> QSClient::CompleteMultipartUpload(
     RetryRequestSleep(milliseconds(sleepMilliseconds));
     outcome = GetQSClientImpl()->CompleteMultipartUpload(filePath, &input);
     ++attemptedRetries;
-    DebugInfo("Retry complete multipart upload " + FormatPath(filePath));
+    Info("Retry complete multipart upload " + FormatPath(filePath));
   }
 
   if (outcome.IsSuccess()) {
@@ -631,7 +631,7 @@ ClientError<QSError::Value> QSClient::AbortMultipartUpload(
     RetryRequestSleep(milliseconds(sleepMilliseconds));
     outcome = GetQSClientImpl()->AbortMultipartUpload(filePath, &input);
     ++attemptedRetries;
-    DebugInfo("Retry abort mulitpart upload " + FormatPath(filePath));
+    Info("Retry abort mulitpart upload " + FormatPath(filePath));
   }
 
   if (outcome.IsSuccess()) {
@@ -664,7 +664,7 @@ ClientError<QSError::Value> QSClient::UploadFile(
     RetryRequestSleep(milliseconds(sleepMilliseconds));
     outcome = GetQSClientImpl()->PutObject(filePath, &input, timeDuration);
     ++attemptedRetries;
-    DebugInfo("Retry upload file " + FormatPath(filePath));
+    Info("Retry upload file " + FormatPath(filePath));
   }
 
   if (outcome.IsSuccess()) {
@@ -701,7 +701,7 @@ ClientError<QSError::Value> QSClient::SymLink(const string &filePath,
     RetryRequestSleep(milliseconds(sleepMilliseconds));
     outcome = GetQSClientImpl()->PutObject(linkPath, &input);
     ++attemptedRetries;
-    DebugInfo("Retry symlink " + FormatPath(filePath, linkPath));
+    Info("Retry symlink " + FormatPath(filePath, linkPath));
   }
 
   if (outcome.IsSuccess()) {
@@ -816,7 +816,7 @@ ListObjectsOutcome QSClient::ListObjects(const string &dirPath,
         GetQSClientImpl()->ListObjects(&listObjInput, resultTruncated, resCount,
                                        maxCount, timeDuration, useThreadPool);
     ++attemptedRetries;
-    DebugInfo("Retry list objects " + FormatPath(dirPath));
+    Info("Retry list objects " + FormatPath(dirPath));
   }
 
   return outcome;
@@ -854,7 +854,7 @@ ClientError<QSError::Value> QSClient::Stat(
     RetryRequestSleep(milliseconds(sleepMilliseconds));
     outcome = GetQSClientImpl()->HeadObject(path, &input);
     ++attemptedRetries;
-    DebugInfo("Retry head object " + FormatPath(path));
+    Info("Retry head object " + FormatPath(path));
   }
 
   if (outcome.IsSuccess()) {
@@ -935,7 +935,7 @@ ClientError<QSError::Value> QSClient::Statvfs(struct statvfs *stvfs) {
     RetryRequestSleep(milliseconds(sleepMilliseconds));
     outcome = GetQSClientImpl()->GetBucketStatistics();
     ++attemptedRetries;
-    DebugInfo("Retry get bucket statistics");
+    Info("Retry get bucket statistics");
   }
 
   if (outcome.IsSuccess()) {
@@ -1013,7 +1013,11 @@ void QSClient::DoStartQSService() {
       Http::ProtocolToString(clientConfig.GetProtocol());
   m_qingStorConfig->port = clientConfig.GetPort();
   m_qingStorConfig->connectionRetries = clientConfig.GetConnectionRetries();
-  m_qingStorConfig->timeOutPeriod = clientConfig.GetTransactionTimeDuration();
+  // timeoutPeriod is for one connection duration, so per transaction will
+  // have timeoutPeriod * sdk_connection_retries
+  m_qingStorConfig->timeOutPeriod = (clientConfig.GetTransactionTimeDuration() -
+                                     clientConfig.GetClientPoolTimeMargin()) /
+                                     clientConfig.GetConnectionRetries();
 }
 
 // --------------------------------------------------------------------------

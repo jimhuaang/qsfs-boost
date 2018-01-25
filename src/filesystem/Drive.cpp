@@ -737,6 +737,7 @@ struct UploadFileCallback {
       if (releaseFile) {
         node->SetFileOpen(false);
         cache->SetFileOpen(filePath, false);
+        Info("Close file " + FormatPath(filePath));
       }
       if (handle->IsMultipart()) {
         drive->m_unfinishedMultipartUploadHandles.emplace(
@@ -812,6 +813,7 @@ void Drive::ReleaseFile(const string &filePath) {
     return;
   }
 
+  Info("Close file " + FormatPath(filePath));
   node->SetNeedUpload(false);
   node->SetFileOpen(false);
   m_cache->SetFileOpen(filePath, false);

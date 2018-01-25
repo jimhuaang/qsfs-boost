@@ -138,7 +138,7 @@ class Options : public Singleton<Options> {
   std::string m_credentialsFile;
   std::string m_logDirectory;
   LogLevel::Value m_logLevel;
-  uint16_t m_retries;
+  uint16_t m_retries;         // transaction retries
   uint32_t m_requestTimeOut;  // in milliseconds
   uint32_t m_maxCacheSizeInMB;
   std::string m_diskCacheDir;

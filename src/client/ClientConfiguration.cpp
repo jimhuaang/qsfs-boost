@@ -47,7 +47,7 @@ using boost::shared_ptr;
 using QS::Exception::QSException;
 using QS::Configure::Default::GetClientDefaultPoolSize;
 using QS::Configure::Default::GetDefaultLogDirectory;
-using QS::Configure::Default::GetDefaultMaxRetries;
+using QS::Configure::Default::GetDefaultTransactionRetries;
 using QS::Configure::Default::GetDefaultParallelTransfers;
 using QS::Configure::Default::GetDefaultTransferBufSize;
 using QS::Configure::Default::GetDefaultHostName;
@@ -122,6 +122,7 @@ void ConstructClientConfigInstance() {
   clientConfigInstance =
       shared_ptr<ClientConfiguration>(new ClientConfiguration);
 }
+
 }  // namespace
 
 // --------------------------------------------------------------------------
@@ -152,7 +153,7 @@ ClientConfiguration::ClientConfiguration(const Credentials &credentials)
       m_logLevel(ClientLogLevel::Warn),
       m_sdkLogDirectory(AppendPathDelim(GetDefaultLogDirectory()) +
                         GetSDKLogFolderBaseName()),
-      m_transactionRetries(GetDefaultMaxRetries()),
+      m_transactionRetries(GetDefaultTransactionRetries()),
       m_transactionTimeDuration(GetTransactionDefaultTimeDuration()),
       m_maxListCount(GetMaxListObjectsCount()),
       m_clientPoolSize(GetClientDefaultPoolSize()),
@@ -173,7 +174,7 @@ ClientConfiguration::ClientConfiguration(const CredentialsProvider &provider)
       m_logLevel(ClientLogLevel::Warn),
       m_sdkLogDirectory(AppendPathDelim(GetDefaultLogDirectory()) +
                         GetSDKLogFolderBaseName()),
-      m_transactionRetries(GetDefaultMaxRetries()),
+      m_transactionRetries(GetDefaultTransactionRetries()),
       m_transactionTimeDuration(GetTransactionDefaultTimeDuration()),
       m_maxListCount(GetMaxListObjectsCount()),
       m_clientPoolSize(GetClientDefaultPoolSize()),
@@ -215,11 +216,21 @@ void ClientConfiguration::InitializeByOptions() {
   }
 
   m_transactionRetries = options.GetRetries();
-  m_transactionTimeDuration = options.GetRequestTimeOut();
+  m_transactionTimeDuration = options.GetRequestTimeOut() +
+                              GetClientPoolTimeMargin();
   m_maxListCount = options.GetMaxListCount();
   m_clientPoolSize = options.GetClientPoolSize();
   m_parallelTransfers = options.GetParallelTransfers();
   m_transferBufferSizeInMB = options.GetTransferBufferSizeInMB();
+}
+
+// --------------------------------------------------------------------------
+uint32_t ClientConfiguration::GetClientPoolTimeMargin() const {
+  const QS::Configure::Options &options = QS::Configure::Options::Instance();
+  // client pool maybe busy, so we calculate a time margin for waiting
+  // the task get excuted.
+  uint16_t poolsize = options.GetClientPoolSize();
+  return poolsize * 1000;  // in milliseconds
 }
 
 }  // namespace Client

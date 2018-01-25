@@ -51,7 +51,7 @@ using QS::Configure::Default::GetDefaultDiskCacheDirectory;
 using QS::Configure::Default::GetDefaultLogDirectory;
 using QS::Configure::Default::GetDefaultLogLevelName;
 using QS::Configure::Default::GetDefaultHostName;
-using QS::Configure::Default::GetDefaultMaxRetries;
+using QS::Configure::Default::GetDefaultTransactionRetries;
 using QS::Configure::Default::GetDefaultPort;
 using QS::Configure::Default::GetDefaultProtocolName;
 using QS::Configure::Default::GetDefaultParallelTransfers;
@@ -79,7 +79,7 @@ static struct options {
   const char *credentials;
   const char *logDirectory;
   const char *logLevel;        // INFO, WARN, ERROR, FATAL
-  int retries;
+  int retries;           // transaction retries
   int32_t reqtimeout;    // in ms
   int32_t maxcache;      // in MB
   const char *diskdir;
@@ -153,7 +153,7 @@ void Parse(int argc, char **argv) {
   options.credentials    = strdup(GetDefaultCredentialsFile().c_str());
   options.logDirectory   = strdup(GetDefaultLogDirectory().c_str());
   options.logLevel       = strdup(GetDefaultLogLevelName().c_str());
-  options.retries        = GetDefaultMaxRetries();
+  options.retries        = GetDefaultTransactionRetries();
   options.reqtimeout     = GetTransactionDefaultTimeDuration();
   options.maxcache       = GetMaxCacheSize() / QS::Size::MB1;
   options.diskdir        = strdup(GetDefaultDiskCacheDirectory().c_str());
@@ -195,8 +195,8 @@ void Parse(int argc, char **argv) {
   qsOptions.SetLogLevel(QS::Logging::GetLogLevelByName(options.logLevel));
 
   if (options.retries <= 0) {
-    PrintWarnMsg("-r|--retries", options.retries, GetDefaultMaxRetries());
-    qsOptions.SetRetries(GetDefaultMaxRetries());
+    PrintWarnMsg("-r|--retries", options.retries, GetDefaultTransactionRetries());
+    qsOptions.SetRetries(GetDefaultTransactionRetries());
   } else {
     qsOptions.SetRetries(options.retries);
   }

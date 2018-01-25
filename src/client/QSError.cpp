@@ -135,7 +135,7 @@ QSError::Value SDKErrorToQSError(QsError sdkErr) {
   static unordered_map<QsError, QSError::Value, QS::HashUtils::EnumHash> sdkErrToQSErrMap;
   sdkErrToQSErrMap[QS_ERR_NO_ERROR]              = QSError::GOOD;
   sdkErrToQSErrMap[QS_ERR_INVAILD_CONFIG_FILE]   = QSError::SDK_CONFIGURE_FILE_INAVLID;
-  sdkErrToQSErrMap[QS_ERR_NO_REQUIRED_PARAMETER] = QSError::PARAMETER_MISSING;
+  sdkErrToQSErrMap[QS_ERR_NO_REQUIRED_PARAMETER] = QSError::SDK_NO_REQUIRED_PARAMETER;
   sdkErrToQSErrMap[QS_ERR_SEND_REQUEST_ERROR]    = QSError::SDK_REQUEST_SEND_ERROR;
   sdkErrToQSErrMap[QS_ERR_UNEXCEPTED_RESPONSE]   = QSError::SDK_UNEXPECTED_RESPONSE;
   unordered_map<QsError, QSError::Value, QS::HashUtils::EnumHash>::iterator it =
@@ -199,7 +199,10 @@ QSError::Value SDKResponseToQSError(HttpResponseCode code) {
 }
 
 // --------------------------------------------------------------------------
-bool SDKShouldRetry(QingStor::Http::HttpResponseCode code){
+bool SDKShouldRetry(QsError sdkErr, QingStor::Http::HttpResponseCode code){
+  if (sdkErr == QS_ERR_UNEXCEPTED_RESPONSE) {
+    return true;
+  }
   using namespace QingStor::Http;
   static unordered_set<HttpResponseCode, QS::HashUtils::EnumHash> retryableSet;
   retryableSet.insert(CONTINUE);                  //"Continue"               100

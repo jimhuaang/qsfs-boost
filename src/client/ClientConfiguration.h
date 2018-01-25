@@ -89,6 +89,7 @@ class ClientConfiguration {
   uint32_t GetTransferBufferSizeInMB() const {
     return m_transferBufferSizeInMB;
   }
+  uint32_t GetClientPoolTimeMargin () const;
 
  private:
   const std::string& GetAccessKeyId() const { return m_accessKeyId; }

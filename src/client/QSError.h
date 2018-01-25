@@ -65,7 +65,7 @@ bool IsGoodQSError(const ClientError<QSError::Value> &error);
 
 QSError::Value SDKErrorToQSError(QsError sdkErr);
 QSError::Value SDKResponseToQSError(QingStor::Http::HttpResponseCode code);
-bool SDKShouldRetry(QingStor::Http::HttpResponseCode code);
+bool SDKShouldRetry(QsError sdkErr, QingStor::Http::HttpResponseCode code);
 bool SDKResponseSuccess(QsError sdkErr, QingStor::Http::HttpResponseCode code);
 
 std::string SDKResponseCodeToName(QingStor::Http::HttpResponseCode code);

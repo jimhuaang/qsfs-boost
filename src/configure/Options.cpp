@@ -38,7 +38,7 @@ using QS::Configure::Default::GetDefaultDiskCacheDirectory;
 using QS::Configure::Default::GetDefaultLogDirectory;
 using QS::Configure::Default::GetDefaultLogLevelName;
 using QS::Configure::Default::GetDefaultHostName;
-using QS::Configure::Default::GetDefaultMaxRetries;
+using QS::Configure::Default::GetDefaultTransactionRetries;
 using QS::Configure::Default::GetDefaultPort;
 using QS::Configure::Default::GetDefaultProtocolName;
 using QS::Configure::Default::GetDefaultParallelTransfers;
@@ -61,7 +61,7 @@ Options::Options()
       m_credentialsFile(GetDefaultCredentialsFile()),
       m_logDirectory(GetDefaultLogDirectory()),
       m_logLevel(GetLogLevelByName(GetDefaultLogLevelName())),
-      m_retries(GetDefaultMaxRetries()),
+      m_retries(GetDefaultTransactionRetries()),
       m_requestTimeOut(GetTransactionDefaultTimeDuration()),
       m_maxCacheSizeInMB(GetMaxCacheSize() / QS::Size::MB1),
       m_diskCacheDir(GetDefaultDiskCacheDirectory()),
