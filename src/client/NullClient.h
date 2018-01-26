@@ -39,7 +39,7 @@ class NullClient : public Client {
   ~NullClient() {}
 
  public:
-  ClientError<QSError::Value> HeadBucket(bool useThreadPool = true);
+  ClientError<QSError::Value> HeadBucket();
 
   ClientError<QSError::Value> DeleteFile(
       const std::string &filePath,
@@ -83,8 +83,7 @@ class NullClient : public Client {
 
   ClientError<QSError::Value> ListDirectory(
       const std::string &dirPath,
-      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
-      bool useThreadPool);
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree);
 
   ClientError<QSError::Value> Stat(
       const std::string &path,

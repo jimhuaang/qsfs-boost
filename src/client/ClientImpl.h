@@ -17,31 +17,16 @@
 #ifndef QSFS_CLIENT_CLIENTIMPL_H_
 #define QSFS_CLIENT_CLIENTIMPL_H_
 
-#include "boost/shared_ptr.hpp"
-
-#include "base/ThreadPool.h"
-#include "client/ClientConfiguration.h"
-
 namespace QS {
 
 namespace Client {
 
 class ClientImpl {
  public:
-  ClientImpl(const boost::shared_ptr<QS::Threading::ThreadPool> &executor =
-                 boost::shared_ptr<QS::Threading::ThreadPool>(
-                     new QS::Threading::ThreadPool(
-                         ClientConfiguration::Instance().GetPoolSize())));
+  ClientImpl();
 
   virtual ~ClientImpl();
 
- protected:
-  const boost::shared_ptr<QS::Threading::ThreadPool> &GetExecutor() const {
-    return m_executor;
-  }
-
- private:
-  boost::shared_ptr<QS::Threading::ThreadPool> m_executor;
 };
 
 }  // namespace Client

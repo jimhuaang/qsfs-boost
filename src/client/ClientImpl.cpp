@@ -16,20 +16,13 @@
 
 #include "client/ClientImpl.h"
 
-#include "boost/shared_ptr.hpp"
-
-#include "base/ThreadPoolInitializer.h"
-
 namespace QS {
 
 namespace Client {
 
-using boost::shared_ptr;
-
 // --------------------------------------------------------------------------
-ClientImpl::ClientImpl(const shared_ptr<QS::Threading::ThreadPool> &executor)
-    : m_executor(executor) {
-  QS::Threading::ThreadPoolInitializer::Instance().Register(m_executor.get());
+ClientImpl::ClientImpl(){
+  // do nothing
 }
 
 // --------------------------------------------------------------------------

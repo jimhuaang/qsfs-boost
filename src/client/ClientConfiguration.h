@@ -72,7 +72,6 @@ class ClientConfiguration {
   Http::Host::Value GetHost() const { return m_host; }
   Http::Protocol::Value GetProtocol() const { return m_protocol; }
   uint16_t GetPort() const { return m_port; }
-  int GetConnectionRetries() const { return m_connectionRetries; }
   bool IsDebugCurl() const { return m_debugCurl; }
   const std::string& GetAdditionalAgent() const {
     return m_additionalUserAgent;
@@ -89,7 +88,6 @@ class ClientConfiguration {
   uint32_t GetTransferBufferSizeInMB() const {
     return m_transferBufferSizeInMB;
   }
-  uint32_t GetClientPoolTimeMargin () const;
 
  private:
   const std::string& GetAccessKeyId() const { return m_accessKeyId; }
@@ -106,13 +104,12 @@ class ClientConfiguration {
   Http::Host::Value m_host;
   Http::Protocol::Value m_protocol;
   uint16_t m_port;
-  int m_connectionRetries;
   bool m_debugCurl;
   std::string m_additionalUserAgent;
   ClientLogLevel::Value m_logLevel;
   std::string m_sdkLogDirectory;  // log directory
 
-  uint16_t m_transactionRetries;       // retry times when transaction fails
+  uint16_t m_transactionRetries;       // retry times for one transaction
   uint32_t m_transactionTimeDuration;  // default time duration for one
                                        // transaction in milliseconds
   int32_t m_maxListCount;              // max obj count for ls

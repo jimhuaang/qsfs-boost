@@ -67,9 +67,9 @@ class Client : private boost::noncopyable {
  public:
   // Head bucket
   //
-  // @param  : flag to use thread pool worker thread or not
+  // @param  : 
   // @return : ClientError
-  virtual ClientError<QSError::Value> HeadBucket(bool useThreadPool = true) = 0;
+  virtual ClientError<QSError::Value> HeadBucket() = 0;
 
   // Delete a file
   //
@@ -184,7 +184,7 @@ class Client : private boost::noncopyable {
 
   // List directory
   //
-  // @param  : dir path,dir tree, flag to use thread pool worker thread or not
+  // @param  : dir path,dir tree
   // @return : ClientError
   //
   // ListDirectory will update directory in tree if dir exists and is modified
@@ -193,8 +193,7 @@ class Client : private boost::noncopyable {
   // Notice the dirPath should end with delimiter.
   virtual ClientError<QSError::Value> ListDirectory(
       const std::string &dirPath,
-      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
-      bool useThreadPool = true) = 0;
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree) = 0;
 
   // Get object meta data
   //

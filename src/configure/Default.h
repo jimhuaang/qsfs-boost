@@ -37,7 +37,6 @@ std::string GetDefaultCredentialsFile();
 std::string GetDefaultDiskCacheDirectory();
 std::string GetDefaultLogDirectory();
 std::string GetDefaultLogLevelName();
-uint16_t GetDefaultTransactionRetries();
 std::string GetDefaultHostName();
 uint16_t GetDefaultPort(const std::string& protocolName);
 std::string GetDefaultProtocolName();
@@ -59,7 +58,7 @@ uint64_t GetMaxCacheSize();         // File data cache size in bytes
 size_t GetMaxStatCount();           // File meta data cache max count
 uint16_t GetMaxListObjectsCount();  // max count for list operation
 
-int GetQSConnectionDefaultRetries();
+uint16_t GetDefaultTransactionRetries();
 uint32_t GetTransactionDefaultTimeDuration();  // in milliseconds
 int GetClientDefaultPoolSize();
 const char* GetSDKLogFolderBaseName();

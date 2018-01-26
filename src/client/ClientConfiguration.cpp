@@ -56,7 +56,6 @@ using QS::Configure::Default::GetDefaultProtocolName;
 using QS::Configure::Default::GetDefaultZone;
 using QS::Configure::Default::GetDefineFileMode;
 using QS::Configure::Default::GetMaxListObjectsCount;
-using QS::Configure::Default::GetQSConnectionDefaultRetries;
 using QS::Configure::Default::GetSDKLogFolderBaseName;
 using QS::Configure::Default::GetTransactionDefaultTimeDuration;
 using QS::StringUtils::FormatPath;
@@ -147,7 +146,6 @@ ClientConfiguration::ClientConfiguration(const Credentials &credentials)
       m_host(QS::Client::Http::StringToHost(GetDefaultHostName())),
       m_protocol(QS::Client::Http::StringToProtocol(GetDefaultProtocolName())),
       m_port(GetDefaultPort(GetDefaultProtocolName())),
-      m_connectionRetries(GetQSConnectionDefaultRetries()),
       m_debugCurl(false),
       m_additionalUserAgent(std::string()),
       m_logLevel(ClientLogLevel::Warn),
@@ -168,7 +166,6 @@ ClientConfiguration::ClientConfiguration(const CredentialsProvider &provider)
       m_host(QS::Client::Http::StringToHost(GetDefaultHostName())),
       m_protocol(QS::Client::Http::StringToProtocol(GetDefaultProtocolName())),
       m_port(GetDefaultPort(GetDefaultProtocolName())),
-      m_connectionRetries(GetQSConnectionDefaultRetries()),
       m_debugCurl(false),
       m_additionalUserAgent(std::string()),
       m_logLevel(ClientLogLevel::Warn),
@@ -189,8 +186,6 @@ void ClientConfiguration::InitializeByOptions() {
   m_host = Http::StringToHost(options.GetHost());
   m_protocol = Http::StringToProtocol(options.GetProtocol());
   m_port = options.GetPort();
-  // m_connectionRetries is sdk internal retries for per transaction
-  // options.GetRetries is for tranaction itself
   m_debugCurl = options.IsDebugCurl();
   m_additionalUserAgent = options.GetAdditionalAgent();
   m_logLevel = static_cast<ClientLogLevel::Value>(options.GetLogLevel());
@@ -216,21 +211,11 @@ void ClientConfiguration::InitializeByOptions() {
   }
 
   m_transactionRetries = options.GetRetries();
-  m_transactionTimeDuration = options.GetRequestTimeOut() +
-                              GetClientPoolTimeMargin();
+  m_transactionTimeDuration = options.GetRequestTimeOut();
   m_maxListCount = options.GetMaxListCount();
   m_clientPoolSize = options.GetClientPoolSize();
   m_parallelTransfers = options.GetParallelTransfers();
   m_transferBufferSizeInMB = options.GetTransferBufferSizeInMB();
-}
-
-// --------------------------------------------------------------------------
-uint32_t ClientConfiguration::GetClientPoolTimeMargin() const {
-  const QS::Configure::Options &options = QS::Configure::Options::Instance();
-  // client pool maybe busy, so we calculate a time margin for waiting
-  // the task get excuted.
-  uint16_t poolsize = options.GetClientPoolSize();
-  return poolsize * 1000;  // in milliseconds
 }
 
 }  // namespace Client

@@ -17,8 +17,6 @@
 #ifndef QSFS_CLIENT_NULLCLIENTIMPL_H_
 #define QSFS_CLIENT_NULLCLIENTIMPL_H_
 
-#include "boost/shared_ptr.hpp"
-
 #include "client/ClientImpl.h"
 
 namespace QS {
@@ -28,7 +26,7 @@ namespace Client {
 class NullClientImpl : public ClientImpl {
  public:
   NullClientImpl()
-      : ClientImpl(boost::shared_ptr<QS::Threading::ThreadPool>()) {}
+      : ClientImpl() {}
 
   ~NullClientImpl() {}
 };

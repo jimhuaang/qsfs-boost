@@ -34,22 +34,20 @@ struct QSError {
     GOOD,
 
     // check sdk request
-    NO_SUCH_LIST_MULTIPART,
-    NO_SUCH_LIST_MULTIPART_UPLOADS,
     NO_SUCH_LIST_OBJECTS,
     NO_SUCH_MULTIPART_DOWNLOAD,
     NO_SUCH_MULTIPART_UPLOAD,
     NO_SUCH_UPLOAD,
     PARAMETER_MISSING,
-    REQUEST_WAITING,  // future state
-    REQUEST_UNINITIALIZED,  // future state
 
     // sdk error
-    SDK_CONFIGURE_FILE_INAVLID,
-    SDK_NO_REQUIRED_PARAMETER,
-    SDK_REQUEST_NOT_MADE,
-    SDK_REQUEST_SEND_ERROR,
-    SDK_UNEXPECTED_RESPONSE,
+    SDK_CONFIGURE_FILE_INAVLID,  // error when loading config file
+    SDK_NO_REQUIRED_PARAMETER,   // request not send as missing required
+                                 // parameters accoriding api specs
+    SDK_REQUEST_SEND_ERROR,      // request send but get no response
+    SDK_UNEXPECTED_RESPONSE,     // sdk get response but is not expected by api
+                                 // specs
+    // QS_ERR_NO_ERROR means response is expected by api specs
 
     // specifics for http response
     KEY_NOT_EXIST  // Not Found (404)
@@ -64,7 +62,8 @@ std::string GetMessageForQSError(const ClientError<QSError::Value> &error);
 bool IsGoodQSError(const ClientError<QSError::Value> &error);
 
 QSError::Value SDKErrorToQSError(QsError sdkErr);
-QSError::Value SDKResponseToQSError(QingStor::Http::HttpResponseCode code);
+QSError::Value SDKResponseToQSError(QsError sdkErr,
+                                    QingStor::Http::HttpResponseCode code);
 bool SDKShouldRetry(QsError sdkErr, QingStor::Http::HttpResponseCode code);
 bool SDKResponseSuccess(QsError sdkErr, QingStor::Http::HttpResponseCode code);
 
@@ -74,6 +73,5 @@ std::string SDKResponseCodeToString(QingStor::Http::HttpResponseCode code);
 
 }  // namespace Client
 }  // namespace QS
-
 
 #endif  // QSFS_CLIENT_QSERROR_H_

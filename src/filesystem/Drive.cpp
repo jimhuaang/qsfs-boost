@@ -187,18 +187,13 @@ bool Drive::IsMountable() {
 
 // --------------------------------------------------------------------------
 void DoListRootDirectory(const shared_ptr<Client> &client,
-                         const shared_ptr<DirectoryTree> &dirTree,
-                         bool useThreadPool) {
-  ClientError<QSError::Value> err =
-      client->ListDirectory("/", dirTree, useThreadPool);
+                         const shared_ptr<DirectoryTree> &dirTree) {
+  ClientError<QSError::Value> err = client->ListDirectory("/", dirTree);
   DebugErrorIf(!IsGoodQSError(err), GetMessageForQSError(err));
 }
 // --------------------------------------------------------------------------
 bool Drive::Connect() {
-  // Connect is call before fuse_main and thread pools are initialized in
-  // fuse init, so at the time the thread pool is still not been initialized.
-  bool notUseThreadPool = false;
-  ClientError<QSError::Value> err = GetClient()->HeadBucket(notUseThreadPool);
+  ClientError<QSError::Value> err = GetClient()->HeadBucket();
   if (!IsGoodQSError(err)) {
     DebugError(GetMessageForQSError(err));
     return false;
@@ -211,7 +206,7 @@ bool Drive::Connect() {
 
   // Build up the root level of directory tree asynchornizely.
   boost::thread(bind(boost::type<void>(), DoListRootDirectory, m_client,
-                     m_directoryTree, notUseThreadPool))
+                     m_directoryTree))
       .detach();
 
   return true;
@@ -285,11 +280,10 @@ pair<shared_ptr<Node>, bool> Drive::GetNode(const string &path,
       GetClient()->GetExecutor()->SubmitAsync(
           bind(boost::type<void>(), receivedHandler, _1),
           bind(boost::type<ClientError<QSError::Value> >(),
-               &QS::Client::Client::ListDirectory, m_client.get(), _1, _2,
-               true),
+               &QS::Client::Client::ListDirectory, m_client.get(), _1, _2),
           path_, m_directoryTree);
     } else {
-      receivedHandler(GetClient()->ListDirectory(path_, m_directoryTree, true));
+      receivedHandler(GetClient()->ListDirectory(path_, m_directoryTree));
     }
   }
 
@@ -317,7 +311,7 @@ vector<weak_ptr<Node> > Drive::FindChildren(const string &dirPath,
     if (node->IsDirectory() && updateIfDir) {
       // Update directory tree synchronously
       ClientError<QSError::Value> err =
-          GetClient()->ListDirectory(dirPath, m_directoryTree, m_cache);
+          GetClient()->ListDirectory(dirPath, m_directoryTree);
       DebugErrorIf(!IsGoodQSError(err), GetMessageForQSError(err));
     }
     return m_directoryTree->FindChildren(dirPath);

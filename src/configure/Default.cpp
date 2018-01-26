@@ -38,19 +38,20 @@ using std::vector;
 static const char* const PROGRAM_NAME = "qsfs";
 static const char* const QSFS_DEFAULT_CREDENTIALS = "/opt/qsfs/qsfs.cred";
 static const char* const QSFS_DEFAULT_DISK_CACHE_DIR = "/tmp/qsfs_cache/";
-static uint16_t const QSFS_DEFAULT_TRANSACTION_RETRIES = 3;
 static const char* const QSFS_DEFAULT_LOG_DIR = "/opt/qsfs/qsfs_log/";
 static const char* const QSFS_DEFAULT_LOGLEVEL_NAME = "WARN";
 static const char* const QSFS_DEFAULT_HOST = "qingstor.com";
 static const char* const QSFS_DEFAULT_PROTOCOL = "https";
 static const char* const QSFS_DEFAULT_ZONE = "pek3a";
 static const char* const MIME_FILE_DEFAULT = "/etc/mime.types";
+static uint16_t const QSFS_DEFAULT_TRANSACTION_RETRIES = 3;
+static const int CLIENT_DEFAULT_POOL_SIZE = 5;
+static const char* QS_SDK_LOG_DIR_BASE_NAME = "sdk.log";  // qs sdk log
 
 const char* GetProgramName() { return PROGRAM_NAME; }
 
 string GetDefaultCredentialsFile() { return QSFS_DEFAULT_CREDENTIALS; }
 string GetDefaultDiskCacheDirectory() { return QSFS_DEFAULT_DISK_CACHE_DIR; }
-uint16_t GetDefaultTransactionRetries() { return QSFS_DEFAULT_TRANSACTION_RETRIES; }
 string GetDefaultLogDirectory() { return QSFS_DEFAULT_LOG_DIR; }
 string GetDefaultLogLevelName() { return QSFS_DEFAULT_LOGLEVEL_NAME; }
 string GetDefaultHostName() { return QSFS_DEFAULT_HOST; }
@@ -112,17 +113,15 @@ uint16_t GetMaxListObjectsCount() {
   return 0;  // to list all object
 }
 
-static const int CLIENT_DEFAULT_POOL_SIZE = 5;
-static const int QS_CONNECTION_DEFAULT_RETRIES = 3;  // qs sdk parameter
-static const char* QS_SDK_LOG_DIR_BASE_NAME = "sdk.log";  // qs sdk log
-
-int GetClientDefaultPoolSize() { return CLIENT_DEFAULT_POOL_SIZE; }
-
-uint32_t GetTransactionDefaultTimeDuration() {
-  return 30 * 1000;  // in milliseconds
+uint16_t GetDefaultTransactionRetries() {
+  return QSFS_DEFAULT_TRANSACTION_RETRIES;
 }
 
-int GetQSConnectionDefaultRetries() { return QS_CONNECTION_DEFAULT_RETRIES; }
+uint32_t GetTransactionDefaultTimeDuration() {
+  return QSFS_DEFAULT_TRANSACTION_RETRIES * 30 * 1000;  // in milliseconds
+}
+
+int GetClientDefaultPoolSize() { return CLIENT_DEFAULT_POOL_SIZE; }
 
 const char* GetSDKLogFolderBaseName() { return QS_SDK_LOG_DIR_BASE_NAME; }
 

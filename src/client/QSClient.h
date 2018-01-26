@@ -25,7 +25,7 @@
 #include "qingstor/QingStor.h"
 
 #include "client/Client.h"
-#include "client/QSClientOutcome.h"
+
 
 namespace QingStor {
 class QsConfig;
@@ -51,9 +51,9 @@ class QSClient : public Client {
  public:
   // Head bucket
   //
-  // @param  : flag to use thread pool worker thread or not
+  // @param  : 
   // @return : ClientError
-  ClientError<QSError::Value> HeadBucket(bool useThreadPool = true);
+  ClientError<QSError::Value> HeadBucket();
 
   // Delete a file
   //
@@ -182,8 +182,7 @@ class QSClient : public Client {
   // Notice the dirPath should end with delimiter.
   ClientError<QSError::Value> ListDirectory(
       const std::string &dirPath,
-      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree,
-      bool useThreadPool = true);
+      const boost::shared_ptr<QS::Data::DirectoryTree> &dirTree);
 
   // Get object meta data
   //
@@ -214,14 +213,6 @@ class QSClient : public Client {
   // Following api only submit sdk request, no ops on local dirtree and cache.
   //
 
-  // Delete object
-  //
-  // @param  : object path
-  // @return : ClientError
-  //
-  // This only submit skd delete object request, no ops on dir tree and cache.
-  ClientError<QSError::Value> DeleteObject(const std::string &path);
-
   // Move object
   //
   // @param  : source file path, target file path
@@ -230,25 +221,6 @@ class QSClient : public Client {
   // This only submit sdk put(move) object request, no ops on dir tree and cache
   ClientError<QSError::Value> MoveObject(const std::string &sourcePath,
                                          const std::string &targetPath);
-
-  // List objects
-  //
-  // @param  : input, resultTruncated(output), resCount(outputu) maxCount,
-  //           flag to use thread pool or not
-  // @return : ListObjectsOutcome
-  //
-  // Use maxCount to specify the count limit of objects you want to list.
-  // Use maxCount = 0 to list all the objects, this is default option.
-  // Use resCount to obtain the actual listed objects number
-  // Use resultTruncated to obtain the status of whether the operation has
-  // list all of the objects of the bucket;
-  //
-  // This only submit skd listobjects request, no ops on dir tree and cache.
-  ListObjectsOutcome ListObjects(const std::string &dirPath,
-                                 bool *resultTruncated = NULL,
-                                 uint64_t *resCount = NULL,
-                                 uint64_t maxCount = 0,
-                                 bool useThreadPool = true);
 
  public:
   static const boost::shared_ptr<QingStor::QsConfig> &GetQingStorConfig();

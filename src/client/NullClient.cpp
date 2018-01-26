@@ -37,7 +37,7 @@ ClientError<QSError::Value> GoodState() {
 }
 }  // namespace
 
-ClientError<QSError::Value> NullClient::HeadBucket(bool useThreadPool) {
+ClientError<QSError::Value> NullClient::HeadBucket() {
   return GoodState();
 }
 
@@ -108,8 +108,7 @@ ClientError<QSError::Value> NullClient::SymLink(const string &filePath,
 }
 
 ClientError<QSError::Value> NullClient::ListDirectory(
-    const string &dirPath, const shared_ptr<QS::Data::DirectoryTree> &dirTree,
-    bool useThreadPool) {
+    const string &dirPath, const shared_ptr<QS::Data::DirectoryTree> &dirTree) {
   return GoodState();
 }
 

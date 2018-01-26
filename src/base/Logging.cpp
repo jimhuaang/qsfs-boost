@@ -91,7 +91,7 @@ void Log::DoInitialize(const string &logdir) {
 // --------------------------------------------------------------------------
 void Log::ClearLogDirectory() const {
   if (m_logDirectory.empty()) {
-    std::cerr << "Log messge to STDERR , nothing to clear" << std::endl;
+    std::cerr << "Log message to console , nothing to clear" << std::endl;
   } else {
     pair<bool, string> outcome =
         QS::Utils::DeleteFilesInDirectory(m_logDirectory, false);

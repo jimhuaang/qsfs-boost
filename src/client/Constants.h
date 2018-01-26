@@ -25,9 +25,10 @@ namespace Client {
 
 namespace Constants {
 
-// For a better performance we set a lower value than the limit
+// For a better performance we set a lower value than the limit of 1000
 // for per transaction of ListObject to lower than max value.
 // https://docs.qingcloud.com/qingstor/api/bucket/get.html
+// default value is 200, but test shows 500 give better performance
 static const uint16_t BucketListObjectsLimit = 500;
 
 // limitation for per tranasction of DeleteMulitipleObjects
