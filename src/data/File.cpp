@@ -275,7 +275,8 @@ tuple<size_t, list<shared_ptr<Page> >, ContentRangeDeque> File::Read(
 
 // --------------------------------------------------------------------------
 tuple<bool, size_t, size_t> File::Write(off_t offset, size_t len,
-                                        const char *buffer, time_t mtime) {
+                                        const char *buffer, time_t mtime,
+                                        bool open) {
   // Cache has checked input.
   // bool isValidInput = = offset >= 0 && len > 0 &&  buffer != NULL;
   // assert(isValidInput);
@@ -287,6 +288,7 @@ tuple<bool, size_t, size_t> File::Write(off_t offset, size_t len,
 
   lock_guard<recursive_mutex> lock(m_mutex);
 
+  SetOpen(open);
   size_t addedSizeInCache = 0;
   size_t addedSize = 0;
   // If pages is empty.
@@ -384,8 +386,9 @@ tuple<bool, size_t, size_t> File::Write(off_t offset, size_t len,
 // --------------------------------------------------------------------------
 tuple<bool, size_t, size_t> File::Write(off_t offset, size_t len,
                                         const shared_ptr<iostream> &stream,
-                                        time_t mtime) {
+                                        time_t mtime, bool open) {
   lock_guard<recursive_mutex> lock(m_mutex);
+  SetOpen(open);
   if (m_pages.empty()) {
     tuple<PageSetConstIterator, bool, size_t, size_t> res =
         UnguardedAddPage(offset, len, stream);
@@ -417,7 +420,7 @@ tuple<bool, size_t, size_t> File::Write(off_t offset, size_t len,
       stream->seekg(0, std::ios_base::beg);
       stream->read(&(*buf)[0], len);
 
-      return Write(offset, len, &(*buf)[0], mtime);
+      return Write(offset, len, &(*buf)[0], mtime, open);
     }
   }
 }

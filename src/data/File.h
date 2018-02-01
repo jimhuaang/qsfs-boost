@@ -135,7 +135,8 @@ class File : private boost::noncopyable {
   // From pointer of buffer, number of len bytes will be writen.
   // The owning file's offset is set with 'offset'.
   boost::tuple<bool, size_t, size_t> Write(off_t offset, size_t len,
-                                           const char *buffer, time_t mtime);
+                                           const char *buffer, time_t mtime,
+                                           bool open = false);
 
   // Write stream into pages
   //
@@ -146,7 +147,7 @@ class File : private boost::noncopyable {
   // The owning file's offset is set with 'offset'.
   boost::tuple<bool, size_t, size_t> Write(
       off_t offset, size_t len, const boost::shared_ptr<std::iostream> &stream,
-      time_t mtime);
+      time_t mtime, bool open = false);
 
   // Resize the total pages' size to a smaller size.
   void ResizeToSmallerSize(size_t smallerSize);

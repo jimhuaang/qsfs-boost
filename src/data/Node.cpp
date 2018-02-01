@@ -46,6 +46,11 @@ using std::string;
 // --------------------------------------------------------------------------
 Node::Node(const Entry &entry, const shared_ptr<Node> &parent)
     : m_entry(entry), m_parent(parent), m_hardLink(false) {
+  if(m_entry) {
+    DebugInfo(">>>>>>>Construct Node<<<<<<< [" + GetFilePath() +"]");
+  } else {
+    DebugInfo(">>>>>>>Construct Node<<<<<<< [entry empty]");
+  }
   m_children.clear();
 }
 
@@ -53,6 +58,11 @@ Node::Node(const Entry &entry, const shared_ptr<Node> &parent)
 Node::Node(const Entry &entry, const shared_ptr<Node> &parent,
            const string &symbolicLink)
     : m_entry(entry), m_parent(parent), m_hardLink(false) {
+  if(m_entry) {
+    DebugInfo(">>>>>>>Construct Node<<<<<<< [" + GetFilePath() +"]");
+  } else {
+    DebugInfo(">>>>>>>Construct Node<<<<<<< [entry empty]");
+  }
   // must use m_entry instead of entry which is moved to m_entry now
   if (m_entry && m_entry.GetFileSize() <= symbolicLink.size()) {
     m_symbolicLink = string(symbolicLink, 0, m_entry.GetFileSize());
@@ -61,6 +71,12 @@ Node::Node(const Entry &entry, const shared_ptr<Node> &parent,
 
 // --------------------------------------------------------------------------
 Node::~Node() {
+  // TODO (jim):
+  if(m_entry) {
+    DebugInfo(">>>>>>>Destroy Node<<<<<<< [" + GetFilePath() +"]");
+  } else {
+    DebugInfo(">>>>>>>Destroy Node<<<<<<< [entry empty]");
+  }
   if (!m_entry) return;
 
   if (IsDirectory() || IsHardLink()) {
@@ -146,7 +162,7 @@ shared_ptr<Node> Node::Insert(const shared_ptr<Node> &child) {
         m_entry.IncreaseNumLink();
       }
     } else {
-      DebugInfo("Node already exists, no insertion " +
+      DebugWarning("Node insertion failed " +
                 FormatPath(child->GetFilePath()));
     }
   } else {
@@ -204,8 +220,13 @@ void Node::Rename(const string &newFilePath) {
     m_children.clear();
     BOOST_FOREACH(shared_ptr<Node> &child, childs) {
       string newPath = AppendPathDelim(newFilePath) + child->MyBaseName();
-      m_children.emplace(newPath, child);
-      child->Rename(newPath);
+      pair<ChildrenMapIterator, bool> res = m_children.emplace(newPath, child);
+      if (res.second) {
+        child->Rename(newPath);
+      } else {
+        DebugWarning("Node rename failed " +
+                     FormatPath(child->GetFilePath()));
+      }
     }
   }
 }
@@ -231,7 +252,10 @@ void Node::RenameChild(const string &oldFilePath, const string &newFilePath) {
     // Need to emplace before erase, otherwise the shared_ptr
     // will probably get deleted when erasing cause its' reference
     // count to be 0.
-    m_children.emplace(newFilePath, child);
+    pair<ChildrenMapIterator, bool> res = m_children.emplace(newFilePath, child);
+    if (!res.second) {
+      DebugWarning("Fail to rename " + FormatPath(oldFilePath, newFilePath));
+    }
     m_children.erase(it);
   } else {
     DebugWarning("Node not exist, no rename " + FormatPath(oldFilePath));

@@ -35,6 +35,7 @@
 
 #include "base/LogMacros.h"
 #include "base/StringUtils.h"
+#include "base/TimeUtils.h"
 #include "base/Utils.h"
 #include "data/FileMetaData.h"
 #include "data/Node.h"
@@ -49,6 +50,7 @@ using boost::recursive_mutex;
 using boost::shared_ptr;
 using boost::weak_ptr;
 using QS::StringUtils::FormatPath;
+using QS::TimeUtils::SecondsToRFC822GMT;
 using QS::Utils::AppendPathDelim;
 using QS::Utils::IsRootDirectory;
 using std::pair;
@@ -79,7 +81,7 @@ shared_ptr<Node> DirectoryTree::Find(const string &filePath) const {
     return it->second;
   } else {
     // Too many info, so disable it
-    // DebugInfo("Node (" + filePath + ") is not existing in directory tree");
+    // DebugInfo("Node not exists in directory tree " + FormatPath(filePath));
     return shared_ptr<Node>();
   }
 }
@@ -126,22 +128,38 @@ shared_ptr<Node> DirectoryTree::Grow(const shared_ptr<FileMetaData> &fileMeta) {
 
   shared_ptr<Node> node = Find(filePath);
   if (node && *node) {
-    if (fileMeta->GetMTime() > node->GetMTime()) {
-      DebugInfo("Update Node " + FormatPath(filePath));
+    time_t timein = fileMeta->GetMTime();
+    time_t timecur = node->GetMTime();
+    if (timein > timecur) {
+      DebugInfo("Update node " + FormatPath(filePath));
       node->SetEntry(Entry(fileMeta));  // update entry
+    } else if (timein < timecur) {
+      if(!node->IsDirectory()) {
+        DebugWarning("file mtime too old " + FormatPath(filePath) +
+                     "[input mtime:" + SecondsToRFC822GMT(timein) +
+                     ", current mtime:" + SecondsToRFC822GMT(timecur) + "]");
+      }
     }
   } else {
-    DebugInfo("Add Node " + FormatPath(filePath));
+    DebugInfo("Add node " + FormatPath(filePath));
     bool isDir = fileMeta->IsDirectory();
     string dirName = fileMeta->MyDirName();
     node = make_shared<Node>(Entry(fileMeta));
-    m_map.emplace(filePath, node);
+    pair<TreeNodeMapIterator, bool> res = m_map.emplace(filePath, node);
+    if(!res.second) {
+      DebugError("Fail to add node " + FormatPath(filePath));
+      return shared_ptr<Node>();
+    }
 
     // hook up with parent
     assert(!dirName.empty());
     TreeNodeMapIterator it = m_map.find(dirName);
     if (it != m_map.end()) {
-      if (shared_ptr<Node> parent = it->second) {
+      shared_ptr<Node> &parent = it->second;
+      if (parent && *parent) {
+        if (parent->HaveChild(filePath)) {
+          parent->Remove(filePath);
+        }
         parent->Insert(node);
         node->SetParent(parent);
       } else {
@@ -154,7 +172,7 @@ shared_ptr<Node> DirectoryTree::Grow(const shared_ptr<FileMetaData> &fileMeta) {
       vector<weak_ptr<Node> > childs = FindChildren(filePath);
       BOOST_FOREACH(weak_ptr<Node> &child, childs) {
         shared_ptr<Node> childNode = child.lock();
-        if (childNode) {
+        if (childNode && *childNode) {
           childNode->SetParent(node);
           node->Insert(childNode);
         }
@@ -162,7 +180,11 @@ shared_ptr<Node> DirectoryTree::Grow(const shared_ptr<FileMetaData> &fileMeta) {
     }
 
     // record parent to children map
-    m_parentToChildrenMap.emplace(dirName, node);
+    if (m_parentToChildrenMap.emplace(dirName, node) ==
+        m_parentToChildrenMap.end()) {
+      DebugError("Fail to add node " + FormatPath(filePath));
+      return shared_ptr<Node>();
+    }
   }
   // m_currentNode = node;
 
@@ -236,7 +258,10 @@ shared_ptr<Node> DirectoryTree::UpdateDirectory(
         if (childNode && (*childNode)) {
           if (deleteChildrenIds.find(childNode->GetFilePath()) ==
               deleteChildrenIds.end()) {
-            m_parentToChildrenMap.emplace(path, child);
+            if (m_parentToChildrenMap.emplace(path, child) ==
+                m_parentToChildrenMap.end()) {
+                DebugWarning("Fail to update node " + FormatPath(path));
+            }
           }
         }
       }
@@ -282,19 +307,31 @@ shared_ptr<Node> DirectoryTree::Rename(const string &oldFilePath,
     }
 
     // Do Renaming
-    DebugInfo("Rename Node " + FormatPath(oldFilePath, newFilePath));
+    DebugInfo("Rename node " + FormatPath(oldFilePath, newFilePath));
     string parentName = node->MyDirName();
     node->Rename(newFilePath);  // still need as parent maybe not added yet
     shared_ptr<Node> parent = node->GetParent();
     if (parent && *parent) {
       parent->RenameChild(oldFilePath, newFilePath);
     }
-    m_map.emplace(newFilePath, node);
+    pair<TreeNodeMapIterator, bool> res = m_map.emplace(newFilePath, node);
+    if (!res.second) {
+      DebugWarning("Fail to rename node " +
+                   FormatPath(oldFilePath, newFilePath));
+    }
     m_map.erase(oldFilePath);
     if (node->IsDirectory()) {
+      bool fail = false;
       vector<weak_ptr<Node> > childs = FindChildren(oldFilePath);
       BOOST_FOREACH(weak_ptr<Node> &child, childs) {
-        m_parentToChildrenMap.emplace(newFilePath, child);
+        if(m_parentToChildrenMap.emplace(newFilePath, child) ==
+           m_parentToChildrenMap.end()) {
+            fail = true;
+        }
+      }
+      if(fail) {
+        DebugWarning("Fail to rename node " +
+                      FormatPath(oldFilePath, newFilePath));
       }
       m_parentToChildrenMap.erase(oldFilePath);
     }
@@ -322,7 +359,7 @@ void DirectoryTree::Remove(const string &path) {
 
   DebugInfo("Remove node " + FormatPath(path));
   shared_ptr<Node> parent = node->GetParent();
-  if (parent) {
+  if (parent && *parent) {
     // if path is a directory, when go out of this function, destructor
     // will recursively delete all its children, as there is no references
     // to the node now.
@@ -380,6 +417,7 @@ DirectoryTree::DirectoryTree(time_t mtime, uid_t uid, gid_t gid, mode_t mode) {
   m_root = make_shared<Node>(
       Entry(ROOT_PATH, 0, mtime, mtime, uid, gid, mode, FileType::Directory));
   // m_currentNode = m_root;
+  m_root->SetFileOpen(true);  // always keep root open
   m_map.emplace(ROOT_PATH, m_root);
 }
 

@@ -28,6 +28,8 @@
 #include "base/LogMacros.h"
 #include "base/Size.h"
 #include "base/StringUtils.h"
+#include "base/Utils.h"
+#include "data/DirectoryTree.h"
 #include "configure/Options.h"
 
 namespace QS {
@@ -39,6 +41,9 @@ using boost::recursive_mutex;
 using boost::shared_ptr;
 using boost::to_string;
 using QS::StringUtils::FormatPath;
+using QS::Utils::GetDirName;
+using QS::Utils::IsRootDirectory;
+using std::pair;
 using std::string;
 
 // --------------------------------------------------------------------------
@@ -105,12 +110,21 @@ MetaDataListIterator FileMetaDataManager::AddNoLock(
   if (it == m_map.end()) {  // not exist in manager
     if (!HasFreeSpaceNoLock(1)) {
       bool success = FreeNoLock(1, filePath);
-      if (!success) return m_metaDatas.end();
+      if (!success) {
+        m_maxCount += static_cast<size_t>(m_maxCount / 5);
+        Warning("Enlarge max stat to " + to_string(m_maxCount));
+      }
     }
     m_metaDatas.push_front(std::make_pair(filePath, fileMetaData));
     if (m_metaDatas.begin()->first == filePath) {  // insert sucessfully
-      m_map.emplace(filePath, m_metaDatas.begin());
-      return m_metaDatas.begin();
+      pair<FileIdToMetaDataMapIterator, bool> res =
+          m_map.emplace(filePath, m_metaDatas.begin());
+      if(res.second) {
+        return m_metaDatas.begin();
+      } else {
+        DebugWarning("Fail to add file "+ FormatPath(filePath));
+        return m_metaDatas.end();
+      }
     } else {
       DebugWarning("Fail to add file " + FormatPath(filePath));
       return m_metaDatas.end();
@@ -185,7 +199,11 @@ void FileMetaDataManager::Rename(const string &oldFilePath,
     it->second->second->m_filePath = newFilePath;
     MetaDataListIterator pos =
         UnguardedMakeMetaDataMostRecentlyUsed(it->second);
-    m_map.emplace(newFilePath, pos);
+    pair<FileIdToMetaDataMapIterator, bool> res =
+        m_map.emplace(newFilePath, pos);
+    if (!res.second) {
+      DebugWarning("Fail to rename " + FormatPath(oldFilePath, newFilePath));
+    }
     m_map.erase(it);
   } else {
     DebugWarning("File not exist, no rename " + FormatPath(oldFilePath));
@@ -221,35 +239,62 @@ bool FileMetaDataManager::FreeNoLock(size_t needCount, string fileUnfreeable) {
 
   assert(!m_metaDatas.empty());
   size_t freedCount = 0;
-  while (!HasFreeSpaceNoLock(needCount) && !m_metaDatas.empty()) {
-    // Discards the least recently used meta first, which is put at back
-    string fileId = m_metaDatas.back().first;
-    if (m_metaDatas.back().second) {
-      if (m_metaDatas.back().second->IsFileOpen()) {
-        return false;
+  // free all in once
+  MetaDataList::reverse_iterator it = m_metaDatas.rbegin();
+  while (it !=m_metaDatas.rend() && !HasFreeSpaceNoLock(needCount)) {
+    string fileId = it->first;
+    if (IsRootDirectory(fileId)) {
+      // cannot free root
+      ++it;
+      continue;
+    }
+    if (it->second) {
+      if (it->second->IsFileOpen() || it->second->IsNeedUpload()) {
+        ++it;
+        continue;
+      }
+      if(fileId[fileId.size() - 1] == '/') {  // do not free dir
+        ++it;
+        continue;
       }
       if (fileId == fileUnfreeable) {
-        return false;
+        ++it;
+        continue;
+      }
+      if(GetDirName(fileId) == GetDirName(fileUnfreeable)) {
+        ++it;
+        continue;
       }
       ++freedCount;
-      m_metaDatas.back().second.reset();
+      it->second.reset();
     } else {
-      DebugWarning("The last recently used file metadata in manager is null");
+      DebugWarning("file metadata null" + FormatPath(fileId));
     }
-    m_metaDatas.pop_back();
+    DebugInfo("Free file " + FormatPath(fileId)); 
+    // Must invoke callback to update directory tree before erasing,
+    // as directory node depend on the file meta data
+    if (m_removeNodeCallback) {
+      m_removeNodeCallback(fileId);
+    }
+    m_metaDatas.erase((++it).base());
     m_map.erase(fileId);
   }
-  if (freedCount > 0) {
-    DebugInfo("Has freed file meta data of " + to_string(freedCount) +
-              " items");
+
+  if (HasFreeSpaceNoLock(needCount)) {
+    return true;
+  } else {
+    Warning("Fail to free " + to_string(needCount) +
+            " items for file " + FormatPath(fileUnfreeable));
+    return false;
   }
-  return true;
 }
 
 // --------------------------------------------------------------------------
 FileMetaDataManager::FileMetaDataManager() {
   m_maxCount = static_cast<size_t>(
       QS::Configure::Options::Instance().GetMaxStatCountInK() * QS::Size::K1);
+  // TODO (jim):
+  m_maxCount = 9;
 }
 
 }  // namespace Data

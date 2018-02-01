@@ -641,11 +641,12 @@ ClientError<QSError::Value> QSClient::Stat(
     // data to record last modified time.
     // Bucket mtime is set when connect to it at the first time.
     // We just think bucket mtime is not modified since then.
-    return HeadBucket();
+    // TODO(jim):
+    return ClientError<QSError::Value>(QSError::GOOD, false);
   }
 
   HeadObjectInput input;
-  if (modifiedSince >= 0) {
+  if (modifiedSince > 0) {
     input.SetIfModifiedSince(SecondsToRFC822GMT(modifiedSince));
   }
 
@@ -684,7 +685,7 @@ ClientError<QSError::Value> QSClient::Stat(
         listObjInput.SetDelimiter(QS::Utils::GetPathDelimiter());
         listObjInput.SetPrefix(LTrim(path, '/'));
         ListObjectsOutcome outcome =
-            GetQSClientImpl()->ListObjects(&listObjInput, NULL, NULL, 2);
+            GetQSClientImpl()->ListObjects(&listObjInput, NULL, NULL, 10);
 
         if (outcome.IsSuccess()) {
           bool dirExist = false;

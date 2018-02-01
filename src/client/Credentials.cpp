@@ -182,9 +182,13 @@ pair<bool, string> DefaultCredentialsProvider::ReadCredentialsFile(
             SetDefaultKey(line.substr(0, firstPos), line.substr(firstPos + 1));
           }
         } else {  // Found bucket specified key
-          m_bucketMap.emplace(line.substr(0, firstPos),
-                              make_pair(line.substr(firstPos + 1, lastPos),
-                                        line.substr(lastPos + 1)));
+          pair<BucketToKeyPairMapIterator, bool> res =
+              m_bucketMap.emplace(line.substr(0, firstPos),
+                                  make_pair(line.substr(firstPos + 1, lastPos),
+                                            line.substr(lastPos + 1)));
+          if(!res.second) {
+            return ErrorOut("Fail to store key pair" + FormatPath(file));
+          }
         }
       }
     } else {

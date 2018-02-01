@@ -24,6 +24,7 @@
 #include <utility>
 #include <vector>
 
+#include "boost/function.hpp"
 #include "boost/shared_ptr.hpp"
 #include "boost/thread/recursive_mutex.hpp"
 #include "boost/unordered_map.hpp"
@@ -33,6 +34,10 @@
 #include "data/FileMetaData.h"
 
 namespace QS {
+
+namespace FileSystem {
+  class Drive;
+}
 
 namespace Data {
 
@@ -106,6 +111,11 @@ class FileMetaDataManager : public Singleton<FileMetaDataManager> {
   // Rename
   void Rename(const std::string &oldFilePath, const std::string &newFilePath);
 
+  void SetRemoveNodeCallback(
+      boost::function<void(const std::string &fildId)> callback) {
+        m_removeNodeCallback = callback;
+  }
+
  private:
   // internal use only
   MetaDataListIterator UnguardedMakeMetaDataMostRecentlyUsed(
@@ -126,9 +136,12 @@ class FileMetaDataManager : public Singleton<FileMetaDataManager> {
 
   mutable boost::recursive_mutex m_mutex;
 
+  boost::function<void(const std::string &fildId)> m_removeNodeCallback;
+
   friend class Singleton<FileMetaDataManager>;
   friend class QS::Data::Entry;
   friend class QS::Data::Node;
+  friend class QS::FileSystem::Drive;
   friend class FileMetaDataManagerTest;
 };
 

@@ -35,6 +35,7 @@ typedef std::pair<std::string, std::string> KeyIdToKeyPair;
 typedef boost::unordered_map<std::string, KeyIdToKeyPair,
                              QS::HashUtils::StringHash>
     BucketToKeyPairMap;
+typedef BucketToKeyPairMap::iterator BucketToKeyPairMapIterator;
 typedef BucketToKeyPairMap::const_iterator BucketToKeyPairMapConstIterator;
 
 void InitializeCredentialsProvider(

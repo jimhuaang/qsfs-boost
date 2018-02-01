@@ -28,6 +28,7 @@ if (BUILD_TESTING)
     ${QSFS_SOURCE_DIR}/data/DirectoryTree.cpp
     ${QSFS_SOURCE_DIR}/data/Entry.cpp
     ${QSFS_SOURCE_DIR}/data/Node.cpp
+    ${QSFS_SOURCE_DIR}/base/TimeUtils.cpp
     $<TARGET_OBJECTS:qsfsFileMetaData>
     $<TARGET_OBJECTS:qsfsLogging>
   )

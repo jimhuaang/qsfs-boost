@@ -187,8 +187,6 @@ pair<size_t, ContentRangeDeque> Cache::Read(const string &fileId, off_t offset,
     DebugWarning("File too old, read no bytes " + FormatPath(fileId) +
                  "[mtime:" + SecondsToRFC822GMT(mtimeSince) +
                  ", file time:" + SecondsToRFC822GMT(file->GetTime()) + "]");
-    unloadedRanges.push_back(make_pair(offset, len));
-    return make_pair(0, unloadedRanges);
   }
   tuple<size_t, list<shared_ptr<Page> >, ContentRangeDeque> outcome =
       file->Read(offset, len, mtimeSince);
@@ -240,7 +238,7 @@ pair<size_t, ContentRangeDeque> Cache::Read(const string &fileId, off_t offset,
 
 // --------------------------------------------------------------------------
 bool Cache::Write(const string &fileId, off_t offset, size_t len,
-                  const char *buffer, time_t mtime) {
+                  const char *buffer, time_t mtime, bool open) {
   if (len == 0) {
     CacheMapIterator it = m_map.find(fileId);
     if (it != m_map.end()) {
@@ -267,7 +265,8 @@ bool Cache::Write(const string &fileId, off_t offset, size_t len,
   if (success) {
     shared_ptr<File> &file = res.second;
     assert(file);
-    tuple<bool, size_t, size_t> res = file->Write(offset, len, buffer, mtime);
+    tuple<bool, size_t, size_t> res =
+        file->Write(offset, len, buffer, mtime, open);
     success = boost::get<0>(res);
     if (success) {
       m_size += boost::get<1>(res);  // added size in cache
@@ -278,7 +277,7 @@ bool Cache::Write(const string &fileId, off_t offset, size_t len,
 
 // --------------------------------------------------------------------------
 bool Cache::Write(const string &fileId, off_t offset, size_t len,
-                  const shared_ptr<iostream> &stream, time_t mtime) {
+                  const shared_ptr<iostream> &stream, time_t mtime, bool open) {
   if (len == 0) {
     CacheMapIterator it = m_map.find(fileId);
     if (it != m_map.end()) {
@@ -314,7 +313,8 @@ bool Cache::Write(const string &fileId, off_t offset, size_t len,
   if (success) {
     shared_ptr<File> &file = res.second;
     assert(file);
-    tuple<bool, size_t, size_t> res = file->Write(offset, len, stream, mtime);
+    tuple<bool, size_t, size_t> res =
+        file->Write(offset, len, stream, mtime, open);
     success = boost::get<0>(res);
     if (success) {
       m_size += boost::get<1>(res);  // added size in cache
@@ -495,7 +495,10 @@ void Cache::Rename(const string &oldFileId, const string &newFileId) {
     it->second->first = newFileId;
     CacheListIterator pos = UnguardedMakeFileMostRecentlyUsed(it->second);
 
-    m_map.emplace(newFileId, pos);
+    pair<CacheMapIterator, bool> res = m_map.emplace(newFileId, pos);
+    if (!res.second) {
+      DebugWarning("Fail to rename " + FormatPath(oldFileId, newFileId));
+    }
     m_map.erase(it);
   } else {
     DebugInfo("File not exists, no rename " + FormatPath(oldFileId));
@@ -507,7 +510,9 @@ void Cache::SetTime(const string &fileId, time_t mtime) {
   CacheMapIterator it = m_map.find(fileId);
   if (it != m_map.end()) {
     shared_ptr<File> &file = it->second->second;
-    file->SetTime(mtime);
+    if (mtime > file->GetTime()) {
+      file->SetTime(mtime);
+    }
   } else {
     DebugInfo("File not exists, no set time " + FormatPath(fileId));
   }
@@ -539,7 +544,8 @@ void Cache::Resize(const string &fileId, size_t newFileSize, time_t mtime) {
       vector<char> hole(holeSize);  // value initialization with '\0'
       DebugInfo("Fill hole [offset:len=" + to_string(oldFileSize) + ":" +
                 to_string(holeSize) + "] " + FormatPath(fileId));
-      Write(fileId, oldFileSize, holeSize, &hole[0], mtime);
+      bool fileOpen = file->IsOpen();
+      Write(fileId, oldFileSize, holeSize, &hole[0], mtime, fileOpen);
     } else {
       file->ResizeToSmallerSize(newFileSize);
       file->SetTime(mtime);
@@ -562,10 +568,15 @@ CacheListIterator Cache::UnguardedNewEmptyFile(const string &fileId,
   m_cache.push_front(make_pair(
       fileId, make_shared<File>(QS::Utils::GetBaseName(fileId), mtime)));
   if (m_cache.begin()->first == fileId) {  // insert to cache sucessfully
-    m_map.emplace(fileId, m_cache.begin());
-    return m_cache.begin();
+    pair<CacheMapIterator, bool> res = m_map.emplace(fileId, m_cache.begin());
+    if (res.second) {
+      return m_cache.begin();
+    } else {
+      DebugError("Fail to create empty file in cache " + FormatPath(fileId));
+      return m_cache.end();
+    }
   } else {
-    DebugError("Fail to create empty file in cache : " + FormatPath(fileId));
+    DebugError("Fail to create empty file in cache " + FormatPath(fileId));
     return m_cache.end();
   }
 }

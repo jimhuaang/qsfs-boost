@@ -144,8 +144,12 @@ struct stat FileMetaData::ToStat() const {
   st.st_gid = m_gid;
   st.st_mode = GetFileTypeAndMode();
   st.st_dev = m_dev;
-  // this may need to always set with 1, to see fuse FAQ. TODO(jim):
-  st.st_nlink = m_numLink;
+  if (IsRootDirectory(m_filePath)) {
+    // see fuse FAQ.
+    st.st_nlink = 1;
+  } else {
+    st.st_nlink = m_numLink;
+  }
 
   return st;
 }

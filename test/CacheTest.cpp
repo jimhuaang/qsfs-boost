@@ -398,12 +398,12 @@ class CacheTest : public Test {
     size_t len2 = strlen(data);
     off_t off2 = off_t(len1);
     shared_ptr<stringstream> page2 = make_shared<stringstream>(data);
-    cache.Write("file1", off2, len2, page2, 0);
+    cache.Write("file1", off2, len2, page2, 0, true);
     const char *page3 = "ABC";
     size_t len3 = strlen(page3);
     size_t holeLen = 10;
     off_t off3 = off2 + holeLen + len3;
-    cache.Write("file1", off3, len3, page3, 0);
+    cache.Write("file1", off3, len3, page3, 0, true);
     cache.Write("file2", off1, len1, page1, 0);
 
     EXPECT_EQ(cache.GetFileSize("file1"), len1 + len2 + len3);

@@ -74,6 +74,7 @@ class FileMetaData {
   const std::string &GetFilePath() const { return m_filePath; }
   time_t GetMTime() const { return m_mtime; }
   bool IsFileOpen() const { return m_fileOpen; }
+  bool IsNeedUpload() const {return m_needUpload;}
 
  private:
   FileMetaData() {}

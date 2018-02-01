@@ -102,7 +102,8 @@ class Drive : public Singleton<Drive> {
 
   // Get the node
   //
-  // @param  : file path, flag update if is dir, flag update dir async
+  // @param  : file path, flag force to update node, flag update if is dir, 
+  //           flag update dir async
   // @return : a pair of { node, bool denotes if the node is modified comparing
   //           with the moment before this operation }
   //
@@ -114,8 +115,8 @@ class Drive : public Singleton<Drive> {
   // Notes: GetNode will connect to object storage to retrive the object and
   // update the local dir tree
   std::pair<boost::shared_ptr<QS::Data::Node>, bool> GetNode(
-      const std::string &path, bool updateIfDirectory = false,
-      bool updateDirAsync = false);
+      const std::string &path, bool forceUpdateNode,
+      bool updateIfDirectory = false, bool updateDirAsync = false);
 
   // Get the node from local dir tree
   // @param  : file path
@@ -265,11 +266,12 @@ class Drive : public Singleton<Drive> {
   // @return : void
   void DownloadFileContentRanges(const std::string &filePath,
                                  const QS::Data::ContentRangeDeque &ranges,
-                                 time_t mtime, bool async = false);
+                                 time_t mtime, bool fileOpen,
+                                 bool async = false);
 
   void DownloadFileContentRange(const std::string &filePath,
                                 const std::pair<off_t, size_t> &range,
-                                time_t mtime, bool async = false);
+                                time_t mtime, bool fileOpen, bool async = false);
 
  private:
   boost::shared_ptr<QS::Client::Client> &GetClient() { return m_client; }
@@ -298,6 +300,7 @@ class Drive : public Singleton<Drive> {
 
  private:
   void CleanUp();
+  void DoConnect();
   Drive();
 
   mutable boost::mutex m_mountableLock;
@@ -305,6 +308,8 @@ class Drive : public Singleton<Drive> {
 
   mutable boost::mutex m_cleanupLock;
   bool m_cleanup;  // denote if drive get cleaned up
+
+  bool m_connect;  // denote if drive connected to storage
 
   boost::shared_ptr<QS::Client::Client> m_client;
   boost::shared_ptr<QS::Client::TransferManager> m_transferManager;

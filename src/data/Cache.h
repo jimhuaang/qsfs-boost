@@ -152,7 +152,7 @@ class Cache : private boost::noncopyable {
   // If File of fileId doesn't exist, create one.
   // From pointer of buffer, number of len bytes will be writen.
   bool Write(const std::string &fileId, off_t offset, size_t len,
-             const char *buffer, time_t mtime);
+             const char *buffer, time_t mtime, bool open = false);
 
   // Write stream into file cache
   //
@@ -162,7 +162,8 @@ class Cache : private boost::noncopyable {
   // If File of fileId doesn't exist, create one.
   // Stream will be moved to cache.
   bool Write(const std::string &fileId, off_t offset, size_t len,
-             const boost::shared_ptr<std::iostream> &stream, time_t mtime);
+             const boost::shared_ptr<std::iostream> &stream, time_t mtime,
+             bool open = false);
 
   // Prepare for Write
   //
