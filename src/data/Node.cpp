@@ -46,11 +46,6 @@ using std::string;
 // --------------------------------------------------------------------------
 Node::Node(const Entry &entry, const shared_ptr<Node> &parent)
     : m_entry(entry), m_parent(parent), m_hardLink(false) {
-  if(m_entry) {
-    DebugInfo(">>>>>>>Construct Node<<<<<<< [" + GetFilePath() +"]");
-  } else {
-    DebugInfo(">>>>>>>Construct Node<<<<<<< [entry empty]");
-  }
   m_children.clear();
 }
 
@@ -58,11 +53,6 @@ Node::Node(const Entry &entry, const shared_ptr<Node> &parent)
 Node::Node(const Entry &entry, const shared_ptr<Node> &parent,
            const string &symbolicLink)
     : m_entry(entry), m_parent(parent), m_hardLink(false) {
-  if(m_entry) {
-    DebugInfo(">>>>>>>Construct Node<<<<<<< [" + GetFilePath() +"]");
-  } else {
-    DebugInfo(">>>>>>>Construct Node<<<<<<< [entry empty]");
-  }
   // must use m_entry instead of entry which is moved to m_entry now
   if (m_entry && m_entry.GetFileSize() <= symbolicLink.size()) {
     m_symbolicLink = string(symbolicLink, 0, m_entry.GetFileSize());
@@ -71,12 +61,6 @@ Node::Node(const Entry &entry, const shared_ptr<Node> &parent,
 
 // --------------------------------------------------------------------------
 Node::~Node() {
-  // TODO (jim):
-  if(m_entry) {
-    DebugInfo(">>>>>>>Destroy Node<<<<<<< [" + GetFilePath() +"]");
-  } else {
-    DebugInfo(">>>>>>>Destroy Node<<<<<<< [entry empty]");
-  }
   if (!m_entry) return;
 
   if (IsDirectory() || IsHardLink()) {

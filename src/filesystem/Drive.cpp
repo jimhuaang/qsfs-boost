@@ -117,17 +117,6 @@ struct PrintErrorMsg {
 };
 
 // --------------------------------------------------------------------------
-struct RemoveNodeCallback {
-  DirectoryTree *tree;
-  RemoveNodeCallback(DirectoryTree *tree_) : tree(tree_) {}
-  void operator()(const string &fileId) {
-    if(tree) {
-      tree->Remove(fileId);
-    }
-  }
-};
-
-// --------------------------------------------------------------------------
 Drive::Drive()
     : m_mountable(true),
       m_cleanup(false),
@@ -147,8 +136,7 @@ Drive::Drive()
 
   m_transferManager->SetClient(m_client);
 
-  RemoveNodeCallback callback(m_directoryTree.get());
-  QS::Data::FileMetaDataManager::Instance().SetRemoveNodeCallback(callback);
+  QS::Data::FileMetaDataManager::Instance().SetDirectoryTree(m_directoryTree.get());
 }
 
 // --------------------------------------------------------------------------

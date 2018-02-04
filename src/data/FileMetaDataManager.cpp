@@ -211,6 +211,12 @@ void FileMetaDataManager::Rename(const string &oldFilePath,
 }
 
 // --------------------------------------------------------------------------
+void FileMetaDataManager::SetDirectoryTree(QS::Data::DirectoryTree *tree) {
+    lock_guard<recursive_mutex> lock(m_mutex);
+    m_dirTree = tree;
+}
+
+// --------------------------------------------------------------------------
 MetaDataListIterator FileMetaDataManager::UnguardedMakeMetaDataMostRecentlyUsed(
     MetaDataListIterator pos) {
   m_metaDatas.splice(m_metaDatas.begin(), m_metaDatas, pos);
@@ -265,19 +271,25 @@ bool FileMetaDataManager::FreeNoLock(size_t needCount, string fileUnfreeable) {
         ++it;
         continue;
       }
-      ++freedCount;
-      it->second.reset();
     } else {
       DebugWarning("file metadata null" + FormatPath(fileId));
     }
+
     DebugInfo("Free file " + FormatPath(fileId)); 
     // Must invoke callback to update directory tree before erasing,
     // as directory node depend on the file meta data
-    if (m_removeNodeCallback) {
-      m_removeNodeCallback(fileId);
+    if (m_dirTree) {
+      m_dirTree->Remove(fileId);
+    }    
+    // Node destructor will inovke FileMetaDataManger::Erase,
+    // so double checking before earsing file meta
+    FileIdToMetaDataMapIterator p = m_map.find(fileId);
+    if(p != m_map.end()) {
+      m_metaDatas.erase(p->second);
+      m_map.erase(p);
     }
-    m_metaDatas.erase((++it).base());
-    m_map.erase(fileId);
+
+    ++freedCount;
   }
 
   if (HasFreeSpaceNoLock(needCount)) {
@@ -293,8 +305,7 @@ bool FileMetaDataManager::FreeNoLock(size_t needCount, string fileUnfreeable) {
 FileMetaDataManager::FileMetaDataManager() {
   m_maxCount = static_cast<size_t>(
       QS::Configure::Options::Instance().GetMaxStatCountInK() * QS::Size::K1);
-  // TODO (jim):
-  m_maxCount = 9;
+  m_dirTree = NULL;
 }
 
 }  // namespace Data

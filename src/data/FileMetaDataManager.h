@@ -41,6 +41,7 @@ namespace FileSystem {
 
 namespace Data {
 
+class DirectoryTree;
 class Entry;
 class Node;
 
@@ -111,10 +112,7 @@ class FileMetaDataManager : public Singleton<FileMetaDataManager> {
   // Rename
   void Rename(const std::string &oldFilePath, const std::string &newFilePath);
 
-  void SetRemoveNodeCallback(
-      boost::function<void(const std::string &fildId)> callback) {
-        m_removeNodeCallback = callback;
-  }
+  void SetDirectoryTree(QS::Data::DirectoryTree *tree);
 
  private:
   // internal use only
@@ -136,7 +134,7 @@ class FileMetaDataManager : public Singleton<FileMetaDataManager> {
 
   mutable boost::recursive_mutex m_mutex;
 
-  boost::function<void(const std::string &fildId)> m_removeNodeCallback;
+  QS::Data::DirectoryTree *m_dirTree;
 
   friend class Singleton<FileMetaDataManager>;
   friend class QS::Data::Entry;

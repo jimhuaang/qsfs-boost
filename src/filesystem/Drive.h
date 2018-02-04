@@ -47,7 +47,6 @@ class TransferManager;
 
 namespace Data {
 class DirectoryTree;
-class FileMetaData;
 class Node;
 }
 

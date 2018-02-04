@@ -374,6 +374,7 @@ void DirectoryTree::Remove(const string &path) {
       if (n && n->GetFilePath() == path) {
         // erase will invalidate iterator, so should not increment it after that
         it = m_parentToChildrenMap.erase(it);
+        break;
       } else {
         ++it;
       }
@@ -384,7 +385,7 @@ void DirectoryTree::Remove(const string &path) {
   m_parentToChildrenMap.erase(path);
 
   if (!node->IsDirectory()) {
-    node.reset();
+    // Do not need to reset, destructor will be invoked at end
     return;
   }
 

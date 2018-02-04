@@ -6,6 +6,9 @@ if (BUILD_TESTING)
     EntryTest.cpp
     ${QSFS_SOURCE_DIR}/data/Entry.cpp
     $<TARGET_OBJECTS:qsfsFileMetaData>
+    ${QSFS_SOURCE_DIR}/data/DirectoryTree.cpp
+    ${QSFS_SOURCE_DIR}/data/Node.cpp
+    ${QSFS_SOURCE_DIR}/base/TimeUtils.cpp
     $<TARGET_OBJECTS:qsfsLogging>
   )
   target_link_libraries(DirectoryEntryTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
@@ -17,6 +20,8 @@ if (BUILD_TESTING)
     ${QSFS_SOURCE_DIR}/data/Entry.cpp
     ${QSFS_SOURCE_DIR}/data/Node.cpp
     $<TARGET_OBJECTS:qsfsFileMetaData>
+    ${QSFS_SOURCE_DIR}/data/DirectoryTree.cpp
+    ${QSFS_SOURCE_DIR}/base/TimeUtils.cpp
     $<TARGET_OBJECTS:qsfsLogging>
   )
   target_link_libraries(DirectoryNodeTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
@@ -46,6 +51,10 @@ if (BUILD_TESTING)
     FileMetaDataManagerTest
     FileMetaDataManagerTest.cpp
     $<TARGET_OBJECTS:qsfsFileMetaData>
+    ${QSFS_SOURCE_DIR}/data/DirectoryTree.cpp
+    ${QSFS_SOURCE_DIR}/data/Node.cpp
+    ${QSFS_SOURCE_DIR}/data/Entry.cpp
+    ${QSFS_SOURCE_DIR}/base/TimeUtils.cpp
     $<TARGET_OBJECTS:qsfsLogging>
   )
   target_link_libraries(FileMetaDataManagerTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
