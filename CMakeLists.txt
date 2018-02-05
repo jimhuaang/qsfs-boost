@@ -6,8 +6,8 @@ cmake_minimum_required(VERSION 3.0)
 #
 option (BUILD_PACKAGING    "Enable build of distribution packages using CPack." OFF)
 option (BUILD_SHARED_LIBS  "Build shared libraries." OFF)
-# to turn on, specify -DBUILD_TESTS=ON in cmake command line
-option (BUILD_TESTING      "Enable build of the unit tests and their execution using CTest." ON)
+# to turn on, specify -DBUILD_TESTING=ON in cmake command line
+option (BUILD_TESTING      "Enable build of the unit tests and their execution using CTest." OFF)
 option (INSTALL_HEADERS    "Request installation of headers and other development files." OFF)
 option (REGISTER_BUILD_DIR "Request entry of build directory in CMake's package registry." OFF)
 
@@ -126,11 +126,9 @@ add_custom_target (lint COMMAND ${CMAKE_COMMAND} -P
 add_compile_options (-fPIC)
 
 # do not specify -g, instead specify -DCMAKE_BUILD_TYPE=Debug/Release in command line
-add_compile_options (-Wall)
-
+# add_compile_options (-Wall)  # for dev
 # disable warnings for boost, this is only for gcc 4.8
 # add_compile_options (-Wno-unused-local-typedefs -Wno-delete-non-virtual-dtor)
-
 # add_compile_options (-g -o0 -fno-inline)  # for debugging
 
 if(IS_MACH_64)

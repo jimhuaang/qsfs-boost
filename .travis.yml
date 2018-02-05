@@ -1,50 +1,6 @@
 language: cpp
 sudo: required
-dist: trusty
-
-# It seems we need to put following in matrix to avoid apt-get update failure
-# upgrade compiler to support c++11 more recent standard
-matrix:
-  include:
-    - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-        packages:
-          - g++-4.1
-    env:
-        - MATRIX_EVAL="CC=gcc-4.1 && CXX=g++-4.1"
-
-    - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-        packages:
-          - g++-4.4
-    env:
-        - MATRIX_EVAL="CC=gcc-4.4 && CXX=g++-4.4"
-    
-    - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-        packages:
-          - g++-4.8
-    env:
-        - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8"
-
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-5
-      env:
-         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+dist: precise  #ubuntu 12.04
 
 # upgrade cmake to support more recent standard
 addons:
@@ -62,14 +18,13 @@ compiler:
   - gcc
 
 before_install:
-  - sudo apt-get update -qq
+  #- sudo apt-get update -qq
   - sudo apt-get install -qy libfuse-dev
-  - eval "${MATRIX_EVAL}"
 
 script:
   - mkdir build
   - cd build
-  - cmake -DBUILD_TESTS=ON ..
+  - cmake -DBUILD_TESTING=ON ..
   - make
   - make test
   - modprobe fuse

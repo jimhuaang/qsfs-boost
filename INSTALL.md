@@ -27,7 +27,7 @@ You may also need to install [git][git install link] in order to clone the sourc
 
 Clone the qsfs source from [yunify/qsfs][qsfs github link] on GitHub:
 ```sh
- $ git clone https://github.com/jimhuaang/qsfs.git
+ $ git clone https://github.com/yunify/qsfs.git
 ```
 
 Enter the project directory containing the package's source code:
@@ -50,7 +50,7 @@ to type password in order to get root privileges:
  $ make
 ```
 
-Notice, if you want to enable unit test, specfiy -DBUILD_TESTS=ON in cmake configure step; you can specify build type such as -DCMAKE_BUILD_TYPE=Debug; you can specify -DINSTALL_HEADERS to request installations of headers and other development files:
+Notice, if you want to enable unit test, specfiy -DBUILD_TESTING=ON in cmake configure step; you can specify build type such as -DCMAKE_BUILD_TYPE=Debug; you can specify -DINSTALL_HEADERS to request installations of headers and other development files:
 ```sh
  $ cmake -DBUILD_TESTS=ON ..
  $ cmake -DCMAKE_BUILD_TYPE=Debug ..
@@ -89,19 +89,6 @@ To clean program binaries, juse remove folder bin:
 To remove all installed files:
 ```sh
  $ [sudo] make uninstall
-```
-
-To only remove installed qsfs files:
-```sh
- $ [sudo] make uninstall_qsfs
-```
-
-To remove installed depended project's files, such as googletest, googleflags, goolgelog and sdk:
-```sh
- $ [sudo] make uninstall_googletest
- $ [sudo] make uninstall_googlelog
- $ [sudo] make uninstall_googleflags
- $ [sudo] make uninstall_qingstorsdk
 ```
 
 

@@ -18,6 +18,7 @@
 #define QSFS_DATA_CACHE_H_
 
 #include <stddef.h>  // for size_t
+#include <stdint.h>
 #include <time.h>
 
 #include <sys/types.h>  // for off_t
