@@ -17,6 +17,8 @@
 #ifndef QSFS_BASE_UTILS_H_
 #define QSFS_BASE_UTILS_H_
 
+#include <stdint.h>
+
 #include <sys/stat.h>
 #include <sys/types.h>
 

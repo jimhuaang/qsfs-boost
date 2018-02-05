@@ -36,6 +36,8 @@ static const uint64_t MB10 = 10 * 1024 * 1024;
 static const uint64_t MB20 = 20 * 1024 * 1024;
 static const uint64_t MB50 = 50 * 1024 * 1024;
 static const uint64_t MB100 = 100 * 1024 * 1024;
+static const uint64_t MB200 = 200 * 1024 * 1024;
+static const uint64_t MB500 = 500 * 1024 * 1024;
 static const uint64_t GB1 = 1024 * 1024 * 1024;
 
 static const size_t K1 = 1 * 1000;

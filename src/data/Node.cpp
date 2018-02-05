@@ -88,7 +88,6 @@ shared_ptr<Node> Node::Find(const string &childFileName) const {
 
 // --------------------------------------------------------------------------
 bool Node::HaveChild(const string &childFilePath) const {
-  ChildrenMapConstIterator p = m_children.begin();
   return m_children.find(childFilePath) != m_children.end();
 }
 

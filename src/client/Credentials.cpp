@@ -121,6 +121,10 @@ Credentials DefaultCredentialsProvider::GetCredentials(
 // --------------------------------------------------------------------------
 pair<bool, string> DefaultCredentialsProvider::ReadCredentialsFile(
     const std::string& file) {
+  if (file.empty()) {
+    return ErrorOut("Credentials file is not specified");
+  }
+
   bool success = true;
   string errMsg;
 
@@ -205,6 +209,10 @@ pair<bool, string> DefaultCredentialsProvider::ReadCredentialsFile(
 namespace {
 
 pair<bool, string> CheckCredentialsFilePermission(const string& file) {
+  if (file.empty()) {
+    return ErrorOut("Credentials file is not specified");
+  }
+
   struct stat st;
   if (stat(file.c_str(), &st) != 0) {
     return ErrorOut("Unable to read credentials file : " +

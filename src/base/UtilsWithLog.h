@@ -17,6 +17,8 @@
 #ifndef QSFS_BASE_UTILSWITHLOG_H_
 #define QSFS_BASE_UTILSWITHLOG_H_
 
+#include <stdint.h>
+
 #include <sys/stat.h>
 #include <sys/types.h>
 

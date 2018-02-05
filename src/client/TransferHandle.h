@@ -140,7 +140,7 @@ class TransferHandle : private boost::noncopyable {
   bool HasFailedParts() const;
   bool HasParts() const;
 
-  // TODO(jim): Notes the transfer progress 's two invariants
+  // Notes the transfer progress 's two invariants
   uint64_t GetBytesTransferred() const {
     boost::lock_guard<boost::mutex> locker(m_bytesTransferredLock);
     return m_bytesTransferred;

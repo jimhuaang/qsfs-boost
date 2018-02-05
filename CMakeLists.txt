@@ -11,11 +11,7 @@ option (BUILD_TESTING      "Enable build of the unit tests and their execution u
 option (INSTALL_HEADERS    "Request installation of headers and other development files." OFF)
 option (REGISTER_BUILD_DIR "Request entry of build directory in CMake's package registry." OFF)
 
-# for temporary test
-set (CMAKE_C_COMPILER   "/opt/gcc-4.1.2/bin/gcc" CACHE PATH "" FORCE)
-set (CMAKE_CXX_COMPILER "/opt/gcc-4.1.2/bin/g++" CACHE PATH "" FORCE)
-SET (ENV{LIBRARY_PATH} "/usr/lib/x86_64-linux-gnu/:$LIBRARY_PATH" CACHE INTERNAL "" FORCE)
-include_directories(/usr/include/x86_64-linux-gnu)
+
 
 #
 # system info
@@ -37,9 +33,6 @@ if (IS_MACH_64)
   set(ENV{LIBRARY_PATH} "/usr/lib/x86_64-linux-gnu/:$LIBRARY_PATH"
       CACHE PATH "library path env variable")
 endif()
-
-# this only affect configure step, not affect build step
-#execute_process(COMMAND export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/:$LIBRARY_PATH)
 
 
 #
@@ -134,9 +127,11 @@ add_compile_options (-fPIC)
 
 # do not specify -g, instead specify -DCMAKE_BUILD_TYPE=Debug/Release in command line
 add_compile_options (-Wall)
-#add_compile_options (-Wunused-value)
 
-add_compile_options (-g -o0 -fno-inline)  # for testing
+# disable warnings for boost, this is only for gcc 4.8
+# add_compile_options (-Wno-unused-local-typedefs -Wno-delete-non-virtual-dtor)
+
+# add_compile_options (-g -o0 -fno-inline)  # for debugging
 
 if(IS_MACH_64)
   # fuse need to uses 64 bit off_t *

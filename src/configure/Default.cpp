@@ -38,7 +38,7 @@ using std::vector;
 static const char* const PROGRAM_NAME = "qsfs";
 static const char* const QSFS_DEFAULT_CREDENTIALS = "/opt/qsfs/qsfs.cred";
 static const char* const QSFS_DEFAULT_DISK_CACHE_DIR = "/tmp/qsfs_cache/";
-static const char* const QSFS_DEFAULT_LOG_DIR = "/opt/qsfs/qsfs_log/";
+static const char* const QSFS_DEFAULT_LOG_DIR = "/tmp/qsfs_log/";
 static const char* const QSFS_DEFAULT_LOGLEVEL_NAME = "WARN";
 static const char* const QSFS_DEFAULT_HOST = "qingstor.com";
 static const char* const QSFS_DEFAULT_PROTOCOL = "https";
@@ -101,7 +101,7 @@ blkcnt_t GetBlocks(off_t size) {
 }
 
 uint64_t GetMaxCacheSize() {
-  return QS::Size::MB100;  // default value
+  return QS::Size::MB200;  // default value
 }
 
 size_t GetMaxStatCount() {
@@ -118,7 +118,7 @@ uint16_t GetDefaultTransactionRetries() {
 }
 
 uint32_t GetTransactionDefaultTimeDuration() {
-  return QSFS_DEFAULT_TRANSACTION_RETRIES * 30 * 1000;  // in milliseconds
+  return 30 ;  // in seconds
 }
 
 int GetClientDefaultPoolSize() { return CLIENT_DEFAULT_POOL_SIZE; }

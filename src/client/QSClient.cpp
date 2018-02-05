@@ -641,7 +641,6 @@ ClientError<QSError::Value> QSClient::Stat(
     // data to record last modified time.
     // Bucket mtime is set when connect to it at the first time.
     // We just think bucket mtime is not modified since then.
-    // TODO(jim):
     return ClientError<QSError::Value>(QSError::GOOD, false);
   }
 
@@ -798,10 +797,8 @@ void QSClient::DoStartQSService() {
       Http::ProtocolToString(clientConfig.GetProtocol());
   m_qingStorConfig->port = clientConfig.GetPort();
   m_qingStorConfig->connectionRetries = clientConfig.GetTransactionRetries();
-  // timeoutPeriod is for one connection duration, so per transaction will
-  // have duration of timeoutPeriod * sdk_connection_retries
-  m_qingStorConfig->timeOutPeriod = clientConfig.GetTransactionTimeDuration() /
-                                    clientConfig.GetTransactionRetries();
+  // timeoutPeriod is for one connection duration
+  m_qingStorConfig->timeOutPeriod = clientConfig.GetTransactionTimeDuration();
   // QSClient has not count on the retry strategy, instead QSClient count on
   // qingstor sdk retry policy
 }

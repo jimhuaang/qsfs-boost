@@ -8,8 +8,8 @@
 
 ## Features
 
-- Large subset of POSIX including reading/writing files, directories, symlinks 
-  (mode, uid/gid is coming later).
+- Large subset of POSIX including reading/writing files, directories, symlinks, .etc,
+  (chmod/chown/utimens will be supported later).
 - File Permissions:
   - Default permission for a file is 0644 and for a directory is 0755.
   - Default uid/gid of a file is the uid/gid of the user.
@@ -34,31 +34,16 @@
   option, e.g. *-L=INFO*.
   - You can log messages to console by specifying forground option *-f*.
   - You can also log messages to log file by specifying log dir option *-l*, e.g.
-  *-l=/path/to/logdir/*. The default location where the logs are stored is */opt/qsfs/qsfs_log/*.
+  *-l=/path/to/logdir/*. The default location where the logs are stored is */tmp/qsfs_log/*.
 - Debugging:
   - You can turn on debug message to log by specifying debug option *-d*, this option
   will also enable FUSE debug mode.
   - You can turn on debug message from libcurl by specifying option *-U*.
-- Thread Pooled Executor:
-  - Submit tasks to run synchronously or asynchronously.
-  - Every HTTP request to QingStor through SDK is handled through executor.
-  - Operations which is time-consuming and do not need instant response could be handle
-  through exectuor asynchronously, such as list objects when entering a directory, rename
-  directory, delete file, upload file, etc. This is default behaviour, you can turn off
-  such behaviour by enable qsfs single thread option *-S*.
 - Retry strategy:
   - You can specify the retry times to retry a faild transaction by *-r* option.
-  - The retry strategy defaults to exponential backoff.
 - Request Timeout:
-  - This value determines the length of time, in milliseconds, to wait before timing out
+  - This value determines the length of time, in seconds, to wait before timing out
   a request.
-  - For these requests which is not time-consuming, such as head a file, make an empty
-  file, make a folder, delete a file, etc., a default time-out (in milliseconds) value is
-  set (500 ms by default). You can increase this value by option *-R*.
-  - For these requests which is time-consuming, the request time-out will be evaluated
-  dependently, e.g. if you need to transfer large files, the time-out will be depend on the file size and the time-out value set by option *-R*.
-- Security:
-  - By default, access to the mount directory is restricted to the user who mounted qsfs.
 - User-specified regions
   - You can sepcify the zone or region by option *-z*, e.g. *-z=sh1a*, default is pek3a.
   You must ensure the qinstor service you want is availabe in the region you configure.
@@ -66,8 +51,6 @@
   - You can specify the protocol by option *-p*, e.g. *-p=HTTP*, default is HTTPS. You can
   set this value to HTTP if the information you are passing is not sensitive and the service
   to which you want to connect supports an HTTP endpoint.
-- Compatibility:
-  - Easy to extend to support other object stores such as Amazon S3.
 
 
 ## Installation
@@ -154,7 +137,7 @@ See the [LICENSE][license link] for details. In summary, qsfs is licensed under 
 
 [build link]: https://travis-ci.org/jimhuaang/qsfs
 [eventual consistency wiki]: https://en.wikipedia.org/wiki/Eventual_consistency
-[faq wiki link]: https://github.com/jimhuaang/qsfs/wiki/FAQ
-[install link]: https://github.com/jimhuaang/qsfs/blob/master/INSTALL.md
-[issue link]: https://github.com/jimhuaang/qsfs/issues
-[license link]: https://github.com/jimhuaang/qsfs/blob/master/COPYING
+[faq wiki link]: https://github.com/jimhuaang/qsfs-boost/wiki/FAQ
+[install link]: https://github.com/jimhuaang/qsfs-boost/blob/master/INSTALL.md
+[issue link]: https://github.com/jimhuaang/qsfs-boost/issues
+[license link]: https://github.com/jimhuaang/qsfs-boost/blob/master/COPYING
