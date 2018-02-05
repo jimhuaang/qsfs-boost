@@ -35,16 +35,17 @@ using boost::to_string;
 using QS::Configure::Default::GetDefaultCredentialsFile;
 using QS::Configure::Default::GetDefaultDiskCacheDirectory;
 using QS::Configure::Default::GetDefaultLogDirectory;
+using QS::Configure::Default::GetDefaultLogLevelName;
 using QS::Configure::Default::GetDefaultHostName;
 using QS::Configure::Default::GetDefaultProtocolName;
 using QS::Configure::Default::GetDefaultParallelTransfers;
+using QS::Configure::Default::GetDefaultTransactionRetries;
 using QS::Configure::Default::GetDefaultTransferBufSize;
 using QS::Configure::Default::GetDefaultZone;
-using QS::Configure::Default::GetDefaultLogLevelName;
 using QS::Configure::Default::GetMaxCacheSize;
 using QS::Configure::Default::GetMaxListObjectsCount;
 using QS::Configure::Default::GetMaxStatCount;
-using QS::Configure::Default::GetTransactionDefaultTimeDuration;
+using QS::Configure::Default::GetDefaultTransactionTimeDuration;
 using std::cout;
 using std::endl;
 
@@ -68,36 +69,37 @@ void ShowQSFSHelp() {
   "Mandatory argements to long options are mandatory for short options too.\n"
   "  -b, --bucket       Specify bucket name\n"
   "  -m, --mount        Specify mount point (path)\n"
-  "  -c, --credentials  Specify credentials file, default is " << 
+  "  -c, --credentials  Specify credentials file, default path is " << 
                           GetDefaultCredentialsFile() << "\n" <<
-  "  -z, --zone         Zone or region, default is " << GetDefaultZone() << "\n"
-  "  -l, --logdir       Specify log directory, default is " <<
+  "  -z, --zone         Zone or region, default value is " << GetDefaultZone() << "\n"
+  "  -l, --logdir       Specify log directory, default path is " <<
                           GetDefaultLogDirectory() << "\n" <<
   "  -L, --loglevel     Min log level, message lower than this level don't logged;\n"
   "                     Specify one of following log level: INFO,WARN,ERROR,FATAL;\n"
   "                     " << GetDefaultLogLevelName() << " is set by default\n"
-  "  -r, --retries      Number of times to retry a failed transaction\n"
-  "  -R, --reqtimeout   Time(seconds) to wait before timing out a request.\n"
-  "                     Default value is " << to_string(GetTransactionDefaultTimeDuration())
+  "  -r, --retries      Number of times to retry a failed transaction, default value\n"
+  "                     is " << to_string(GetDefaultTransactionRetries()) << " times\n"
+  "  -R, --reqtimeout   Time(seconds) to wait before timing out a request, default value\n"
+  "                     is " << to_string(GetDefaultTransactionTimeDuration())
                                           << " seconds\n"
-  "  -Z, --maxcache     Max in-memory cache size(MB) for files, default is "
+  "  -Z, --maxcache     Max in-memory cache size(MB) for files, default value is "
                         << to_string(GetMaxCacheSize() / QS::Size::MB1) << "MB\n"
   "  -D, --diskdir      Specify the directory to store file data when in-memory cache\n"
-  "                     is not availabe, default is " << GetDefaultDiskCacheDirectory() << "\n"
-  "  -t, --maxstat      Max count(K) of cached stat entrys, default is "
+  "                     is not availabe, default path is " << GetDefaultDiskCacheDirectory() << "\n"
+  "  -t, --maxstat      Max count(K) of cached stat entrys, default value is "
                         << to_string(GetMaxStatCount() / QS::Size::K1) << "K\n"
   "  -e, --statexpire   Expire time(minutes) for stat entries, negative value will\n"
   "                     disable stat expire, default is no expire\n"
   "  -i, --maxlist      Max count of files of ls operation. A value of zero will list\n"
-  "                     all files, default is " << to_string(GetMaxListObjectsCount()) <<"\n"
+  "                     all files, default value is " << to_string(GetMaxListObjectsCount()) <<"\n"
   "  -n, --numtransfer  Max number file tranfers to run in parallel, you can increase\n"
-  "                     the value when transfer large files, default is "
+  "                     the value when transfer large files, default value is "
                         << to_string(GetDefaultParallelTransfers()) << "\n"
   "  -u, --bufsize      File transfer buffer size(MB), this should be larger than 8MB,\n"
-  "                     default is " 
+  "                     default value is " 
                         << to_string(GetDefaultTransferBufSize() / QS::Size::MB1) << "MB\n"
-  "  -H, --host         Host name, default is " << GetDefaultHostName() << "\n" <<
-  "  -p, --protocol     Protocol could be https or http, default is " <<
+  "  -H, --host         Host name, default value is " << GetDefaultHostName() << "\n" <<
+  "  -p, --protocol     Protocol could be https or http, default value is " <<
                                               GetDefaultProtocolName() << "\n" <<
   "  -P, --port         Specify port, default is 443 for https and 80 for http\n"
   "  -a, --agent        Additional user agent\n"

@@ -1,6 +1,6 @@
 # QingStor File System
 
-[![Build Status](https://travis-ci.org/jimhuaang/qsfs.svg?branch=master)][build link]
+[![Build Status](https://travis-ci.org/jimhuaang/qsfs-boost.svg?branch=master)][build link]
 [![License](http://img.shields.io/badge/license-apache%20v2-blue.svg)][license link]
 
 **qsfs** is a FUSE based filesystem that allows you to mount a qingstor bucket in Linux.
@@ -135,7 +135,7 @@ If you notice any issue, please open an [issue][issue link] on GitHub. Please se
 See the [LICENSE][license link] for details. In summary, qsfs is licensed under the Apache License (Version 2.0, January 2004).
 
 
-[build link]: https://travis-ci.org/jimhuaang/qsfs
+[build link]: https://travis-ci.org/jimhuaang/qsfs-boost
 [eventual consistency wiki]: https://en.wikipedia.org/wiki/Eventual_consistency
 [faq wiki link]: https://github.com/jimhuaang/qsfs-boost/wiki/FAQ
 [install link]: https://github.com/jimhuaang/qsfs-boost/blob/master/INSTALL.md

@@ -60,7 +60,7 @@ using QS::Configure::Default::GetDefaultZone;
 using QS::Configure::Default::GetMaxCacheSize;
 using QS::Configure::Default::GetMaxListObjectsCount;
 using QS::Configure::Default::GetMaxStatCount;
-using QS::Configure::Default::GetTransactionDefaultTimeDuration;
+using QS::Configure::Default::GetDefaultTransactionTimeDuration;
 
 void PrintWarnMsg(const char *opt, int32_t invalidVal, int32_t defaultVal) {
   if (opt == NULL) return;
@@ -154,7 +154,7 @@ void Parse(int argc, char **argv) {
   options.logDirectory   = strdup(GetDefaultLogDirectory().c_str());
   options.logLevel       = strdup(GetDefaultLogLevelName().c_str());
   options.retries        = GetDefaultTransactionRetries();
-  options.reqtimeout     = GetTransactionDefaultTimeDuration();
+  options.reqtimeout     = GetDefaultTransactionTimeDuration();
   options.maxcache       = GetMaxCacheSize() / QS::Size::MB1;
   options.diskdir        = strdup(GetDefaultDiskCacheDirectory().c_str());
   options.maxstat        = GetMaxStatCount() / QS::Size::K1;
@@ -203,8 +203,8 @@ void Parse(int argc, char **argv) {
 
   if (options.reqtimeout <= 0) {
     PrintWarnMsg("-R|--reqtimeout", options.reqtimeout,
-                 GetTransactionDefaultTimeDuration());
-    qsOptions.SetRequestTimeOut(GetTransactionDefaultTimeDuration());
+                 GetDefaultTransactionTimeDuration());
+    qsOptions.SetRequestTimeOut(GetDefaultTransactionTimeDuration());
   } else {
     qsOptions.SetRequestTimeOut(options.reqtimeout);
   }

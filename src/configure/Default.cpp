@@ -117,7 +117,7 @@ uint16_t GetDefaultTransactionRetries() {
   return QSFS_DEFAULT_TRANSACTION_RETRIES;
 }
 
-uint32_t GetTransactionDefaultTimeDuration() {
+uint32_t GetDefaultTransactionTimeDuration() {
   return 30 ;  // in seconds
 }
 
