@@ -384,7 +384,7 @@ bool QSTransferManager::PrepareDownload(
     }
     size_t sz = totalTransferSize - (partCount - 1) * bufferSize;
     handle->AddQueuePart(make_shared<Part>(
-        partCount, 0, std::min(sz, bufferSize),
+        partCount, 0, std::min(sz, static_cast<size_t>(bufferSize)),
         handle->GetContentRangeBegin() + (partCount - 1) * bufferSize));
   }
   return true;

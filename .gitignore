@@ -19,6 +19,7 @@ build/
 #
 bin/
 lib/
+!third_party/*/lib/
 
 #
 # Generated cmake files

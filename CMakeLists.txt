@@ -131,10 +131,8 @@ add_compile_options (-fPIC)
 # add_compile_options (-Wno-unused-local-typedefs -Wno-delete-non-virtual-dtor)
 # add_compile_options (-g -o0 -fno-inline)  # for debugging
 
-if(IS_MACH_64)
-  # fuse need to uses 64 bit off_t *
-  add_compile_options(-D_FILE_OFFSET_BITS=64)
-endif()
+# fuse need to uses 64 bit off_t *
+add_compile_options(-D_FILE_OFFSET_BITS=64)
 
 
 #
