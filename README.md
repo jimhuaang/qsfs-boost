@@ -60,9 +60,9 @@ See the [INSTALL][install link] for installation instructions.
 
 ## Usage
 
-Enter your qingstor access key id and secret key in a file `/path/to/cred`:
+Enter your QingCloud API access key pair in a file `/path/to/cred`:
 ```sh
- $ echo MyAccessKeyId:MySecretKey > /path/to/cred
+ $ echo YourAccessKeyId:YourSecretKey > /path/to/cred
 ```
 
 Make sure the file `/path/to/cred` has proper permissions (if you get 'permissions' error when mounting):

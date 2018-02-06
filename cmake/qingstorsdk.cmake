@@ -26,7 +26,7 @@ else(BUILD_PACKAGING)
     # Install
     # As qingstor static lib is not available for now, so we need to
     # install it on /usr/local in order to let make install linkage complete
-    install_project(qingstorsdk ${EXTERNAL_PROJECT_INSTALL_PREFIX})
+    install_project(qingstorsdk ${CMAKE_INSTALL_PREFIX})
 
     # Uninstall
     include(cmake/UninstallProject.cmake)

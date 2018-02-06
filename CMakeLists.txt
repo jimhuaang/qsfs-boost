@@ -84,7 +84,9 @@ if (NOT Threads_FOUND)
   "\n\t${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log")
 endif ()
 
-# download and install dependencies under ./third_party/install
+# Not call find_package to check dependencies, instead
+# download and install dependencies as static libraries
+# under ./third_party/install
 set (EXTERNAL_PROJECT_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/third_party/install
      CACHE PATH "Installation prefix for dependencies")
 if (NOT googletest_INSTALLED)
@@ -99,6 +101,8 @@ if(NOT googlelog_INSTALLED)
   include(cmake/glog.cmake)
 endif()
 
+# qingstor sdk static libraries is not available now,
+# so its shared libraries will be installed under /usr/local/lib
 if (NOT qingstorsdk_INSTALLED)
   include (cmake/qingstorsdk.cmake)
 endif()
@@ -204,8 +208,11 @@ if(TARGET uninstall_googleflags)
   set (UNINSTALL_ALL ${UNINSTALL_ALL} uninstall_googleflags)
 endif()
 
+# uninstall only uninstall qsfs and qingstor sdk, as they are
+# installed under /usr/local
 add_custom_target(
   uninstall DEPENDS uninstall_${PROJECT_NAME}
+                    uninstall_qingstorsdk
 )
 
 add_custom_target(
