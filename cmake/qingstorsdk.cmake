@@ -17,11 +17,14 @@ download_project(qingstorsdk)
 
 
 if (BUILD_PACKAGING)
+    # cascade qingstor sdk headers installation option
+    set(INSTALL_SDK_HEADERS ${INSTALL_HEADERS} CACHE BOOL "" FORCE)
     add_subdirectory(${qingstorsdk_SOURCE_DIR})
 
     include_directories(${qingstorsdk_SOURCE_DIR}/include)
     link_directories(${CMAKE_BINARY_DIR}/build/qingstorsdk/src/bin)
     # as qingstorsdk is add as subdirectory of qsfs, so no need to uninstall individually
+
 else(BUILD_PACKAGING)
     # Install
     # As qingstor static lib is not available for now, so we need to

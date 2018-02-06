@@ -43,14 +43,14 @@ set (PACKAGE_VERSION_MAJOR 1)
 set (PACKAGE_VERSION_MINOR 0)
 set (PACKAGE_VERSION_PATCH 0)
 set (PACKAGE_VERSION       ${PACKAGE_VERSION_MAJOR}.${PACKAGE_VERSION_MINOR}.${PACKAGE_VERSION_PATCH})
+set (PACKAGE_RELEASE       1)
 set (PACKAGE_STRING        "${QSFS_NAME} ${QSFS_VERSION}")
 set (PACKAGE_TARNAME       "${QSFS_NAME}-${QSFS_VERSION}")
-set (PACKAGE_BUGREPORT     "https://github.com/jimhuaang/qsfs/issues")
+set (PACKAGE_BUGREPORT     "https://github.com/jimhuaang/qsfs-boost/issues")
 set (PACKAGE_DESCRIPTION   "A FUSE based filesystem allows you to mount a qingstor bucket in Linux.")
-set (PACKAGE_URL           "https://github.com/jimhuaang/qsfs")
+set (PACKAGE_URL           "https://github.com/jimhuaang/qsfs-boost")
 
 string (TOUPPER "${PACKAGE_NAME}"       PACKAGE_PREFIX)
-string (TOLOWER "${CMAKE_SYSTEM_NAME}"  CPACK_SYSTEM_NAME)
 
 project (${PACKAGE_NAME})
 message (STATUS "Building project version: ${PACKAGE_VERSION}")
@@ -170,6 +170,31 @@ endif()
 
 
 #
+# Make sure that the required libraries are always found independent 
+# from LD_LIBRARY_PATH and the install location
+#
+# use, i.e. don't skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+
+# the RPATH to be used when installing
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# the RPATH to be used when installing, but only if it's not a system directory
+LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+IF("${isSystemDir}" STREQUAL "-1")
+   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+ENDIF("${isSystemDir}" STREQUAL "-1")
+
+
+#
 # installation
 #
 # directories vars should be put before include directories
@@ -182,6 +207,34 @@ set (EXPORT_NAME ${PROJECT_NAME}-targets)
 set (INSTALL_PREFIX_REL2CONFIG_DIR .)
 file (RELATIVE_PATH INSTALL_PREFIX_REL2CONFIG_DIR
       "${CMAKE_INSTALL_PREFIX}/${INSTALL_CMAKE_DIR}" "${CMAKE_INSTALL_PREFIX}")
+
+# for build tree
+configure_file (cmake/templates/config.cmake.in
+                "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake" @ONLY)
+# for install tree
+configure_file (cmake/templates/config.cmake.in
+                "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}-config.cmake" @ONLY)
+# for both
+configure_file (cmake/templates/version.cmake.in 
+                "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake" @ONLY)
+
+if (INSTALL_HEADERS)
+  install (FILES
+    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}-config.cmake"
+    "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
+    DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev
+  )
+  install (
+    EXPORT ${EXPORT_NAME}
+    DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev
+  )
+endif ()
+
+# support direct use of build tree
+export (TARGETS ${TARGETS} FILE "${PROJECT_BINARY_DIR}/${EXPORT_NAME}.cmake")
+if (REGISTER_BUILD_DIR)
+  export (PACKAGE ${PACKAGE_NAME})
+endif ()
 
 
 #
@@ -234,3 +287,98 @@ if (BUILD_TESTING)
   enable_testing ()
   add_subdirectory(test)
 endif (BUILD_TESTING)
+
+
+#
+# packaging
+#
+if (BUILD_PACKAGING)
+  include (InstallRequiredSystemLibraries)
+
+  # unix
+  set (PACKAGE_GENERATOR        "DEB;RPM")
+  set (PACKAGE_SOURCE_GENERATOR "TGZ;ZIP")
+
+  # used package generators
+  set (CPACK_GENERATOR        "${PACKAGE_GENERATOR}"        CACHE STRING "List of binary package generators (CPack).")
+  set (CPACK_SOURCE_GENERATOR "${PACKAGE_SOURCE_GENERATOR}" CACHE STRING "List of source package generators (CPack).")
+  mark_as_advanced (CPACK_GENERATOR CPACK_SOURCE_GENERATOR)
+
+  # common package information
+  set (CPACK_PACKAGE_VENDOR              "yunify")
+  set (CPACK_PACKAGE_CONTACT             "jimhuang@yunify.com")
+  set (CPACK_PACKAGE_NAME                "${PACKAGE_NAME}")
+  set (CPACK_PACKAGE_VERSION             "${PACKAGE_VERSION}")
+  set (CPACK_PACKAGE_VERSION_MAJOR       "${PACKAGE_VERSION_MAJOR}")
+  set (CPACK_PACKAGE_VERSION_MINOR       "${PACKAGE_VERSION_MINOR}")
+  set (CPACK_PACKAGE_VERSION_PATCH       "${PACKAGE_VERSION_PATCH}")
+  set (CPACK_PACKAGE_RELEASE             "${PACKAGE_RELEASE}")
+  set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PACKAGE_DESCRIPTION}")
+  set (CPACK_RESOURCE_FILE_WELCOME       "${PROJECT_SOURCE_DIR}/README.md")
+  set (CPACK_RESOURCE_FILE_LICENSE       "${PROJECT_SOURCE_DIR}/COPYING")
+  set (CPACK_PACKAGE_DESCRIPTION_FILE    "${PROJECT_SOURCE_DIR}/README.md")
+  set (CPACK_INSTALL_PREFIX              "${CMAKE_INSTALL_PREFIX}")
+  set (CPACK_PACKAGING_INSTALL_PREFIX    "${CMAKE_INSTALL_PREFIX}")
+  set (CPACK_OUTPUT_FILE_PREFIX          packages)
+  set (CPACK_PACKAGE_RELOCATABLE         TRUE)
+  set (CPACK_MONOLITHIC_INSTALL          TRUE)
+
+  # RPM package information -- used in cmake/package.cmake.in also for DEB
+  set (CPACK_RPM_PACKAGE_GROUP   "Development/Libraries")
+  set (CPACK_RPM_PACKAGE_LICENSE "Apache")
+  set (CPACK_RPM_PACKAGE_URL     "${PACKAGE_URL}")
+  set (CPACK_RPM_PACKAGE_RELEASE "${CPACK_PACKAGE_RELEASE}")
+  set (CPACK_RPM_CHANGELOG_FILE  "${PROJECT_SOURCE_DIR}/ChangeLog")
+
+  # unix system/architecture
+  string (TOLOWER "${CMAKE_SYSTEM_NAME}" CPACK_SYSTEM_NAME)
+  if (CMAKE_CXX_FLAGS MATCHES "-m32")
+    set (CPACK_PACKAGE_ARCHITECTURE i386)
+  else ()
+    execute_process (
+      COMMAND         dpkg --print-architecture
+      RESULT_VARIABLE RV
+      OUTPUT_VARIABLE CPACK_PACKAGE_ARCHITECTURE
+    )
+    if (RV EQUAL 0)
+      string (STRIP "${CPACK_PACKAGE_ARCHITECTURE}" CPACK_PACKAGE_ARCHITECTURE)
+    else ()
+      execute_process (
+        COMMAND uname -m 
+        OUTPUT_VARIABLE CPACK_PACKAGE_ARCHITECTURE
+      )
+      if (CPACK_PACKAGE_ARCHITECTURE MATCHES "x86_64")
+        set (CPACK_PACKAGE_ARCHITECTURE x86_64)
+      else ()
+        set (CPACK_PACKAGE_ARCHITECTURE i386)
+      endif ()
+    endif ()
+  endif ()
+
+  # source package settings
+  set (CPACK_SOURCE_TOPLEVEL_TAG      "source")
+  set (CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
+  set (CPACK_SOURCE_IGNORE_FILES      "/\\\\.git/;\\\\.swp$;\\\\.#;/#;\\\\.*~;cscope\\\\.*;/[Bb]uild[.+-_a-zA-Z0-9]*/")
+
+  # default binary package settings
+  set (CPACK_INCLUDE_TOPLEVEL_DIRECTORY TRUE)
+  set (CPACK_PACKAGE_FILE_NAME          "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME}")
+  if (CPACK_PACKAGE_ARCHITECTURE)
+    set (CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-${CPACK_PACKAGE_ARCHITECTURE}")
+  endif ()
+
+  # generator specific configuration file
+  #
+  # allow package maintainers to use their own configuration file
+  # $ cmake -DCPACK_PROJECT_CONFIG_FILE:FILE=/path/to/package/config
+  if (NOT CPACK_PROJECT_CONFIG_FILE)
+    configure_file (
+      cmake/templates/package.cmake.in
+      "${PROJECT_BINARY_DIR}/${PACKAGE_NAME}-package.cmake" @ONLY
+    )
+    set (CPACK_PROJECT_CONFIG_FILE "${PROJECT_BINARY_DIR}/${PACKAGE_NAME}-package.cmake")
+  endif ()
+
+  include (CPack)
+
+endif (BUILD_PACKAGING) # BUILD_PACKAGING

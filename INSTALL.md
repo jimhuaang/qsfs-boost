@@ -6,7 +6,7 @@ These are the base requirements to build and use qsfs from a source package (as 
 
 ### Additional Requirements
 **qsfs** is integrated with QingStor via the [QingStor SDK for C++][qs-sdk-cpp link]. During the CMake build's configure, qingstor sdk shared library will be installed to /usr/local/lib.
-qsfs uses glog for logging and gtest for unit testing, glog and gtest static libraries will be installed to the source directory/third_party/install. So, basically you can just leave them alone.
+qsfs uses glog for logging and gtest for unit testing, glog and gtest static libraries will be installed to /path/to/source_directory/third_party/install. So, basically you can just leave them alone.
 
 qsfs is a fuse based filesystem, so you must have libfuse installed. QingStor SDK requires libcurl and libopenssl, so you also must have them installed. Typically, you'll find these packages in your system's package manager.
 
