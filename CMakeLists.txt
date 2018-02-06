@@ -12,7 +12,6 @@ option (INSTALL_HEADERS    "Request installation of headers and other developmen
 option (REGISTER_BUILD_DIR "Request entry of build directory in CMake's package registry." OFF)
 
 
-
 #
 # system info
 #
@@ -243,10 +242,14 @@ endif ()
 include(cmake/UninstallProject.cmake)
 setup_uninstall_project(${PROJECT_NAME})
 
-set (UNINSTALL_ALL ${UNINSTALL_ALL} uninstall_${PROJECT_NAME})
+if(TARGET uninstall_${PROJECT_NAME})
+  set (UNINSTALL_ALL ${UNINSTALL_ALL} uninstall_${PROJECT_NAME})
+  set (UNINSTALL_DEFAULT ${UNINSTALL_DEFAULT} uninstall_${PROJECT_NAME})
+endif()
 
 if(TARGET uninstall_qingstorsdk)
   set (UNINSTALL_ALL ${UNINSTALL_ALL} uninstall_qingstorsdk)
+  set (UNINSTALL_DEFAULT ${UNINSTALL_DEFAULT} uninstall_qingstorsdk)
 endif()
 
 if(TARGET uninstall_googletest)
@@ -264,8 +267,7 @@ endif()
 # uninstall only uninstall qsfs and qingstor sdk, as they are
 # installed under /usr/local
 add_custom_target(
-  uninstall DEPENDS uninstall_${PROJECT_NAME}
-                    uninstall_qingstorsdk
+  uninstall DEPENDS ${UNINSTALL_DEFAULT}
 )
 
 add_custom_target(
