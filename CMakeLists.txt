@@ -326,7 +326,7 @@ if (BUILD_PACKAGING)
   set (CPACK_MONOLITHIC_INSTALL          TRUE)
 
   # RPM package information -- used in cmake/package.cmake.in also for DEB
-  set (CPACK_RPM_PACKAGE_GROUP   "Development/Libraries")
+  set (CPACK_RPM_PACKAGE_GROUP   "Applications/System")
   set (CPACK_RPM_PACKAGE_LICENSE "Apache")
   set (CPACK_RPM_PACKAGE_URL     "${PACKAGE_URL}")
   set (CPACK_RPM_PACKAGE_RELEASE "${CPACK_PACKAGE_RELEASE}")
