@@ -1,4 +1,4 @@
-# QingStor File System
+# qsfs
 
 [![Build Status](https://travis-ci.org/jimhuaang/qsfs-boost.svg?branch=master)][build link]
 [![License](http://img.shields.io/badge/license-apache%20v2-blue.svg)][license link]
@@ -18,39 +18,16 @@
 - File Transfer:
   - Large files uploads via multipart parallel uploads.
   - Large files downloads via parallel byte-range downloads.
-  - Large files transfer in chunks (10MB chunks by default). If you are uploading large
-  files (e.g. larger than 1GB), you can increase the transfer buffer size and the max
-  parallel transfers (5 by default) by specifying *-u* and *-n* option, respectively.
+  - Large files transfer in chunks (10MB chunks by default). If you are uploading large files (e.g. larger than 1GB), you can increase the transfer buffer size and the max
+  parallel transfers.
 - Cache:
-  - In-memory metadata caching. You can specify the expire time (in minutes) by *-e*
-  option to invalidate the file metadata in cache. You can specify the max count
-  of metadata entrys in cache by *-t* option.
-  - In-memory file data caching. You can specify max cache size for file data cache by
-  *-Z* option. For a big file, partial file data may been stored in a local disk file
-  when the file cache is not available, by default the disk file will be put under
-  */tmp/qsfs_cache/*, you can change it by *-D* option.
-- Logging:
-  - You can specify any of the logging levels like INFO, WARN, ERROR and FATAL by *-L*
-  option, e.g. *-L=INFO*.
-  - You can log messages to console by specifying forground option *-f*.
-  - You can also log messages to log file by specifying log dir option *-l*, e.g.
-  *-l=/path/to/logdir/*. The default location where the logs are stored is */tmp/qsfs_log/*.
-- Debugging:
-  - You can turn on debug message to log by specifying debug option *-d*, this option
+  - In-memory metadata caching.
+  - In-memory file data caching. For a big file, partial file data may been stored in a local disk file when the im-memory file cache is not available.
+- Logging/Debugging:
+  - Support to log messages to console or to a directory.
+  - Support turn on debug message to log by specifying debug option *-d*, this option
   will also enable FUSE debug mode.
-  - You can turn on debug message from libcurl by specifying option *-U*.
-- Retry strategy:
-  - You can specify the retry times to retry a faild transaction by *-r* option.
-- Request Timeout:
-  - This value determines the length of time, in seconds, to wait before timing out
-  a request.
-- User-specified regions
-  - You can sepcify the zone or region by option *-z*, e.g. *-z=sh1a*, default is pek3a.
-  You must ensure the qinstor service you want is availabe in the region you configure.
-- Protocol:
-  - You can specify the protocol by option *-p*, e.g. *-p=HTTP*, default is HTTPS. You can
-  set this value to HTTP if the information you are passing is not sensitive and the service
-  to which you want to connect supports an HTTP endpoint.
+  - You can turn on debug message from curl by specifying option *-U*.
 
 
 ## Installation
@@ -60,7 +37,7 @@ See the [INSTALL][install link] for installation instructions.
 
 ## Usage
 
-Enter your QingCloud API access key pair in a file `/path/to/cred`:
+Enter your QingCloud API access keys in a file `/path/to/cred`, go to [QingCloud Console][qingcloud console link] to create them if you do not have one:
 ```sh
  $ echo YourAccessKeyId:YourSecretKey > /path/to/cred
 ```
@@ -109,6 +86,46 @@ For help:
  $ qsfs -h
 ```
 
+## Command line options
+Supported general options are listed as following,
+
+| short | full | type | required | usage |
+| ----- |------|:------:|:----------:|------ |
+| -b | --bucket      | string  | Y | Specify bucket name
+| -m | --mount       | string  | Y | Specify mount point (path)
+| -c | --credentials | string  | Y | Specify credentials file
+| -z | --zone        | string  | N | Specify zone or region, default value is `pek3a`
+| -l | --logdir      | string  | N | Specify log directory, default path is `/tmp/qsfs_log/`
+| -L | --loglevel    | string  | N | Specify min log level (INFO,WARN,ERROR or FATAL), message lower than this level don't logged; default value is `INFO`.
+| -r | --retries     | integer | N | Specify number of times to retry a failed transaction, default value is `3 times`
+| -R | --reqtimeout  | integer | N | Specify time(seconds) to wait before timing out a request, default value is `30 seconds`
+| -Z | --maxcache    | integer | N | Specify max in-memory cache size(MB) for files, default value is `200 MB`
+| -D | --diskdir     | string  | N | Specify the directory to store file data when in-memory cache is not availabe, default path is `/tmp/qsfs_cache/`
+| -t | --maxstat     | integer | N | Specify max count(K) of cached stat entrys, default value is `20 K`
+| -e | --statexpire  | integer | N | Specify expire time(minutes) for stat entries, negative value will disable stat expire, default is no expire
+| -i | --maxlist     | integer | N | Specify max count of files of ls operation. A value of zero will list all files, default is to list all files
+| -n | --numtransfer | integer | N | Specify max number file tranfers to run in parallel, you can increase the value when transfer large files, default value is `5`
+| -u | --bufsize     | integer | N | Specify file transfer buffer size(MB), this should be larger than 8MB, default value is `10 MB`
+| -H | --host        | string  | N | Specify host name, default value is `qingstor.com`
+| -p | --protocol    | string  | N | Specify protocol (https or http) default value is `https`
+| -P | --port        | integer | N | Specify port, default is 443 for https and 80 for http
+| -a | --agent       | string  | N | Specify additional user agent, default is empty
+
+Supported miscellaneous options are list as following,
+
+| short | full | type | required | usage |
+| ----- |------|:------:|:----------:|------ |
+| -C | --clearlogdir | bool | N | Clear log directory at beginning
+| -f | --forground   | bool | N | Turn on log to STDERR and enable FUSE foreground mode
+| -s | --single      | bool | N | Turn on FUSE single threaded option - disable multi-threaded
+| -d | --debug       | bool | N | Turn on debug messages to log and enable FUSE debug option
+| -U | --curldbg     | bool | N | Turn on debug message from curl
+| -h | --help        | bool | N | Print qsfs help
+| -V | --version     | bool | N | Print qsfs version
+
+You can also specify FUSE specific mount options with `-o opt [,opt...]` e.g. nonempty, allow_other, etc. See the FUSE's README for the full set.
+
+
 ## Limitations
 
 Generally qingstor cannot offer the same performance or semantics as a local file system.  More specifically:
@@ -141,3 +158,4 @@ See the [LICENSE][license link] for details. In summary, qsfs is licensed under 
 [install link]: https://github.com/jimhuaang/qsfs-boost/blob/master/INSTALL.md
 [issue link]: https://github.com/jimhuaang/qsfs-boost/issues
 [license link]: https://github.com/jimhuaang/qsfs-boost/blob/master/COPYING
+[qingcloud console link]: https://console.qingcloud.com/access_keys/

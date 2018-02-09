@@ -48,16 +48,25 @@ to type password in order to get root privileges:
  $ cmake ..
 ```
 
-Notice, if you want to enable unit test, specfiy -DBUILD_TESTING=ON in cmake configure step; you can also specify build type, for example -DCMAKE_BUILD_TYPE=Debug; and you can specify -DINSTALL_HEADERS to request installations of headers and other development files:
+Notice, if you want to enable unit test, specfiy -DBUILD_TESTING=ON in cmake configure step; 
 ```sh
  $ cmake -DBUILD_TESTING=ON ..
- $ cmake -DCMAKE_BUILD_TYPE=Debug ..
- $ cmake -DINSTALL_HEADERS ..
 ```
+
+Install the programs and any data files and documentation:
+```sh
+ $ [sudo] make install
+```
+
 
 Run make to build:
 ```sh
  $ make
+```
+
+To remove all installed files:
+```sh
+ $ [sudo] make uninstall
 ```
 
 Run unit tests:
@@ -69,11 +78,6 @@ Run unit tests:
  $ ctest -R qsfs -V
 ```
 
-Install the programs and any data files and documentation:
-```sh
- $ [sudo] make install
-```
-
 To clean the generated build files, just remove the folder of build:
 ```sh
  $ rm -rf build
@@ -82,11 +86,6 @@ To clean the generated build files, just remove the folder of build:
 To clean program binaries, juse remove the folder of bin:
 ```sh
  $ rm -rf bin
-```
-
-To remove all installed files:
-```sh
- $ [sudo] make uninstall
 ```
 
 
