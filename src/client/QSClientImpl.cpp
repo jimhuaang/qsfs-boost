@@ -132,11 +132,17 @@ HeadBucketOutcome QSClientImpl::HeadBucket() const {
   HeadBucketOutput output;
   QsError sdkErr = m_bucket->HeadBucket(input, output);
 
+  string exceptionName = "QingStorHeadBucket";
   HttpResponseCode responseCode = output.GetResponseCode();
+  if (responseCode == QingStor::Http::NOT_FOUND) {
+    return HeadBucketOutcome(ClientError<QSError::Value>(
+        QSError::NOT_FOUND, exceptionName,
+        SDKResponseCodeToString(responseCode), false));
+  }
+
   if (SDKResponseSuccess(sdkErr, responseCode)) {
     return HeadBucketOutcome(output);
   } else {
-    string exceptionName = "QingStorHeadBucket";
     return HeadBucketOutcome(BuildQSError(
         sdkErr, exceptionName, output, SDKShouldRetry(sdkErr, responseCode)));
   }

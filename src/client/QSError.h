@@ -50,7 +50,7 @@ struct QSError {
     // QS_ERR_NO_ERROR means response is expected by api specs
 
     // specifics for http response
-    KEY_NOT_EXIST  // Not Found (404)
+    NOT_FOUND  // Not Found (404)
   };
 };
 

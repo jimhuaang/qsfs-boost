@@ -204,6 +204,7 @@ void Drive::DoConnect() {
   if (!IsGoodQSError(err)) {
     DebugError(GetMessageForQSError(err));
     m_connect = false;
+    return;
   } else {
     m_connect = true;
   }
@@ -256,7 +257,7 @@ pair<shared_ptr<Node>, bool> Drive::GetNode(const string &path,
       if (!IsGoodQSError(err)) {
         // As user can remove file through other ways such as web console, etc.
         // So we need to remove file from local dir tree and cache.
-        if (err.GetError() == QSError::KEY_NOT_EXIST) {
+        if (err.GetError() == QSError::NOT_FOUND) {
           // remove node
           DebugInfo("File not exist " + FormatPath(path));
           m_directoryTree->Remove(path);
@@ -274,7 +275,7 @@ pair<shared_ptr<Node>, bool> Drive::GetNode(const string &path,
     if (IsGoodQSError(err)) {
       node = m_directoryTree->Find(path);
     } else {
-      if (err.GetError() == QSError::KEY_NOT_EXIST) {
+      if (err.GetError() == QSError::NOT_FOUND) {
         DebugInfo("File not exist " + FormatPath(path));
       } else {
         DebugError(GetMessageForQSError(err));

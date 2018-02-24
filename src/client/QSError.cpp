@@ -71,7 +71,7 @@ QSError::Value StringToQSError(const string &errorCode) {
   map["SDKNoRequiredParameter"]     = QSError::SDK_NO_REQUIRED_PARAMETER;
   map["SDKRequestSendError"]        = QSError::SDK_REQUEST_SEND_ERROR;
   map["SDKUnexpectedResponse"]      = QSError::SDK_UNEXPECTED_RESPONSE;
-  map["KeyNotExist"]                = QSError::KEY_NOT_EXIST;
+  map["NotFound"]                = QSError::NOT_FOUND;
 
   unordered_map<string, QSError::Value, QS::HashUtils::StringHash>::iterator it =
         map.find(errorCode);
@@ -92,7 +92,7 @@ std::string QSErrorToString(QSError::Value err){
   map[QSError::SDK_NO_REQUIRED_PARAMETER]      = "SDKNoRequiredParameter";
   map[QSError::SDK_REQUEST_SEND_ERROR]         = "SDKRequestSendError";
   map[QSError::SDK_UNEXPECTED_RESPONSE]        = "SDKUnexpectedResponse";
-  map[QSError::KEY_NOT_EXIST]                  = "KeyNotExist";
+  map[QSError::NOT_FOUND]                      = "NotFound";
   unordered_map<QSError::Value, string, QS::HashUtils::EnumHash>::iterator it =
         map.find(err);
   return it != map.end() ? it->second : "Unknow";
@@ -137,7 +137,7 @@ QSError::Value SDKResponseToQSError(QsError sdkErr, HttpResponseCode code) {
   }
 
   if (code == NOT_FOUND ) {
-    return QSError::KEY_NOT_EXIST;
+    return QSError::NOT_FOUND;
   } else if (SDKResponseCodeSuccess(code)) {
     return QSError::GOOD;
   } else {

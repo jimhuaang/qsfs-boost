@@ -263,7 +263,7 @@ ClientError<QSError::Value> QSClient::MoveFile(
     // So, we need to create it.
     string sourceFilePath1 = RTrim(sourceFilePath, ' ');
     bool isDir = sourceFilePath1[sourceFilePath1.size() - 1] == '/';
-    if (err.GetError() == QSError::KEY_NOT_EXIST && isDir) {
+    if (err.GetError() == QSError::NOT_FOUND && isDir) {
       ClientError<QSError::Value> err1 = MakeDirectory(destFilePath);
       if (IsGoodQSError(err1)) {
         if (dirTree && dirTree->Has(sourceFilePath)) {
@@ -677,7 +677,7 @@ ClientError<QSError::Value> QSClient::Stat(
     // So, we need to use listobject with prefix of "/abc/" to confirm if a
     // directory node is actually needed to be construct in dir tree.
     ClientError<QSError::Value> err = outcome.GetError();
-    if (err.GetError() == QSError::KEY_NOT_EXIST) {
+    if (err.GetError() == QSError::NOT_FOUND) {
       if (path[path.size() - 1] == '/') {
         ListObjectsInput listObjInput;
         listObjInput.SetLimit(2);
