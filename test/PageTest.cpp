@@ -78,7 +78,7 @@ class PageTest : public Test {
     EXPECT_TRUE(p1.UseDiskFile());
     RemoveFileIfExists(file1);
 
-    shared_ptr<stringstream> ss = make_shared<stringstream>(str);
+    shared_ptr<stringstream> ss = shared_ptr<stringstream>(new stringstream(str));
     string file2 = QS::Configure::Options::Instance().GetDiskCacheDirectory() +
                    "test_page2";
     Page p2(0, len, ss, file2);
@@ -134,7 +134,7 @@ TEST_F(PageTest, Ctor) {
   EXPECT_EQ(GetStreamSize(p1.GetBody()), len);
   EXPECT_FALSE(p1.UseDiskFile());
 
-  shared_ptr<stringstream> ss = make_shared<stringstream>(str);
+  shared_ptr<stringstream> ss = shared_ptr<stringstream>(new stringstream(str));
   Page p2(0, len, ss);
   EXPECT_EQ(p2.Stop(), (off_t)(len - 1));
   EXPECT_EQ(p2.Next(), (off_t)len);

@@ -57,7 +57,6 @@ using QS::Data::Node;
 using QS::Exception::QSException;
 using QS::Configure::Default::GetNameMaxLen;
 using QS::Configure::Default::GetPathMaxLen;
-using QS::Configure::Default::GetDefineFileMode;
 using QS::FileSystem::Drive;
 using QS::StringUtils::AccessMaskToString;
 using QS::StringUtils::FormatPath;
@@ -87,6 +86,14 @@ uid_t GetFuseContextUID() {
 gid_t GetFuseContextGID() {
   static struct fuse_context* fuseCtx = fuse_get_context();
   return fuseCtx->gid;
+}
+
+// --------------------------------------------------------------------------
+void ExitQsfsFuseLoop() {
+  static struct fuse_context* fuseCtx = fuse_get_context();
+  if (fuseCtx != NULL) {
+    fuse_exit(fuseCtx->fuse);
+  }
 }
 
 // --------------------------------------------------------------------------
@@ -157,9 +164,9 @@ void FillStat(const struct stat& source, struct stat* target) {
   target->st_size = source.st_size;
   target->st_blocks = source.st_blocks;
   target->st_blksize = source.st_blksize;
-  target->st_atim = source.st_atim;
-  target->st_mtim = source.st_mtim;
-  target->st_ctim = source.st_ctim;
+  target->st_atime = source.st_atime;
+  target->st_mtime = source.st_mtime;
+  target->st_ctime = source.st_ctime;
   target->st_uid = source.st_uid;
   target->st_gid = source.st_gid;
   target->st_mode = source.st_mode;
@@ -320,7 +327,7 @@ int qsfs_getattr(const char* path, struct stat* statbuf) {
       DebugInfo("No such file or directory " + FormatPath(path));
     }
   } catch (const QSException& err) {
-    DebugWarning(err.get());
+    Warning(err.get());
     if (ret == 0) {
       ret = -errno;
     }
@@ -445,7 +452,7 @@ int qsfs_mknod(const char* path, mode_t mode, dev_t dev) {
     }
 
     // Create the new node
-    drive.MakeFile(path, mode | GetDefineFileMode(), dev);
+    drive.MakeFile(path, mode | QS::Configure::Options::Instance().GetFileMode(), dev);
   } catch (const QSException& err) {
     Error(err.get());
     if (ret == 0) {
@@ -979,7 +986,7 @@ int qsfs_open(const char* path, struct fuse_file_info* fi) {
           throw QSException("No write permission for path " + FormatPath(path));
         }
         // Create a empty file
-        drive.MakeFile(path, GetDefineFileMode());
+        drive.MakeFile(path, QS::Configure::Options::Instance().GetFileMode());
       }
 
       // Do Open
@@ -1118,6 +1125,7 @@ int qsfs_write(const char* path, const char* buf, size_t size, off_t offset,
 //
 // The 'f_frsize', 'f_favail', 'f_fsid' and 'f_flag' fields are ignored.
 int qsfs_statfs(const char* path, struct statvfs* statv) {
+  DebugInfo("qsfs_statfs " + FormatPath(path));
   if (!IsValidPath(path)) {
     Error("Null path parameter from fuse");
     return -EINVAL;
@@ -1491,6 +1499,19 @@ int qsfs_fsyncdir(const char* path, int datasync, struct fuse_file_info* fi) {
 // It overrides the initial value provided to fuse_main() / fuse_new().
 void* qsfs_init(struct fuse_conn_info* conn) {
   Info("Connecting qsfs...");
+
+  // Do check bucket service here
+  // To avoid the commom problem for libcurl, that when calling fork (which
+  // will be called by fuse_main when goes into the background) after initializing
+  // libraries that the libcurl need to be initialized again. Otherwise libcurl
+  // will reproduce error by making an https request.
+  Drive& drive = Drive::Instance();
+  if (!drive.IsMountable()) {
+    Error("Unable to connect bucket " +
+          QS::Configure::Options::Instance().GetBucket());
+    ExitQsfsFuseLoop();
+    return NULL;
+  }
 
   // Threads should be started from the init() method. Threads started
   // before fuse_main will exit when the process goes into the background.

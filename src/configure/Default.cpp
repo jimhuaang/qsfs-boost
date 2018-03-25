@@ -36,7 +36,7 @@ using std::string;
 using std::vector;
 
 static const char* const PROGRAM_NAME = "qsfs";
-static const char* const QSFS_DEFAULT_CREDENTIALS = "/opt/qsfs/qsfs.cred";
+static const char* const QSFS_DEFAULT_CREDENTIALS = "/etc/qsfs.cred";
 static const char* const QSFS_DEFAULT_DISK_CACHE_DIR = "/tmp/qsfs_cache/";
 static const char* const QSFS_DEFAULT_LOG_DIR = "/tmp/qsfs_log/";
 static const char* const QSFS_DEFAULT_LOGLEVEL_NAME = "WARN";
@@ -87,8 +87,8 @@ uint16_t GetPathMaxLen() {
 uint16_t GetNameMaxLen() { return 255; }
 
 mode_t GetRootMode() { return (S_IRWXU | S_IRWXG | S_IRWXO); }
-mode_t GetDefineFileMode() { return (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH); }
-mode_t GetDefineDirMode() {
+mode_t GetDefaultFileMode() { return (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH); }
+mode_t GetDefaultDirMode() {
   return (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 }
 

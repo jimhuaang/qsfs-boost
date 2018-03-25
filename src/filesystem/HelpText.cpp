@@ -23,6 +23,7 @@
 
 #include "base/Size.h"
 #include "configure/Default.h"
+#include "configure/Options.h"
 #include "configure/Version.h"
 
 namespace QS {
@@ -34,6 +35,8 @@ namespace HelpText {
 using boost::to_string;
 using QS::Configure::Default::GetDefaultCredentialsFile;
 using QS::Configure::Default::GetDefaultDiskCacheDirectory;
+using QS::Configure::Default::GetDefaultDirMode;
+using QS::Configure::Default::GetDefaultFileMode;
 using QS::Configure::Default::GetDefaultLogDirectory;
 using QS::Configure::Default::GetDefaultLogLevelName;
 using QS::Configure::Default::GetDefaultHostName;
@@ -61,14 +64,12 @@ void ShowQSFSHelp() {
   cout <<
   "\n"
   "  mounting\n"
-  "    qsfs -b=<BUCKET> -m=<MOUNTPOINT> -c=<CREDENTIALS> [options]\n"
+  "    qsfs <BUCKET> <MOUNTPOINT> -c=<CREDENTIALS> [options]\n"
   "  unmounting\n"
   "    umount <MOUNTPOINT>  or  fusermount -u <MOUNTPOINT>\n"
   "\n"
   "qsfs Options:\n"
   "Mandatory argements to long options are mandatory for short options too.\n"
-  "  -b, --bucket       Specify bucket name\n"
-  "  -m, --mount        Specify mount point (path)\n"
   "  -c, --credentials  Specify credentials file, default path is " << 
                           GetDefaultCredentialsFile() << "\n" <<
   "  -z, --zone         Zone or region, default value is " << GetDefaultZone() << "\n"
@@ -77,6 +78,17 @@ void ShowQSFSHelp() {
   "  -L, --loglevel     Min log level, message lower than this level don't logged;\n"
   "                     Specify one of following log level: INFO,WARN,ERROR,FATAL;\n"
   "                     " << GetDefaultLogLevelName() << " is set by default\n"
+  "  -F, --filemode     Specify the permission bits in st_mode for file objects without\n"
+  "                     x-qs-meta-mode header. The value is given in octal representation,\n"
+  "                     default value is " << std::oct << GetDefaultFileMode() << "\n"
+  "  -D, --dirmode      Specify the permission bits in st_mode for directory objects without\n"
+  "                     x-qs-meta-mode header. The value is given in octal representation,\n"
+  "                     default value is " << GetDefaultDirMode() << std::dec << "\n"
+  "  -u, --umaskmp      Specify the permission bits in st_mode for the mount point directory.\n"
+  "                     This option only works when you set with the fuse allow_other option.\n"
+  "                     The resulting permission bits are the ones missing from the given \n"
+  "                     umask value. The value is given in octal representation,\n"
+  "                     default value is 0000\n"
   "  -r, --retries      Number of times to retry a failed transaction, default value\n"
   "                     is " << to_string(GetDefaultTransactionRetries()) << " times\n"
   "  -R, --reqtimeout   Time(seconds) to wait before timing out a request, default value\n"
@@ -84,7 +96,7 @@ void ShowQSFSHelp() {
                                           << " seconds\n"
   "  -Z, --maxcache     Max in-memory cache size(MB) for files, default value is "
                         << to_string(GetMaxCacheSize() / QS::Size::MB1) << "MB\n"
-  "  -D, --diskdir      Specify the directory to store file data when in-memory cache\n"
+  "  -k, --diskdir      Specify the directory to store file data when in-memory cache\n"
   "                     is not availabe, default path is " << GetDefaultDiskCacheDirectory() << "\n"
   "  -t, --maxstat      Max count(K) of cached stat entrys, default value is "
                         << to_string(GetMaxStatCount() / QS::Size::K1) << "K\n"
@@ -95,7 +107,7 @@ void ShowQSFSHelp() {
   "  -n, --numtransfer  Max number file tranfers to run in parallel, you can increase\n"
   "                     the value when transfer large files, default value is "
                         << to_string(GetDefaultParallelTransfers()) << "\n"
-  "  -u, --bufsize      File transfer buffer size(MB), this should be larger than 8MB,\n"
+  "  -b, --bufsize      File transfer buffer size(MB), this should be larger than 8MB.\n"
   "                     default value is " 
                         << to_string(GetDefaultTransferBufSize() / QS::Size::MB1) << "MB\n"
   "  -H, --host         Host name, default value is " << GetDefaultHostName() << "\n" <<
@@ -104,7 +116,8 @@ void ShowQSFSHelp() {
   "  -P, --port         Specify port, default is 443 for https and 80 for http\n"
   "  -a, --agent        Additional user agent\n"
   "\n"
-  "Miscellaneous Options:\n"
+  " Miscellaneous Options:\n"
+  "  -m, --contentMD5   Enable writes with MD5 hashs to ensure data integrity\n"
   "  -C, --clearlogdir  Clear log directory at beginning\n"
   "  -f, --forground    Turn on log to STDERR and enable FUSE foreground mode\n"
   "  -s, --single       Turn on FUSE single threaded option - disable multi-threaded\n"
@@ -123,16 +136,19 @@ void ShowQSFSHelp() {
 
 void ShowQSFSUsage() { 
   cout << 
-  "Usage: qsfs -b|--bucket=<name> -m|--mount=<mount point>\n"
+  "Usage: qsfs <BUCKET> <MOUNTPOINT>\n"
   "       [-c|--credentials=[file path]] [-z|--zone=[value]]\n"
   "       [-l|--logdir=[dir]] [-L|--loglevel=[INFO|WARN|ERROR|FATAL]] \n"
+  "       [-F|--filemode=[octal-mode]] [-D|--dirmode=[octal-mode]]\n"
+  "       [-u|--umaskmp=[octal-mode]]\n"
   "       [-r|--retries=[value]] [-R|reqtimeout=[value]]\n"
-  "       [-Z|--maxcache=[value]] [-D|--diskdir=[value]]\n"
+  "       [-Z|--maxcache=[value]] [-k|--diskdir=[value]]\n"
   "       [-t|--maxstat=[value]] [-e|--statexpire=[value]]\n"
   "       [-i|--maxlist=[value]]\n"
-  "       [-n|--numtransfer=[value]] [-u|--bufsize=value]]\n"
+  "       [-n|--numtransfer=[value]] [-b|--bufsize=value]]\n"
   "       [-H|--host=[value]] [-p|--protocol=[value]]\n"
   "       [-P|--port=[value]] [-a|--agent=[value]]\n"
+  "       [-m|--contentMD5]\n"
   "       [-C|--clearlogdir]\n"
   "       [-f|--foreground]\n"
   "       [-s|--single]\n"

@@ -38,9 +38,7 @@ class Mounter : public Singleton<Mounter> {
  public:
   std::pair<bool, std::string> IsMountable(const std::string &mountPoint,
                                            bool logOn) const;
-  bool IsMounted(const std::string &mountPoint, bool logOn) const;
   bool Mount(const QS::Configure::Options &options, bool logOn) const;
-  void UnMount(const std::string &mountPoint, bool logOn) const;
   bool DoMount(const QS::Configure::Options &options, bool logOn,
                void *user_data) const;
 

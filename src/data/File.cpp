@@ -559,7 +559,7 @@ tuple<PageSetConstIterator, bool, size_t, size_t> File::UnguardedAddPage(
         make_shared<Page>(offset, len, buffer, AskDiskFilePath()));
     // do not count size of data stored in disk file
   } else {
-    res = m_pages.insert(make_shared<Page>(offset, len, buffer));
+    res = m_pages.insert(shared_ptr<Page>(new Page(offset, len, buffer)));
     if (res.second) {
       addedSizeInCache = len;
       m_cacheSize += len;  // count size of data stored in cache
@@ -586,7 +586,7 @@ tuple<PageSetConstIterator, bool, size_t, size_t> File::UnguardedAddPage(
     res = m_pages.insert(
         make_shared<Page>(offset, len, stream, AskDiskFilePath()));
   } else {
-    res = m_pages.insert(make_shared<Page>(offset, len, stream));
+    res = m_pages.insert(shared_ptr<Page>(new Page(offset, len, stream)));
     if (res.second) {
       addedSizeInCache = len;
       m_cacheSize += len;

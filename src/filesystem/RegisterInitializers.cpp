@@ -96,12 +96,12 @@ void MimeTypesInitializer() {
     }
   }
   if (mimeFile.empty()) {
-    string files = string();
-    BOOST_FOREACH(const string &filePath, GetMimeFiles()) {
-      files += filePath;
-      files += ";";
-    }
-    Info("Unable to find mime types [path=" + files + "]");
+    // string files = string();
+    // BOOST_FOREACH(const string &filePath, GetMimeFiles()) {
+    //   files += filePath;
+    //   files += ";";
+    // }
+    // Info("Unable to find mime types [path=" + files + "]");
     QS::FileSystem::InitializeMimeTypes("");  // default initialize
   } else {
     QS::FileSystem::InitializeMimeTypes(mimeFile);

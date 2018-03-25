@@ -36,7 +36,7 @@ time_t RFC822GMTToSeconds(const string &date) {
   memset(&res, 0, sizeof(struct tm));
 
   // date example: Tue, 15 Nov 1994 08:12:31 GMT
-  static const char *formatGMT = "%a, %d %b %Y %H:%M:%S %Z";
+  static const char *formatGMT = "%a, %d %b %Y %H:%M:%S GMT";
   strptime(date.c_str(), formatGMT, &res);
   return timegm(&res);  // GMT
 }

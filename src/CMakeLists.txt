@@ -29,7 +29,12 @@ add_executable(
   ${PROJECT_NAME}
   ${QSFS_SOURCES}
   )
-target_link_libraries(${PROJECT_NAME} fuse glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT} qingstor)
+if (APPLE)
+  target_link_libraries(${PROJECT_NAME} osxfuse osxboost_thread)
+elseif (UNIX)
+  target_link_libraries(${PROJECT_NAME} fuse boost_thread)
+endif ()
+target_link_libraries(${PROJECT_NAME} glog gflags ${CMAKE_THREAD_LIBS_INIT} qingstor)
 set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 

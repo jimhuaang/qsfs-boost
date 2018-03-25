@@ -85,52 +85,19 @@ pair<bool, string> Mounter::IsMountable(const std::string &mountPoint,
 }
 
 // --------------------------------------------------------------------------
-bool Mounter::IsMounted(const string &mountPoint, bool logOn) const {
-  bool mounted = false;
-  string command("cat /etc/mtab | grep " + mountPoint + " | wc -c");
-  FILE *pFile = popen(command.c_str(), "r");
-  if (pFile != NULL && fgetc(pFile) != '0') {
-    mounted = true;
-  }
-  pclose(pFile);
-
-  return mounted;
-}
-
-// --------------------------------------------------------------------------
 bool Mounter::Mount(const Options &options, bool logOn) const {
   Drive &drive = QS::FileSystem::Drive::Instance();
-  if (!drive.IsMountable()) {
-    throw QSException("Unable to connect bucket " + options.GetBucket() +
-                      " ...");
-  }
+  // IsMountable will invoking sdk which will call libcurl.
+  // But there is a common problem for libcurl, when calling fork after initializing
+  // libraries that need to be initialized again.
+  // And fuse_main will fork a child process when run in backgroud mode.
+  // So to avoid such problem, we move following code of checking bucket service
+  // to qsfs_init after fuse_main get called.
+  // if (!drive.IsMountable()) {
+  //   throw QSException("Unable to connect bucket " + options.GetBucket() +
+  //                     " ...");
+  // }
   return DoMount(options, logOn, &drive);
-}
-
-// --------------------------------------------------------------------------
-void Mounter::UnMount(const string &mountPoint, bool logOn) const {
-  if (IsMounted(mountPoint, logOn)) {
-    string command("fusermount -u " + mountPoint + " | wc -c");
-    FILE *pFile = popen(command.c_str(), "r");
-    if (pFile != NULL && fgetc(pFile) != '0') {
-      if (logOn) {
-        Error(
-            "Unable to unmout filesystem at MOUNTPOINT. Trying lazy unmount " +
-            FormatPath(mountPoint));
-      }
-      command.assign("fusermount -uqz " + mountPoint);
-      system(command.c_str());
-    }
-    pclose(pFile);
-    if (logOn) {
-      Info("Unmount qsfs sucessfully");
-    }
-  } else {
-    if (logOn) {
-      Warning("Trying to unmount filesystem at an unmounted MOUNTPOINT " +
-              FormatPath(mountPoint));
-    }
-  }
 }
 
 // --------------------------------------------------------------------------
@@ -142,35 +109,13 @@ bool Mounter::DoMount(const Options &options, bool logOn,
   // Do really mount
   struct fuse_args &fuseArgs = const_cast<Options &>(options).GetFuseArgs();
   const string &mountPoint = options.GetMountPoint();
-  static int maxTries = 3;
-  int count = 0;
-  do {
-    if (!IsMounted(mountPoint, logOn)) {
-      int ret =
-          fuse_main(fuseArgs.argc, fuseArgs.argv, &qsfsOperations, user_data);
-      if (0 != ret) {
-        errno = ret;
-        throw QSException("Unable to mount qsfs");
-      } else {
-        return true;
-      }
-    } else {
-      if (++count > maxTries) {
-        if (logOn) {
-          Error("Unable to unmount MOUNTPOINT " + FormatPath(mountPoint));
-        }
-        return false;
-      }
-      if (logOn) {
-        Warning(
-            "MOUNTPOINT is already mounted. Trying to unmount, and mount "
-            "again " +
-            FormatPath(mountPoint));
-      }
-      string command("umount -l " + mountPoint);  // lazy detach filesystem
-      system(command.c_str());
-    }
-  } while (true);
+  int ret = fuse_main(fuseArgs.argc, fuseArgs.argv, &qsfsOperations, user_data);
+  if (0 != ret) {
+    errno = ret;
+    throw QSException("Unable to mount qsfs");
+  } else {
+    return true;
+  }
 
   return false;
 }

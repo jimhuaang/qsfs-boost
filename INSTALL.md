@@ -5,28 +5,27 @@ These are the base requirements to build and use qsfs from a source package (as 
 - [CMake][cmake install link] v3.0 or later
 
 ### Additional Requirements
-**qsfs** is integrated with QingStor via the [QingStor SDK for C++][qs-sdk-cpp link]. During the CMake build's configure, qingstor sdk shared library will be installed to /usr/local/lib.
-qsfs uses glog for logging and gtest for unit testing, glog and gtest static libraries will be installed to /path/to/source_directory/third_party/install. So, basically you can just leave them alone.
+**qsfs** is integrated with QingStor via the [QingStor SDK for C++][qs-sdk-cpp link]. **qsfs** uses glog for logging and gtest for unit testing. During the CMake build's configure, these dependencies will be downloaded from their github repo and get installed. So, basically you can just leave them alone.
 
-qsfs is a fuse based filesystem, so you must have libfuse installed. QingStor SDK requires libcurl and libopenssl, so you also must have them installed. Typically, you'll find these packages in your system's package manager.
+**qsfs** is a fuse based filesystem, so you must have libfuse installed. QingStor SDK requires libcurl and libopenssl, so you also must have them installed. Typically, you'll find these packages in your system's package manager.
+
+You also need to install [git][git install link] in order to clone the source code from GitHub.
 
 To install these packages on Debian/Ubuntu-based systems:
 ```sh
- $ [sudo] apt-get install g++ fuse libfuse-dev libcurl4-openssl-dev libssl-dev
+ $ [sudo] apt-get install gcc g++ git fuse libfuse-dev libcurl4-openssl-dev libssl-dev
 ```
 
 To install these packages on Redhat/Fedora-based systems:
 ```sh
- $ [sudo] yum install gcc-c++ fuse fuse-devel libcurl-devel openssl-devel
+ $ [sudo] yum install gcc gcc-c++ git fuse fuse-devel libcurl-devel openssl-devel
 ```
-
-You may also need to install [git][git install link] in order to clone the source code from GitHub.
 
 # Build from Source using CMake
 
 Clone the qsfs source from [yunify/qsfs][qsfs github link] on GitHub:
 ```sh
- $ git clone https://github.com/yunify/qsfs.git
+ $ git clone https://github.com/yunify/qsfs-fuse.git
 ```
 
 Enter the project directory containing the package's source code:
@@ -53,20 +52,9 @@ Notice, if you want to enable unit test, specfiy -DBUILD_TESTING=ON in cmake con
  $ cmake -DBUILD_TESTING=ON ..
 ```
 
-Install the programs and any data files and documentation:
-```sh
- $ [sudo] make install
-```
-
-
 Run make to build:
 ```sh
  $ make
-```
-
-To remove all installed files:
-```sh
- $ [sudo] make uninstall
 ```
 
 Run unit tests:
@@ -76,6 +64,16 @@ Run unit tests:
   or
 ```sh
  $ ctest -R qsfs -V
+```
+
+Install the programs and any data files and documentation:
+```sh
+ $ [sudo] make install
+```
+
+To remove all installed files:
+```sh
+ $ [sudo] make uninstall
 ```
 
 To clean the generated build files, just remove the folder of build:
@@ -89,7 +87,7 @@ To clean program binaries, juse remove the folder of bin:
 ```
 
 
-[qsfs github link]: https://github.com/yunify/qsfs
+[qsfs github link]: https://github.com/yunify/qsfs-fuse
 [qs-sdk-cpp link]: https://github.com/yunify/qingstor-sdk-cpp
 [git install link]: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 [cmake install link]: https://cmake.org/install/

@@ -54,7 +54,6 @@ using QS::Configure::Default::GetDefaultHostName;
 using QS::Configure::Default::GetDefaultPort;
 using QS::Configure::Default::GetDefaultProtocolName;
 using QS::Configure::Default::GetDefaultZone;
-using QS::Configure::Default::GetDefineFileMode;
 using QS::Configure::Default::GetMaxListObjectsCount;
 using QS::Configure::Default::GetSDKLogFolderBaseName;
 using QS::Configure::Default::GetDefaultTransactionTimeDuration;
@@ -148,6 +147,7 @@ ClientConfiguration::ClientConfiguration(const Credentials &credentials)
       m_port(GetDefaultPort(GetDefaultProtocolName())),
       m_debugCurl(false),
       m_additionalUserAgent(std::string()),
+      m_enableContentMD5(false),
       m_logLevel(ClientLogLevel::Warn),
       m_sdkLogDirectory(AppendPathDelim(GetDefaultLogDirectory()) +
                         GetSDKLogFolderBaseName()),
@@ -168,6 +168,7 @@ ClientConfiguration::ClientConfiguration(const CredentialsProvider &provider)
       m_port(GetDefaultPort(GetDefaultProtocolName())),
       m_debugCurl(false),
       m_additionalUserAgent(std::string()),
+      m_enableContentMD5(false),
       m_logLevel(ClientLogLevel::Warn),
       m_sdkLogDirectory(AppendPathDelim(GetDefaultLogDirectory()) +
                         GetSDKLogFolderBaseName()),
@@ -188,6 +189,7 @@ void ClientConfiguration::InitializeByOptions() {
   m_port = options.GetPort();
   m_debugCurl = options.IsDebugCurl();
   m_additionalUserAgent = options.GetAdditionalAgent();
+  m_enableContentMD5 = options.IsEnableContentMD5();
   m_logLevel = static_cast<ClientLogLevel::Value>(options.GetLogLevel());
   if (options.IsDebug()) {
     m_logLevel = ClientLogLevel::Debug;

@@ -11,7 +11,12 @@ if (BUILD_TESTING)
     ${QSFS_SOURCE_DIR}/base/TimeUtils.cpp
     $<TARGET_OBJECTS:qsfsLogging>
   )
-  target_link_libraries(DirectoryEntryTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  if (APPLE)
+    target_link_libraries(DirectoryEntryTest osxfuse osxboost_thread)
+  elseif (UNIX)
+    target_link_libraries(DirectoryEntryTest fuse boost_thread)
+  endif ()
+  target_link_libraries(DirectoryEntryTest gtest glog gflags ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_directory_entry COMMAND DirectoryEntryTest)
 
   add_executable(
@@ -24,7 +29,12 @@ if (BUILD_TESTING)
     ${QSFS_SOURCE_DIR}/base/TimeUtils.cpp
     $<TARGET_OBJECTS:qsfsLogging>
   )
-  target_link_libraries(DirectoryNodeTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  if (APPLE)
+    target_link_libraries(DirectoryNodeTest osxfuse osxboost_thread)
+  elseif (UNIX)
+    target_link_libraries(DirectoryNodeTest fuse boost_thread)
+  endif () 
+  target_link_libraries(DirectoryNodeTest gtest glog gflags ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_directory_node COMMAND DirectoryNodeTest)
 
   add_executable(
@@ -37,7 +47,12 @@ if (BUILD_TESTING)
     $<TARGET_OBJECTS:qsfsFileMetaData>
     $<TARGET_OBJECTS:qsfsLogging>
   )
-  target_link_libraries(DirectoryTreeTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  if (APPLE)
+    target_link_libraries(DirectoryTreeTest osxfuse osxboost_thread)
+  elseif (UNIX)
+    target_link_libraries(DirectoryTreeTest fuse boost_thread)
+  endif ()
+  target_link_libraries(DirectoryTreeTest gtest glog gflags ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_directory_tree COMMAND DirectoryTreeTest)
 
   add_executable(
@@ -57,7 +72,12 @@ if (BUILD_TESTING)
     ${QSFS_SOURCE_DIR}/base/TimeUtils.cpp
     $<TARGET_OBJECTS:qsfsLogging>
   )
-  target_link_libraries(FileMetaDataManagerTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  if (APPLE)
+    target_link_libraries(FileMetaDataManagerTest osxfuse osxboost_thread)
+  elseif (UNIX)
+    target_link_libraries(FileMetaDataManagerTest fuse boost_thread)
+  endif ()
+  target_link_libraries(FileMetaDataManagerTest gtest glog gflags ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_file_metadata_manager COMMAND FileMetaDataManagerTest)
 
   add_executable(
@@ -81,7 +101,12 @@ if (BUILD_TESTING)
     LoggingTest.cpp
     $<TARGET_OBJECTS:qsfsLogging>
   )
-  target_link_libraries(LoggingTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  if (APPLE)
+    target_link_libraries(LoggingTest osxboost_thread)
+  elseif (UNIX)
+    target_link_libraries(LoggingTest boost_thread)
+  endif ()
+  target_link_libraries(LoggingTest gtest glog gflags ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_logging COMMAND LoggingTest)
 
   add_executable(
@@ -93,7 +118,12 @@ if (BUILD_TESTING)
     $<TARGET_OBJECTS:qsfsStream>
     $<TARGET_OBJECTS:qsfsLogging>
   )
-  target_link_libraries(PageTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  if (APPLE)
+    target_link_libraries(PageTest osxfuse osxboost_thread)
+  elseif (UNIX)
+    target_link_libraries(PageTest fuse boost_thread)
+  endif ()
+  target_link_libraries(PageTest gtest glog gflags ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_page COMMAND PageTest)
 
   add_executable(
@@ -106,7 +136,12 @@ if (BUILD_TESTING)
     $<TARGET_OBJECTS:qsfsStream>
     $<TARGET_OBJECTS:qsfsLogging>
   )
-  target_link_libraries(FileTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  if (APPLE)
+    target_link_libraries(FileTest osxfuse osxboost_thread)
+  elseif (UNIX)
+    target_link_libraries(FileTest fuse boost_thread)
+  endif ()
+  target_link_libraries(FileTest gtest glog gflags ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_file COMMAND FileTest)
 
   add_executable(
@@ -121,7 +156,12 @@ if (BUILD_TESTING)
     $<TARGET_OBJECTS:qsfsStream>
     $<TARGET_OBJECTS:qsfsLogging>
   )
-  target_link_libraries(CacheTest fuse gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  if (APPLE)
+    target_link_libraries(CacheTest osxfuse osxboost_thread)
+  elseif (UNIX)
+    target_link_libraries(CacheTest fuse boost_thread)
+  endif ()
+  target_link_libraries(CacheTest gtest glog gflags ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_cache COMMAND CacheTest)
 
   add_executable(
@@ -130,7 +170,12 @@ if (BUILD_TESTING)
     ${QSFS_SOURCE_DIR}/data/ResourceManager.cpp
     $<TARGET_OBJECTS:qsfsLogging>
   )
-  target_link_libraries(ResourceManagerTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  if (APPLE)
+    target_link_libraries(ResourceManagerTest osxboost_thread)
+  elseif (UNIX)
+    target_link_libraries(ResourceManagerTest boost_thread)
+  endif ()
+  target_link_libraries(ResourceManagerTest gtest glog gflags ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_resource_manager COMMAND ResourceManagerTest)
 
   add_executable(
@@ -139,7 +184,12 @@ if (BUILD_TESTING)
     $<TARGET_OBJECTS:qsfsStream>
     $<TARGET_OBJECTS:qsfsLogging>
   )
-  target_link_libraries(StreamTest gtest glog gflags boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  if (APPLE)
+    target_link_libraries(StreamTest osxboost_thread)
+  elseif (UNIX)
+    target_link_libraries(StreamTest boost_thread)
+  endif ()
+  target_link_libraries(StreamTest gtest glog gflags ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_stream COMMAND StreamTest)
 
   add_executable(
@@ -156,7 +206,12 @@ if (BUILD_TESTING)
     ${QSFS_SOURCE_DIR}/base/ThreadPool.cpp
     ${QSFS_SOURCE_DIR}/base/TaskHandle.cpp
   )
-  target_link_libraries(ThreadPoolTest gtest boost_thread ${CMAKE_THREAD_LIBS_INIT})
+  if (APPLE)
+    target_link_libraries(ThreadPoolTest osxboost_thread)
+  elseif (UNIX)
+    target_link_libraries(ThreadPoolTest boost_thread)
+  endif ()
+  target_link_libraries(ThreadPoolTest gtest ${CMAKE_THREAD_LIBS_INIT})
   add_test(NAME qsfs_threadpool COMMAND ThreadPoolTest)
 
   add_executable(

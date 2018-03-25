@@ -26,6 +26,7 @@
 #include "base/StringUtils.h"
 #include "base/Utils.h"
 #include "configure/Default.h"
+#include "configure/Options.h"
 
 namespace QS {
 
@@ -34,13 +35,13 @@ namespace Data {
 using boost::make_shared;
 using boost::shared_ptr;
 using boost::to_string;
-using QS::Configure::Default::GetDefineDirMode;
 using QS::StringUtils::AccessMaskToString;
 using QS::StringUtils::FormatPath;
 using QS::StringUtils::ModeToString;
 using QS::Utils::AppendPathDelim;
 using QS::Utils::GetProcessEffectiveUserID;
 using QS::Utils::GetProcessEffectiveGroupID;
+using QS::Utils::IsIncludedInGroup;
 using QS::Utils::IsRootDirectory;
 using std::string;
 
@@ -80,7 +81,7 @@ string GetFileTypeName(FileType::Value fileType) {
 shared_ptr<FileMetaData> BuildDefaultDirectoryMeta(const string &dirPath,
                                                         time_t mtime) {
   time_t atime = time(NULL);
-  mode_t mode = GetDefineDirMode();
+  mode_t mode = QS::Configure::Options::Instance().GetDirMode();
   return make_shared<FileMetaData>(
       AppendPathDelim(dirPath), 0, atime, mtime, GetProcessEffectiveUserID(),
       GetProcessEffectiveGroupID(), mode, FileType::Directory);
@@ -134,12 +135,9 @@ struct stat FileMetaData::ToStat() const {
   st.st_size = m_fileSize;
   st.st_blocks = QS::Configure::Default::GetBlocks(st.st_size);
   st.st_blksize = QS::Configure::Default::GetBlockSize();
-  st.st_atim.tv_sec = m_atime;
-  st.st_mtim.tv_sec = m_mtime;
-  st.st_ctim.tv_sec = m_ctime;
-  st.st_atim.tv_nsec = 0;
-  st.st_mtim.tv_nsec = 0;
-  st.st_ctim.tv_nsec = 0;
+  st.st_atime = m_atime;
+  st.st_mtime = m_mtime;
+  st.st_ctime = m_ctime;
   st.st_uid = m_uid;
   st.st_gid = m_gid;
   st.st_mode = GetFileTypeAndMode();
@@ -157,6 +155,7 @@ struct stat FileMetaData::ToStat() const {
 // --------------------------------------------------------------------------
 mode_t FileMetaData::GetFileTypeAndMode() const {
   mode_t stmode;
+
   switch (m_fileType) {
     case FileType::File:
       stmode = S_IFREG | m_fileMode;
@@ -183,6 +182,7 @@ mode_t FileMetaData::GetFileTypeAndMode() const {
       stmode = S_IFREG | m_fileMode;
       break;
   }
+
   return stmode;
 }
 
@@ -198,15 +198,30 @@ string FileMetaData::MyBaseName() const {
 
 // --------------------------------------------------------------------------
 bool FileMetaData::FileAccess(uid_t uid, gid_t gid, int amode) const {
-/*   DebugInfo("Check access permission " + FormatPath(m_filePath));
-  DebugInfo("[uid:gid:mode process=" + to_string(uid) + ":" + to_string(gid)+
-           ":" + AccessMaskToString(amode) +
-           ", file=" + to_string(m_uid) + ":" + to_string(m_gid) +
-           ":" + ModeToString(m_fileMode) + "]"); */
-
   if (m_filePath.empty()) {
+    DebugWarning("Check access permission " + FormatPath(m_filePath));
     DebugWarning("object file path is empty");
     return false;
+  }
+
+  if (uid == 0) {
+    // root is allowed all accessing
+    return true;
+  }
+
+  QS::Configure::Options &options = QS::Configure::Options::Instance();
+
+  if (options.IsOverrideUID() && uid == options.GetUID()) {
+    // overrided uid user is allowed all accessing
+    return true;
+  }
+
+  if (options.IsOverrideUID()) {
+    uid = options.GetUID();
+  }
+
+  if (options.IsOverrideGID()) {
+    gid = options.GetGID();
   }
 
   // Check file existence
@@ -214,53 +229,47 @@ bool FileMetaData::FileAccess(uid_t uid, gid_t gid, int amode) const {
     return true;  // there is a file, always allowed
   }
 
-  bool ret = false;
-  // Check read permission
-  if (amode & R_OK) {
-    if ((uid == m_uid || uid == 0) && (m_fileMode & S_IRUSR)) {
-      ret = true;
-    } else if ((gid == m_gid || gid == 0) && (m_fileMode & S_IRGRP)) {
-      ret = true;
-    } else if (m_fileMode & S_IROTH) {
-      ret = true;
-    } else {
-      return false;
+  // umask behavior keep same as FUSE
+  // FUSE set permission as (0777 & ~umask) for both files and directories
+  // https://github.com/libfuse/libfuse/blob/fuse-2_9_bugfix/lib/fuse.c#L1386-L1388
+  mode_t mode = options.IsUmask()
+                    ? ((S_IRWXU | S_IRWXG | S_IRWXO) & ~options.GetUmask())
+                    : GetFileTypeAndMode();
+  mode_t base_mask = S_IRWXO;
+  if (uid == m_uid) {
+    base_mask |= S_IRWXU;
+  }
+  if (gid == m_gid || IsIncludedInGroup(uid, m_gid).first) {
+    base_mask |= S_IRWXG;
+  }
+  mode &= base_mask;
+
+  bool ret = true;
+  if (X_OK == (amode & X_OK)) {
+    if ((mode & (S_IXUSR | S_IXGRP | S_IXOTH)) == 0) {
+      ret = false;
     }
   }
-  // Check write permission
-  if (amode & W_OK) {
-    if ((uid == m_uid || uid == 0) && (m_fileMode & S_IWUSR)) {
-      ret = true;
-    } else if ((gid == m_gid || gid == 0) && (m_fileMode & S_IWGRP)) {
-      ret = true;
-    } else if (m_fileMode & S_IWOTH) {
-      ret = true;
-    } else {
-      return false;
+  if (W_OK == (amode & W_OK)) {
+    if ((mode & (S_IWUSR | S_IWGRP | S_IWOTH)) == 0) {
+      ret = false;
     }
   }
-  // Check execute permission
-  if (amode & X_OK) {
-    if (uid == 0) {
-      // if execute permission is allowed for any user,
-      // root shall get execute permission too.
-      if ((m_fileMode & S_IXUSR) || (m_fileMode & S_IXGRP) ||
-          (m_fileMode & S_IXOTH)) {
-        ret = true;
-      } else {
-        return false;
-      }
-    } else {
-      if ((uid == m_uid) && (m_fileMode & S_IXUSR)) {
-        ret = true;
-      } else if ((gid == m_gid) && (m_fileMode & S_IXGRP)) {
-        ret = true;
-      } else if (m_fileMode & S_IXOTH) {
-        ret = true;
-      } else {
-        return false;
-      }
+  if (R_OK == (amode & R_OK)) {
+    if ((mode & (S_IRUSR | S_IRGRP | S_IROTH)) == 0) {
+      ret = false;
     }
+  }
+  if (mode == 0) {
+    ret = false;
+  }
+
+  if (!ret) {
+    Warning("No access permission " + FormatPath(m_filePath));
+    Warning("[uid:gid:mode process=" + to_string(uid) + ":" +
+                 to_string(gid) + ":" + AccessMaskToString(amode) +
+                 ", file=" + to_string(m_uid) + ":" + to_string(m_gid) + ":" +
+                 ModeToString(m_fileMode) + "]");
   }
 
   return ret;

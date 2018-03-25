@@ -42,9 +42,6 @@ class IOStream : public std::basic_iostream<char, std::char_traits<char> >,
   IOStream(Buffer buf, size_t lengthToRead);
 
   ~IOStream();
-
- private:
-  IOStream() {}
 };
 
 }  // namespace Data
